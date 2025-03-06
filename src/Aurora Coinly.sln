@@ -14,6 +14,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Domain", "Aurora.Coinly.Domain\Aurora.Coinly.Domain.csproj", "{940BB4DA-E1DE-4017-B806-CD9F907DACE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Application", "Aurora.Coinly.Application\Aurora.Coinly.Application.csproj", "{D0999CBD-4946-4BC7-A7DB-20ACEDDC08E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Infrastructure", "Aurora.Coinly.Infrastructure\Aurora.Coinly.Infrastructure.csproj", "{4AB73B31-FE29-4290-8CEC-355E73C6A43A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +34,18 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{940BB4DA-E1DE-4017-B806-CD9F907DACE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{940BB4DA-E1DE-4017-B806-CD9F907DACE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{940BB4DA-E1DE-4017-B806-CD9F907DACE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{940BB4DA-E1DE-4017-B806-CD9F907DACE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0999CBD-4946-4BC7-A7DB-20ACEDDC08E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0999CBD-4946-4BC7-A7DB-20ACEDDC08E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0999CBD-4946-4BC7-A7DB-20ACEDDC08E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0999CBD-4946-4BC7-A7DB-20ACEDDC08E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AB73B31-FE29-4290-8CEC-355E73C6A43A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AB73B31-FE29-4290-8CEC-355E73C6A43A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AB73B31-FE29-4290-8CEC-355E73C6A43A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AB73B31-FE29-4290-8CEC-355E73C6A43A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
