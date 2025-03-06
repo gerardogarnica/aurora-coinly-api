@@ -26,13 +26,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore
-        run: dotnet restore Aurora Coinly.sln
+        run: dotnet restore "Aurora Coinly.sln"
 
       - name: Build
-        run: dotnet build Aurora Coinly.sln --configuration Release --no-restore
+        run: dotnet build "Aurora Coinly.sln" --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test Aurora Coinly.sln --configuration Release --no-restore --no-build
+        run: dotnet test "Aurora Coinly.sln" --configuration Release --no-restore --no-build
 
       - name: Publish
-        run: dotnet publish Aurora Coinly.sln --configuration Release --no-restore --no-build
+        run: dotnet publish "Aurora Coinly.sln" --configuration Release --no-restore --no-build
