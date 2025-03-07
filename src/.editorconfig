@@ -368,7 +368,7 @@ dotnet_diagnostic.CA2234.severity = none
 # CA2326: Do not use TypeNameHandling values other than None
 dotnet_diagnostic.CA2326.severity = none
 
-# CA2326: Do not use insecure JsonSerializerSettings
+# CA2327: Do not use insecure JsonSerializerSettings
 dotnet_diagnostic.CA2327.severity = none
 
 # CA5394: Do not use insecure randomness
