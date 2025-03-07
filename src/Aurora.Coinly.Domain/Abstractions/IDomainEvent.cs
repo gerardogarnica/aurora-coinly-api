@@ -1,6 +1,4 @@
-﻿using MediatR;
-
-namespace Aurora.Coinly.Domain.Abstractions;
+﻿namespace Aurora.Coinly.Domain.Abstractions;
 
 public interface IDomainEvent : INotification
 {

@@ -5,10 +5,14 @@ public class Result
     protected internal Result(bool isSuccessful, BaseError error)
     {
         if (isSuccessful && error != BaseError.None)
+        {
             throw new ArgumentException("Result is successful, but error is not None.", nameof(error));
+        }
 
         if (!isSuccessful && error == BaseError.None)
+        {
             throw new ArgumentException("Result is failed, but error is None.", nameof(error));
+        }
 
         IsSuccessful = isSuccessful;
         Error = error;
