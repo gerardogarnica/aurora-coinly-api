@@ -5,6 +5,7 @@ public sealed class PaymentMethod : BaseEntity
     public string Name { get; private set; }
     public bool IsDefault { get; private set; }
     public bool AllowRecurring { get; private set; }
+    public bool AutoMarkAsPaid { get; private set; }
     public string? Notes { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
@@ -16,12 +17,14 @@ public sealed class PaymentMethod : BaseEntity
         Name = string.Empty;
         IsDefault = false;
         AllowRecurring = false;
+        AutoMarkAsPaid = false;
     }
 
     public static PaymentMethod Create(
         string name,
         bool isDefault,
         bool allowRecurring,
+        bool autoMarkAsPaid,
         string? notes)
     {
         var paymentMethod = new PaymentMethod
@@ -29,6 +32,7 @@ public sealed class PaymentMethod : BaseEntity
             Name = name,
             IsDefault = isDefault,
             AllowRecurring = allowRecurring,
+            AutoMarkAsPaid = autoMarkAsPaid,
             Notes = notes,
             IsDeleted = false,
             CreatedOnUtc = DateTime.UtcNow
@@ -40,6 +44,7 @@ public sealed class PaymentMethod : BaseEntity
     public Result<PaymentMethod> Update(
         string name,
         bool allowRecurring,
+        bool autoMarkAsPaid,
         string? notes)
     {
         if (IsDeleted)
@@ -49,6 +54,7 @@ public sealed class PaymentMethod : BaseEntity
 
         Name = name;
         AllowRecurring = allowRecurring;
+        AutoMarkAsPaid = autoMarkAsPaid;
         Notes = notes;
         UpdatedOnUtc = DateTime.UtcNow;
 
