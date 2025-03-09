@@ -10,7 +10,9 @@ public sealed class Transaction : BaseEntity
     public Guid CategoryId { get; private set; }
     public DateOnly TransactionDate { get; private set; }
     public DateOnly MaxPaymentDate { get; private set; }
+    public DateOnly? PaymentDate { get; private set; }
     public TransactionType Type => Category.Type;
+    public bool IsPaid => Status == TransactionStatus.Paid;
     public Money Amount { get; private set; }
     public Guid PaymentMethodId { get; private set; }
     public Guid? WalletId { get; private set; }
@@ -43,8 +45,7 @@ public sealed class Transaction : BaseEntity
         Money amount,
         PaymentMethod paymentMethod,
         string? notes,
-        int installmentNumber,
-        Wallet? wallet)
+        int installmentNumber)
     {
         var transaction = new Transaction
         {
@@ -56,8 +57,7 @@ public sealed class Transaction : BaseEntity
             PaymentMethodId = paymentMethod.Id,
             Notes = notes,
             InstallmentNumber = installmentNumber,
-            Status = paymentMethod.AutoMarkAsPaid ? TransactionStatus.Paid : TransactionStatus.Pending,
-            WalletId = wallet?.Id
+            Status = TransactionStatus.Pending
         };
 
         transaction.AddDomainEvent(new TransactionCreatedEvent(transaction));
@@ -65,13 +65,14 @@ public sealed class Transaction : BaseEntity
         return transaction;
     }
 
-    public Result<Transaction> Pay(Wallet wallet)
+    public Result<Transaction> Pay(Wallet wallet, DateOnly paymentDate)
     {
         if (Status != TransactionStatus.Pending)
         {
             return Result.Fail<Transaction>(TransactionErrors.NotPending);
         }
 
+        PaymentDate = paymentDate;
         Status = TransactionStatus.Paid;
         WalletId = wallet.Id;
         PaidOnUtc = DateTime.UtcNow;

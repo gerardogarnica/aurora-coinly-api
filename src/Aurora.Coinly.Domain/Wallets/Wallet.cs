@@ -69,7 +69,7 @@ public sealed class Wallet : BaseEntity
 
     public Result<Wallet> AssignToSavings(Money amount, DateOnly assignedOn)
     {
-        if (AvailableAmount.Amount < amount.Amount)
+        if (AvailableAmount < amount)
         {
             return Result.Fail<Wallet>(WalletErrors.UnableToAssignToSavings);
         }
@@ -91,7 +91,7 @@ public sealed class Wallet : BaseEntity
 
     public Result<Wallet> AssignToAvailable(Money amount, DateOnly assignedOn)
     {
-        if (SavingsAmount.Amount < amount.Amount)
+        if (SavingsAmount < amount)
         {
             return Result.Fail<Wallet>(WalletErrors.UnableToAssignToAvailable);
         }

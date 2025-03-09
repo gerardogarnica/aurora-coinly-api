@@ -9,21 +9,40 @@ public record Money(decimal Amount, Currency Currency)
 
     public static Money operator +(Money first, Money second)
     {
-        if (first.Currency != second.Currency)
-        {
-            throw new InvalidOperationException("Currencies have to be equal");
-        }
+        ValidateCurrencies(first, second);
 
         return new Money(first.Amount + second.Amount, first.Currency);
     }
 
     public static Money operator -(Money first, Money second)
     {
+        ValidateCurrencies(first, second);
+
+        return new Money(first.Amount - second.Amount, first.Currency);
+    }
+
+    public static bool operator <(Money first, Money second)
+    {
+        return CompareAmounts(first, second) < 0;
+    }
+
+    public static bool operator >(Money first, Money second)
+    {
+        return CompareAmounts(first, second) > 0;
+    }
+
+    private static void ValidateCurrencies(Money first, Money second)
+    {
         if (first.Currency != second.Currency)
         {
             throw new InvalidOperationException("Currencies have to be equal");
         }
+    }
 
-        return new Money(first.Amount - second.Amount, first.Currency);
+    private static int CompareAmounts(Money first, Money second)
+    {
+        ValidateCurrencies(first, second);
+
+        return first.Amount.CompareTo(second.Amount);
     }
 }
