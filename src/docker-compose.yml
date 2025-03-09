@@ -1,9 +1,10 @@
 services:
   aurora.coinly.api:
-    image: ${DOCKER_REGISTRY-}auroracoinlyapi
+    image: ${DOCKER_REGISTRY-}aurora/coinly-api:1.0
     build:
       context: .
       dockerfile: Aurora.Coinly.Api/Dockerfile
+    container_name: Aurora.Coinly.Api
     ports:
       - 5000:8080
       - 5001:8081
@@ -12,11 +13,12 @@ services:
       - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 
   aurora.coinly.seq:
-    image: datalust/seq:2024.3 # or latest
+    image: datalust/seq:2024.3
     environment:
       ACCEPT_EULA: "Y"
     volumes:
       - ./.containers/seq_data:/data
+    container_name: Aurora.Coinly.Seq
     ports:
       - 8080:80
       - 5341:5341
