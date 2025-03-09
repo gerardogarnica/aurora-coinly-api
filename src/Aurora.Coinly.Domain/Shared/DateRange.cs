@@ -21,4 +21,13 @@ public record DateRange
             End = end
         };
     }
+
+    public bool Contains(DateOnly date) => date >= Start && date <= End;
+
+    public bool IsWithinSameYear() => Start.Year == End.Year;
+
+    public bool Overlaps(DateRange other)
+    {
+        return Start <= other.End && End >= other.Start;
+    }
 }
