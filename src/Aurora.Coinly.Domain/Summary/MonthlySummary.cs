@@ -10,11 +10,7 @@ public sealed class MonthlySummary : BaseEntity
     public Money TotalExpense { get; private set; }
     public Money Balance => TotalIncome - TotalExpense;
 
-    private MonthlySummary() : base(Guid.NewGuid())
-    {
-        Year = DateTime.UtcNow.Year;
-        Month = DateTime.UtcNow.Month;
-    }
+    private MonthlySummary() : base(Guid.NewGuid()) { }
 
     public static MonthlySummary Create(
         int year,

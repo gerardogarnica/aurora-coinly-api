@@ -20,7 +20,8 @@ public sealed class Category : BaseEntity
     public static Category Create(
         string name,
         TransactionType type,
-        string? notes)
+        string? notes,
+        DateTime createdOnUtc)
     {
         var category = new Category
         {
@@ -28,13 +29,13 @@ public sealed class Category : BaseEntity
             Type = type,
             Notes = notes,
             IsDeleted = false,
-            CreatedOnUtc = DateTime.UtcNow
+            CreatedOnUtc = createdOnUtc
         };
 
         return category;
     }
 
-    public Result<Category> Update(string name, string? notes)
+    public Result<Category> Update(string name, string? notes, DateTime updatedOnUtc)
     {
         if (IsDeleted)
         {
@@ -43,12 +44,12 @@ public sealed class Category : BaseEntity
 
         Name = name;
         Notes = notes;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
 
         return this;
     }
 
-    public Result<Category> Delete()
+    public Result<Category> Delete(DateTime deletedOnUtc)
     {
         if (IsDeleted)
         {
@@ -56,7 +57,7 @@ public sealed class Category : BaseEntity
         }
 
         IsDeleted = true;
-        DeletedOnUtc = DateTime.UtcNow;
+        DeletedOnUtc = deletedOnUtc;
 
         return this;
     }

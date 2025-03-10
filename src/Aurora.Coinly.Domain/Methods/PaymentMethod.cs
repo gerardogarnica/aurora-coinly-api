@@ -25,7 +25,8 @@ public sealed class PaymentMethod : BaseEntity
         bool isDefault,
         bool allowRecurring,
         bool autoMarkAsPaid,
-        string? notes)
+        string? notes,
+        DateTime createdOnUtc)
     {
         var paymentMethod = new PaymentMethod
         {
@@ -35,7 +36,7 @@ public sealed class PaymentMethod : BaseEntity
             AutoMarkAsPaid = autoMarkAsPaid,
             Notes = notes,
             IsDeleted = false,
-            CreatedOnUtc = DateTime.UtcNow
+            CreatedOnUtc = createdOnUtc
         };
 
         return paymentMethod;
@@ -45,7 +46,8 @@ public sealed class PaymentMethod : BaseEntity
         string name,
         bool allowRecurring,
         bool autoMarkAsPaid,
-        string? notes)
+        string? notes,
+        DateTime updatedOnUtc)
     {
         if (IsDeleted)
         {
@@ -56,12 +58,12 @@ public sealed class PaymentMethod : BaseEntity
         AllowRecurring = allowRecurring;
         AutoMarkAsPaid = autoMarkAsPaid;
         Notes = notes;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
 
         return this;
     }
 
-    public Result<PaymentMethod> Delete()
+    public Result<PaymentMethod> Delete(DateTime deletedOnUtc)
     {
         if (IsDeleted)
         {
@@ -69,12 +71,12 @@ public sealed class PaymentMethod : BaseEntity
         }
 
         IsDeleted = true;
-        DeletedOnUtc = DateTime.UtcNow;
+        DeletedOnUtc = deletedOnUtc;
 
         return this;
     }
 
-    public Result<PaymentMethod> SetAsDefault()
+    public Result<PaymentMethod> SetAsDefault(DateTime updatedOnUtc)
     {
         if (IsDeleted)
         {
@@ -82,12 +84,12 @@ public sealed class PaymentMethod : BaseEntity
         }
 
         IsDefault = true;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
 
         return this;
     }
 
-    public Result<PaymentMethod> SetAsNotDefault()
+    public Result<PaymentMethod> SetAsNotDefault(DateTime updatedOnUtc)
     {
         if (IsDeleted)
         {
@@ -95,7 +97,7 @@ public sealed class PaymentMethod : BaseEntity
         }
 
         IsDefault = false;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
 
         return this;
     }
