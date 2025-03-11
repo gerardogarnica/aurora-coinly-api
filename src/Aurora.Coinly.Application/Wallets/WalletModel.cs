@@ -11,7 +11,8 @@ public sealed record WalletModel(
     decimal TotalAmount,
     WalletType Type,
     bool IsDeleted,
-    string? Notes);
+    string? Notes,
+    List<WalletTransactionModel> Transactions);
 
 internal static class WalletModelExtensions
 {
@@ -24,5 +25,6 @@ internal static class WalletModelExtensions
         wallet.TotalAmount.Amount,
         wallet.Type,
         wallet.IsDeleted,
-        wallet.Notes);
+        wallet.Notes,
+        [.. wallet.Operations.Select(x => x.ToModel()).OrderBy(x => x.Date)]);
 }
