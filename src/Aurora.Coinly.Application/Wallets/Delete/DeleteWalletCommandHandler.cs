@@ -1,13 +1,13 @@
 ﻿using Aurora.Coinly.Domain.Wallets;
 
-namespace Aurora.Coinly.Application.Wallets.Update;
+namespace Aurora.Coinly.Application.Wallets.Delete;
 
-internal sealed class UpdateWalletCommandHandler(
+internal sealed class DeleteWalletCommandHandler(
     IWalletRepository walletRepository,
-    IDateTimeService dateTimeService) : ICommandHandler<UpdateWalletCommand>
+    IDateTimeService dateTimeService) : ICommandHandler<DeleteWalletCommand>
 {
     public async Task<Result> Handle(
-        UpdateWalletCommand request,
+        DeleteWalletCommand request,
         CancellationToken cancellationToken)
     {
         // Get wallet
@@ -18,10 +18,7 @@ internal sealed class UpdateWalletCommandHandler(
         }
 
         // Update wallet
-        var result = wallet.Update(
-            request.Name,
-            request.Notes,
-            dateTimeService.UtcNow);
+        var result = wallet.Delete(dateTimeService.UtcNow);
 
         if (!result.IsSuccessful)
         {
