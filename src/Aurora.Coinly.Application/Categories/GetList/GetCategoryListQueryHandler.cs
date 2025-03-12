@@ -2,11 +2,11 @@
 
 namespace Aurora.Coinly.Application.Categories.GetList;
 
-internal sealed class GetListQueryHandler(
-    ICategoryRepository categoryRepository) : IQueryHandler<GetListQuery, IReadOnlyCollection<CategoryModel>>
+internal sealed class GetCategoryListQueryHandler(
+    ICategoryRepository categoryRepository) : IQueryHandler<GetCategoryListQuery, IReadOnlyCollection<CategoryModel>>
 {
     public async Task<Result<IReadOnlyCollection<CategoryModel>>> Handle(
-        GetListQuery request,
+        GetCategoryListQuery request,
         CancellationToken cancellationToken)
     {
         // Get categories

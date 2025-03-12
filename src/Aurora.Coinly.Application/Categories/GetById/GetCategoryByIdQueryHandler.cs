@@ -2,11 +2,11 @@
 
 namespace Aurora.Coinly.Application.Categories.GetById;
 
-internal sealed class GetByIdQueryHandler(
-    ICategoryRepository categoryRepository) : IQueryHandler<GetByIdQuery, CategoryModel>
+internal sealed class GetCategoryByIdQueryHandler(
+    ICategoryRepository categoryRepository) : IQueryHandler<GetCategoryByIdQuery, CategoryModel>
 {
     public async Task<Result<CategoryModel>> Handle(
-        GetByIdQuery request,
+        GetCategoryByIdQuery request,
         CancellationToken cancellationToken)
     {
         // Get category
