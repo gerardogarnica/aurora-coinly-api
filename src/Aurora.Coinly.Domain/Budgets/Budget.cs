@@ -117,4 +117,28 @@ public sealed class Budget : BaseEntity
 
         return this;
     }
+
+    public Result<Budget> RemoveTransaction(Transaction transaction)
+    {
+        if (Status is BudgetStatus.Closed)
+        {
+            return Result.Fail<Budget>(BudgetErrors.IsClosed);
+        }
+
+        if (!_transactions.Any(t => t.TransactionId == transaction.Id))
+        {
+            return Result.Fail<Budget>(BudgetErrors.TransactionNotBelongs);
+        }
+
+        if (transaction.IsPaid)
+        {
+            return Result.Fail<Budget>(TransactionErrors.AlreadyPaid);
+        }
+
+        _transactions.Remove(_transactions.First(t => t.TransactionId == transaction.Id));
+
+        AddDomainEvent(new BudgetUpdatedEvent(this));
+
+        return this;
+    }
 }

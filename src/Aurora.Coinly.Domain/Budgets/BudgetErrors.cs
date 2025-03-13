@@ -14,11 +14,15 @@ public static class BudgetErrors
         "Budget.TransactionCategoryMismatch",
         "The transaction category does not match the budget category");
 
-    public static readonly BaseError TransactionPaymentDateOutOfRange = new(
-        "Budget.TransactionPaymentDateOutOfRange",
-        "The transaction payment date is out of the budget period range");
+    public static readonly BaseError TransactionNotBelongs = new(
+        "Budget.TransactionNotBelongs",
+        "The transaction does not belong to the budget");
 
     public static readonly BaseError TransactionNotPaid = new(
         "Budget.TransactionNotPaid",
         "The transaction is not paid");
+
+    public static readonly BaseError TransactionPaymentDateOutOfRange = new(
+        "Budget.TransactionPaymentDateOutOfRange",
+        "The transaction payment date is out of the budget period range");
 }
