@@ -4,6 +4,7 @@ public sealed class WalletHistory
 {
     public Guid Id { get; set; }
     public Guid WalletId { get; set; }
+    public Guid? TransactionId { get; set; }
     public WalletHistoryType Type { get; private set; }
     public string Description { get; private set; }
     public Money Amount { get; private set; }
@@ -20,6 +21,7 @@ public sealed class WalletHistory
 
     internal static WalletHistory Create(
         Wallet wallet,
+        Guid? transactionId,
         WalletHistoryType type,
         string description,
         Money amount,
@@ -30,6 +32,7 @@ public sealed class WalletHistory
         return new WalletHistory
         {
             WalletId = wallet.Id,
+            TransactionId = transactionId,
             Type = type,
             Description = description,
             Amount = amount,

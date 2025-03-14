@@ -37,11 +37,13 @@ internal sealed class AddTransactionToWalletCommandHandler(
                 transaction.Amount,
                 transaction.Description,
                 transaction.PaymentDate!.Value,
+                transaction.Id,
                 dateTimeService.UtcNow)
             : wallet.Withdraw(
                 transaction.Amount,
                 transaction.Description,
                 transaction.PaymentDate!.Value,
+                transaction.Id,
                 dateTimeService.UtcNow);
 
         if (!result.IsSuccessful)

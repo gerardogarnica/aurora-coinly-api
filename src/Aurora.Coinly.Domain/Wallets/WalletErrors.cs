@@ -14,6 +14,10 @@ public static class WalletErrors
         "Wallet.CurrenciesNotMatch",
         "The currencies of the wallets do not match");
 
+    public static readonly BaseError TransactionNotBelongs = new(
+        "Wallet.TransactionNotBelongs",
+        "The transaction does not belong to the wallet");
+
     public static readonly BaseError UnableToAssignToAvailable = new(
         "Wallet.UnableToAssignToAvailable",
         "Insufficient funds to assign to available amount");

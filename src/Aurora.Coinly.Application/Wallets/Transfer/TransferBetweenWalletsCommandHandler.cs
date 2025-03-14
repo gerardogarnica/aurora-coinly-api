@@ -38,6 +38,7 @@ internal sealed class TransferBetweenWalletsCommandHandler(
                 new Money(request.Amount, sourceWallet.TotalAmount.Currency),
                 $"Transfer to {destinationWallet.Name}",
                 request.TransferedOn,
+                null,
                 dateTimeService.UtcNow);
 
             if (!withdrawResult.IsSuccessful)
@@ -50,6 +51,7 @@ internal sealed class TransferBetweenWalletsCommandHandler(
                 new Money(request.Amount, destinationWallet.TotalAmount.Currency),
                 $"Transfer from {sourceWallet.Name}",
                 request.TransferedOn,
+                null,
                 dateTimeService.UtcNow);
 
             if (!depositResult.IsSuccessful)

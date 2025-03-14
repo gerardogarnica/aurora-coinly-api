@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Domain.Wallets;
+﻿using Aurora.Coinly.Domain.Transactions;
+
+namespace Aurora.Coinly.Domain.Wallets;
 
 public sealed class Wallet : BaseEntity
 {
@@ -111,7 +113,12 @@ public sealed class Wallet : BaseEntity
         return this;
     }
 
-    public Result<Wallet> Deposit(Money amount, string description, DateOnly processedOn, DateTime updatedOnUtc)
+    public Result<Wallet> Deposit(
+        Money amount,
+        string description,
+        DateOnly processedOn,
+        Guid? transactionId,
+        DateTime updatedOnUtc)
     {
         AvailableAmount += amount;
         UpdatedOnUtc = updatedOnUtc;
@@ -120,14 +127,20 @@ public sealed class Wallet : BaseEntity
             WalletHistoryType.Deposit,
             description,
             amount,
-            processedOn);
+            processedOn,
+            transactionId);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
         return this;
     }
 
-    public Result<Wallet> Withdraw(Money amount, string description, DateOnly processedOn, DateTime updatedOnUtc)
+    public Result<Wallet> Withdraw(
+        Money amount,
+        string description,
+        DateOnly processedOn,
+        Guid? transactionId,
+        DateTime updatedOnUtc)
     {
         AvailableAmount -= amount;
         UpdatedOnUtc = updatedOnUtc;
@@ -136,7 +149,8 @@ public sealed class Wallet : BaseEntity
             WalletHistoryType.Withdrawal,
             description,
             amount,
-            processedOn);
+            processedOn,
+            transactionId);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
@@ -156,14 +170,40 @@ public sealed class Wallet : BaseEntity
         return this;
     }
 
+    public Result<Wallet> RemoveTransaction(Transaction transaction)
+    {
+        if (IsDeleted)
+        {
+            return Result.Fail<Wallet>(WalletErrors.IsDeleted);
+        }
+
+        if (!_walletHistory.Any(t => t.TransactionId == transaction.Id))
+        {
+            return Result.Fail<Wallet>(WalletErrors.TransactionNotBelongs);
+        }
+
+        if (transaction.IsPaid)
+        {
+            return Result.Fail<Wallet>(TransactionErrors.AlreadyPaid);
+        }
+
+        _walletHistory.Remove(_walletHistory.First(t => t.TransactionId == transaction.Id));
+
+        AddDomainEvent(new WalletBalanceUpdatedEvent(this));
+
+        return this;
+    }
+
     private void AddOperation(
         WalletHistoryType type,
         string description,
         Money amount,
-        DateOnly date)
+        DateOnly date,
+        Guid? transactionId = null)
     {
         _walletHistory.Add(WalletHistory.Create(
             this,
+            transactionId,
             type,
             description,
             amount,
