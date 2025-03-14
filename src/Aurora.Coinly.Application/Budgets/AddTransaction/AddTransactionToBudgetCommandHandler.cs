@@ -11,18 +11,26 @@ internal sealed class AddTransactionToBudgetCommandHandler(
         AddTransactionToBudgetCommand request,
         CancellationToken cancellationToken)
     {
-        // Get budget
-        var budget = await budgetRepository.GetByIdAsync(request.BudgetId);
-        if (budget is null)
-        {
-            return Result.Fail(BudgetErrors.NotFound);
-        }
-
         // Get transaction
         var transaction = await transactionRepository.GetByIdAsync(request.TransactionId);
         if (transaction is null)
         {
             return Result.Fail(TransactionErrors.NotFound);
+        }
+
+        if (!transaction.IsPaid)
+        {
+            return Result.Fail(TransactionErrors.NotPaid);
+        }
+
+        // Get budget
+        var budget = await budgetRepository.GetByCategoryIdAsync(
+            transaction.CategoryId,
+            transaction.PaymentDate!.Value);
+        if (budget is null)
+        {
+            // Because budget is not neccesary for transaction
+            return Result.Ok();
         }
 
         // Add transaction to budget
