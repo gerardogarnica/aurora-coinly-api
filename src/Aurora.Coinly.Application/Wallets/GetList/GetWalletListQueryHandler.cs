@@ -2,11 +2,11 @@
 
 namespace Aurora.Coinly.Application.Wallets.GetList;
 
-internal sealed class GetListQueryHandler(
-    IWalletRepository walletRepository) : IQueryHandler<GetListQuery, IReadOnlyCollection<WalletModel>>
+internal sealed class GetWalletListQueryHandler(
+    IWalletRepository walletRepository) : IQueryHandler<GetWalletListQuery, IReadOnlyCollection<WalletModel>>
 {
     public async Task<Result<IReadOnlyCollection<WalletModel>>> Handle(
-        GetListQuery request,
+        GetWalletListQuery request,
         CancellationToken cancellationToken)
     {
         // Get wallets
