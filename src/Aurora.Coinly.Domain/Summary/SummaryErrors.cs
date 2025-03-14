@@ -2,6 +2,10 @@
 
 public static class SummaryErrors
 {
+    public static readonly BaseError CurrencyNotMatched = new(
+        "Summary.CurrencyNotMatched",
+        "The currency of the transaction does not match the currency of the summary");
+
     public static readonly BaseError TransactionAlreadyIsPaid = new(
         "Summary.TransactionAlreadyIsPaid",
         "The transaction is already paid");
