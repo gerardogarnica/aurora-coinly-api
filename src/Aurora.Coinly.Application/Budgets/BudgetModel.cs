@@ -10,6 +10,8 @@ public sealed record BudgetModel(
     decimal AmountLimit,
     DateOnly PeriodBegins,
     DateOnly PeriodEnds,
+    decimal SpentAmount,
+    bool IsExceeded,
     string? Notes,
     BudgetStatus Status,
     List<BudgetTransactionModel> Transactions);
@@ -24,6 +26,8 @@ internal static class BudgetModelExtensions
         budget.AmountLimit.Amount,
         budget.Period.Start,
         budget.Period.End,
+        budget.GetSpentAmount().Amount,
+        budget.IsExceeded(),
         budget.Notes,
         budget.Status,
         [.. budget.Transactions.Select(x => x.ToModel()).OrderBy(x => x.Date)]);
