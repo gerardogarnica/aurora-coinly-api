@@ -25,7 +25,7 @@ internal sealed class RemoveTransactionFromBudgetCommandHandler(
             return Result.Fail(TransactionErrors.NotFound);
         }
 
-        // Add transaction to budget
+        // Remove transaction from budget
         var result = budget.RemoveTransaction(transaction);
 
         if (!result.IsSuccessful)
