@@ -32,7 +32,7 @@ public sealed class Transaction : BaseEntity
         Amount = Money.Zero();
     }
 
-    public static Transaction Create(
+    public static Result<Transaction> Create(
         string description,
         Category category,
         DateOnly transactionDate,
@@ -43,6 +43,16 @@ public sealed class Transaction : BaseEntity
         int installmentNumber,
         DateTime createdOnUtc)
     {
+        if (category.IsDeleted)
+        {
+            return Result.Fail<Transaction>(CategoryErrors.IsDeleted);
+        }
+
+        if (paymentMethod.IsDeleted)
+        {
+            return Result.Fail<Transaction>(PaymentMethodErrors.IsDeleted);
+        }
+
         var transaction = new Transaction
         {
             Description = description,
@@ -98,6 +108,7 @@ public sealed class Transaction : BaseEntity
 
         return this;
     }
+
     public Result<Transaction> UndoPayment()
     {
         if (Status != TransactionStatus.Paid)
