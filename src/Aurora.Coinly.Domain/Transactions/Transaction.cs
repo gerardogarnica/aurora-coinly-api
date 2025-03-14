@@ -29,12 +29,7 @@ public sealed class Transaction : BaseEntity
     private Transaction() : base(Guid.NewGuid())
     {
         Description = string.Empty;
-        CategoryId = Guid.Empty;
-        TransactionDate = DateOnly.FromDateTime(DateTime.UtcNow);
-        MaxPaymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
         Amount = Money.Zero();
-        PaymentMethodId = Guid.Empty;
-        CreatedOnUtc = DateTime.UtcNow;
     }
 
     public static Transaction Create(
@@ -45,7 +40,8 @@ public sealed class Transaction : BaseEntity
         Money amount,
         PaymentMethod paymentMethod,
         string? notes,
-        int installmentNumber)
+        int installmentNumber,
+        DateTime createdOnUtc)
     {
         var transaction = new Transaction
         {
@@ -57,7 +53,8 @@ public sealed class Transaction : BaseEntity
             PaymentMethodId = paymentMethod.Id,
             Notes = notes,
             InstallmentNumber = installmentNumber,
-            Status = TransactionStatus.Pending
+            Status = TransactionStatus.Pending,
+            CreatedOnUtc = createdOnUtc
         };
 
         transaction.AddDomainEvent(new TransactionCreatedEvent(transaction));
@@ -65,7 +62,7 @@ public sealed class Transaction : BaseEntity
         return transaction;
     }
 
-    public Result<Transaction> Pay(Wallet wallet, DateOnly paymentDate)
+    public Result<Transaction> Pay(Wallet wallet, DateOnly paymentDate, DateTime paidOnUtc)
     {
         if (Status != TransactionStatus.Pending)
         {
@@ -75,14 +72,14 @@ public sealed class Transaction : BaseEntity
         PaymentDate = paymentDate;
         Status = TransactionStatus.Paid;
         WalletId = wallet.Id;
-        PaidOnUtc = DateTime.UtcNow;
+        PaidOnUtc = paidOnUtc;
 
         AddDomainEvent(new TransactionPaidEvent(this));
 
         return this;
     }
 
-    public Result<Transaction> Remove()
+    public Result<Transaction> Remove(DateTime removedOnUtc)
     {
         if (Status == TransactionStatus.Paid)
         {
@@ -95,7 +92,7 @@ public sealed class Transaction : BaseEntity
         }
 
         Status = TransactionStatus.Removed;
-        RemovedOnUtc = DateTime.UtcNow;
+        RemovedOnUtc = removedOnUtc;
 
         AddDomainEvent(new TransactionRemovedEvent(this));
 

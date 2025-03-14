@@ -14,7 +14,7 @@ public record Currency
         Eur
     ];
 
-    public Currency(string code) => Code = code;
+    internal Currency(string code) => Code = code;
 
     public static Currency FromCode(string code)
     {

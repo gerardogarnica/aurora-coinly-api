@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Domain.Wallets;
+﻿using Aurora.Coinly.Domain.Transactions;
+
+namespace Aurora.Coinly.Domain.Wallets;
 
 public sealed class Wallet : BaseEntity
 {
@@ -29,7 +31,7 @@ public sealed class Wallet : BaseEntity
         Money amount,
         WalletType type,
         string? notes,
-        DateOnly createdOn)
+        DateTime createdOn)
     {
         var wallet = new Wallet
         {
@@ -39,21 +41,21 @@ public sealed class Wallet : BaseEntity
             Type = type,
             Notes = notes,
             IsDeleted = false,
-            CreatedOnUtc = DateTime.UtcNow
+            CreatedOnUtc = createdOn
         };
 
         wallet.AddOperation(
             WalletHistoryType.Created,
             "Wallet created",
             amount,
-            createdOn);
+            DateOnly.FromDateTime(createdOn));
 
         wallet.AddDomainEvent(new WalletCreatedEvent(wallet));
 
         return wallet;
     }
 
-    public Result<Wallet> Update(string name, string? notes)
+    public Result<Wallet> Update(string name, string? notes, DateTime updatedOnUtc)
     {
         if (IsDeleted)
         {
@@ -62,12 +64,12 @@ public sealed class Wallet : BaseEntity
 
         Name = name;
         Notes = notes;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
 
         return this;
     }
 
-    public Result<Wallet> AssignToSavings(Money amount, DateOnly assignedOn)
+    public Result<Wallet> AssignToSavings(Money amount, DateOnly assignedOn, DateTime updatedOnUtc)
     {
         if (AvailableAmount < amount)
         {
@@ -76,7 +78,7 @@ public sealed class Wallet : BaseEntity
 
         AvailableAmount -= amount;
         SavingsAmount += amount;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
 
         AddOperation(
             WalletHistoryType.AssignedToSavings,
@@ -89,7 +91,7 @@ public sealed class Wallet : BaseEntity
         return this;
     }
 
-    public Result<Wallet> AssignToAvailable(Money amount, DateOnly assignedOn)
+    public Result<Wallet> AssignToAvailable(Money amount, DateOnly assignedOn, DateTime updatedOnUtc)
     {
         if (SavingsAmount < amount)
         {
@@ -98,7 +100,7 @@ public sealed class Wallet : BaseEntity
 
         SavingsAmount -= amount;
         AvailableAmount += amount;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
 
         AddOperation(
             WalletHistoryType.AssignedToAvailable,
@@ -111,39 +113,51 @@ public sealed class Wallet : BaseEntity
         return this;
     }
 
-    public Result<Wallet> Deposit(Money amount, string description, DateOnly processedOn)
+    public Result<Wallet> Deposit(
+        Money amount,
+        string description,
+        DateOnly processedOn,
+        Guid? transactionId,
+        DateTime updatedOnUtc)
     {
         AvailableAmount += amount;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
 
         AddOperation(
             WalletHistoryType.Deposit,
             description,
             amount,
-            processedOn);
+            processedOn,
+            transactionId);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
         return this;
     }
 
-    public Result<Wallet> Withdraw(Money amount, string description, DateOnly processedOn)
+    public Result<Wallet> Withdraw(
+        Money amount,
+        string description,
+        DateOnly processedOn,
+        Guid? transactionId,
+        DateTime updatedOnUtc)
     {
         AvailableAmount -= amount;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
 
         AddOperation(
             WalletHistoryType.Withdrawal,
             description,
             amount,
-            processedOn);
+            processedOn,
+            transactionId);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
         return this;
     }
 
-    public Result<Wallet> Delete()
+    public Result<Wallet> Delete(DateTime deletedOnUtc)
     {
         if (IsDeleted)
         {
@@ -151,7 +165,31 @@ public sealed class Wallet : BaseEntity
         }
 
         IsDeleted = true;
-        DeletedOnUtc = DateTime.UtcNow;
+        DeletedOnUtc = deletedOnUtc;
+
+        return this;
+    }
+
+    public Result<Wallet> RemoveTransaction(Transaction transaction)
+    {
+        if (IsDeleted)
+        {
+            return Result.Fail<Wallet>(WalletErrors.IsDeleted);
+        }
+
+        if (!_walletHistory.Any(t => t.TransactionId == transaction.Id))
+        {
+            return Result.Fail<Wallet>(WalletErrors.TransactionNotBelongs);
+        }
+
+        if (transaction.IsPaid)
+        {
+            return Result.Fail<Wallet>(TransactionErrors.AlreadyPaid);
+        }
+
+        _walletHistory.Remove(_walletHistory.First(t => t.TransactionId == transaction.Id));
+
+        AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
         return this;
     }
@@ -160,10 +198,12 @@ public sealed class Wallet : BaseEntity
         WalletHistoryType type,
         string description,
         Money amount,
-        DateOnly date)
+        DateOnly date,
+        Guid? transactionId = null)
     {
         _walletHistory.Add(WalletHistory.Create(
             this,
+            transactionId,
             type,
             description,
             amount,

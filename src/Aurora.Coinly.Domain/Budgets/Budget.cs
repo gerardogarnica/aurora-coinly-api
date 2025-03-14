@@ -28,7 +28,8 @@ public sealed class Budget : BaseEntity
         Category category,
         Money amountLimit,
         DateRange period,
-        string? notes)
+        string? notes,
+        DateTime createdOnUtc)
     {
         var budget = new Budget
         {
@@ -37,7 +38,7 @@ public sealed class Budget : BaseEntity
             Period = period,
             Notes = notes,
             Status = BudgetStatus.Draft,
-            CreatedOnUtc = DateTime.UtcNow
+            CreatedOnUtc = createdOnUtc
         };
 
         return budget;
@@ -46,7 +47,8 @@ public sealed class Budget : BaseEntity
     public Result<Budget> Update(
         Money amountLimit,
         DateRange period,
-        string? notes)
+        string? notes,
+        DateTime updatedOnUtc)
     {
         if (Status is BudgetStatus.Closed)
         {
@@ -56,11 +58,12 @@ public sealed class Budget : BaseEntity
         AmountLimit = amountLimit;
         Period = period;
         Notes = notes;
+        UpdatedOnUtc = updatedOnUtc;
 
         return this;
     }
 
-    public Result<Budget> Close()
+    public Result<Budget> Close(DateTime closedOnUtc)
     {
         if (Status is BudgetStatus.Closed)
         {
@@ -68,7 +71,7 @@ public sealed class Budget : BaseEntity
         }
 
         Status = BudgetStatus.Closed;
-        ClosedOnUtc = DateTime.UtcNow;
+        ClosedOnUtc = closedOnUtc;
 
         return this;
     }
@@ -109,6 +112,30 @@ public sealed class Budget : BaseEntity
 
         Status = BudgetStatus.Active;
         _transactions.Add(BudgetTransaction.Create(this, transaction));
+
+        AddDomainEvent(new BudgetUpdatedEvent(this));
+
+        return this;
+    }
+
+    public Result<Budget> RemoveTransaction(Transaction transaction)
+    {
+        if (Status is BudgetStatus.Closed)
+        {
+            return Result.Fail<Budget>(BudgetErrors.IsClosed);
+        }
+
+        if (!_transactions.Any(t => t.TransactionId == transaction.Id))
+        {
+            return Result.Fail<Budget>(BudgetErrors.TransactionNotBelongs);
+        }
+
+        if (transaction.IsPaid)
+        {
+            return Result.Fail<Budget>(TransactionErrors.AlreadyPaid);
+        }
+
+        _transactions.Remove(_transactions.First(t => t.TransactionId == transaction.Id));
 
         AddDomainEvent(new BudgetUpdatedEvent(this));
 
