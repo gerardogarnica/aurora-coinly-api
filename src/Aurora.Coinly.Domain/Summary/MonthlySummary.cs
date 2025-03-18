@@ -6,6 +6,7 @@ public sealed class MonthlySummary : BaseEntity
 {
     public int Year { get; private set; }
     public int Month { get; private set; }
+    public Currency Currency { get; private set; }
     public Money TotalIncome { get; private set; }
     public Money TotalExpense { get; private set; }
     public Money Balance => TotalIncome - TotalExpense;
@@ -14,14 +15,16 @@ public sealed class MonthlySummary : BaseEntity
 
     public static MonthlySummary Create(
         int year,
-        int month)
+        int month,
+        Currency currency)
     {
         var summary = new MonthlySummary
         {
             Year = year,
             Month = month,
-            TotalIncome = Money.Zero(),
-            TotalExpense = Money.Zero()
+            Currency = currency,
+            TotalIncome = Money.Zero(currency),
+            TotalExpense = Money.Zero(currency)
         };
 
         return summary;
@@ -37,6 +40,11 @@ public sealed class MonthlySummary : BaseEntity
         if (!GetSummaryPeriod().Contains(transaction.PaymentDate!.Value))
         {
             return Result.Fail<MonthlySummary>(SummaryErrors.TransactionNotInPeriod);
+        }
+
+        if (transaction.Amount.Currency != Currency)
+        {
+            return Result.Fail<MonthlySummary>(SummaryErrors.CurrencyNotMatched);
         }
 
         if (transaction.Type is TransactionType.Income)
@@ -61,6 +69,11 @@ public sealed class MonthlySummary : BaseEntity
         if (!GetSummaryPeriod().Contains(transaction.PaymentDate!.Value))
         {
             return Result.Fail<MonthlySummary>(SummaryErrors.TransactionNotInPeriod);
+        }
+
+        if (transaction.Amount.Currency != Currency)
+        {
+            return Result.Fail<MonthlySummary>(SummaryErrors.CurrencyNotMatched);
         }
 
         if (transaction.Type is TransactionType.Income)
