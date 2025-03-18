@@ -1,4 +1,6 @@
 using Aurora.Coinly.Api;
+using Aurora.Coinly.Application;
+using Aurora.Coinly.Infrastructure;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -24,6 +26,10 @@ builder.Logging.AddOpenTelemetry(cfg=>
     cfg.IncludeScopes = true;
     cfg.IncludeFormattedMessage = true;
 });
+
+builder.Services
+    .AddApplicationServices()
+    .AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 
