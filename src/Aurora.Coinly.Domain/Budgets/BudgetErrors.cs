@@ -10,6 +10,10 @@ public static class BudgetErrors
         "Budget.IsClosed",
         "The budget is closed");
 
+    public static readonly BaseError TransactionAlreadyIsPaid = new(
+        "Budget.TransactionAlreadyIsPaid",
+        "The transaction has already been paid");
+
     public static readonly BaseError TransactionCategoryMismatch = new(
         "Budget.TransactionCategoryMismatch",
         "The transaction category does not match the budget category");
