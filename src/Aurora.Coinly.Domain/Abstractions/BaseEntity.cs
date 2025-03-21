@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Domain.Abstractions;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Aurora.Coinly.Domain.Abstractions;
 
 public abstract class BaseEntity
 {
@@ -10,6 +12,9 @@ public abstract class BaseEntity
     {
         Id = id;
     }
+
+    [NotMapped]
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 
