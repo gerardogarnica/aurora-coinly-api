@@ -117,6 +117,7 @@ public sealed class Transaction : BaseEntity
         }
 
         Status = TransactionStatus.Pending;
+        PaymentDate = null;
         WalletId = null;
         PaidOnUtc = null;
 

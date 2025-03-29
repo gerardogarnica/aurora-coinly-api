@@ -114,6 +114,37 @@ public sealed class Wallet : BaseEntity
     }
 
     public Result<Wallet> Deposit(
+        Transaction transaction,
+        DateTime updatedOnUtc)
+    {
+        if (!transaction.IsPaid)
+        {
+            return Result.Fail<Wallet>(TransactionErrors.NotPaid);
+        }
+
+        return Deposit(
+            transaction.Amount,
+            transaction.Description,
+            transaction.PaymentDate!.Value,
+            transaction.Id,
+            updatedOnUtc);
+    }
+
+    public Result<Wallet> Deposit(
+        Money amount,
+        string description,
+        DateOnly processedOn,
+        DateTime updatedOnUtc)
+    {
+        return Deposit(
+            amount,
+            description,
+            processedOn,
+            null,
+            updatedOnUtc);
+    }
+
+    private Result<Wallet> Deposit(
         Money amount,
         string description,
         DateOnly processedOn,
@@ -136,6 +167,37 @@ public sealed class Wallet : BaseEntity
     }
 
     public Result<Wallet> Withdraw(
+        Transaction transaction,
+        DateTime updatedOnUtc)
+    {
+        if (!transaction.IsPaid)
+        {
+            return Result.Fail<Wallet>(TransactionErrors.NotPaid);
+        }
+
+        return Withdraw(
+            transaction.Amount,
+            transaction.Description,
+            transaction.PaymentDate!.Value,
+            transaction.Id,
+            updatedOnUtc);
+    }
+
+    public Result<Wallet> Withdraw(
+        Money amount,
+        string description,
+        DateOnly processedOn,
+        DateTime updatedOnUtc)
+    {
+        return Withdraw(
+            amount,
+            description,
+            processedOn,
+            null,
+            updatedOnUtc);
+    }
+
+    private Result<Wallet> Withdraw(
         Money amount,
         string description,
         DateOnly processedOn,

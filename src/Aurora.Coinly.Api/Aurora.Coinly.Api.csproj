@@ -16,4 +16,8 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Aurora.Coinly.Infrastructure\Aurora.Coinly.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

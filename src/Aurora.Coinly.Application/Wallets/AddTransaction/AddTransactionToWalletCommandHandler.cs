@@ -26,25 +26,10 @@ internal sealed class AddTransactionToWalletCommandHandler(
             return Result.Fail(TransactionErrors.NotFound);
         }
 
-        if (!transaction.IsPaid)
-        {
-            return Result.Fail(TransactionErrors.NotPaid);
-        }
-
         // Deposit or withdrawal
         var result = transaction.Type == TransactionType.Income
-            ? wallet.Deposit(
-                transaction.Amount,
-                transaction.Description,
-                transaction.PaymentDate!.Value,
-                transaction.Id,
-                dateTimeService.UtcNow)
-            : wallet.Withdraw(
-                transaction.Amount,
-                transaction.Description,
-                transaction.PaymentDate!.Value,
-                transaction.Id,
-                dateTimeService.UtcNow);
+            ? wallet.Deposit(transaction, dateTimeService.UtcNow)
+            : wallet.Withdraw(transaction, dateTimeService.UtcNow);
 
         if (!result.IsSuccessful)
         {

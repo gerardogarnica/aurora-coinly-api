@@ -1,10 +1,7 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35806.99
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Api", "Aurora.Coinly.Api\Aurora.Coinly.Api.csproj", "{E4707769-1839-497A-A2A0-122B768EC50A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -12,13 +9,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A22A3F71-82DB-4C53-A2BE-786623BB0C33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Domain", "Aurora.Coinly.Domain\Aurora.Coinly.Domain.csproj", "{940BB4DA-E1DE-4017-B806-CD9F907DACE2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Api", "Aurora.Coinly.Api\Aurora.Coinly.Api.csproj", "{E4707769-1839-497A-A2A0-122B768EC50A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Application", "Aurora.Coinly.Application\Aurora.Coinly.Application.csproj", "{D0999CBD-4946-4BC7-A7DB-20ACEDDC08E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Domain", "Aurora.Coinly.Domain\Aurora.Coinly.Domain.csproj", "{940BB4DA-E1DE-4017-B806-CD9F907DACE2}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Infrastructure", "Aurora.Coinly.Infrastructure\Aurora.Coinly.Infrastructure.csproj", "{4AB73B31-FE29-4290-8CEC-355E73C6A43A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Domain.UnitTests", "test\Aurora.Coinly.Domain.UnitTests\Aurora.Coinly.Domain.UnitTests.csproj", "{E8E673BC-7EAF-4071-B08F-2B357305758B}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,9 +51,20 @@ Global
 		{4AB73B31-FE29-4290-8CEC-355E73C6A43A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4AB73B31-FE29-4290-8CEC-355E73C6A43A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4AB73B31-FE29-4290-8CEC-355E73C6A43A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8E673BC-7EAF-4071-B08F-2B357305758B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8E673BC-7EAF-4071-B08F-2B357305758B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8E673BC-7EAF-4071-B08F-2B357305758B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8E673BC-7EAF-4071-B08F-2B357305758B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E4707769-1839-497A-A2A0-122B768EC50A} = {A22A3F71-82DB-4C53-A2BE-786623BB0C33}
+		{940BB4DA-E1DE-4017-B806-CD9F907DACE2} = {A22A3F71-82DB-4C53-A2BE-786623BB0C33}
+		{D0999CBD-4946-4BC7-A7DB-20ACEDDC08E3} = {A22A3F71-82DB-4C53-A2BE-786623BB0C33}
+		{4AB73B31-FE29-4290-8CEC-355E73C6A43A} = {A22A3F71-82DB-4C53-A2BE-786623BB0C33}
+		{E8E673BC-7EAF-4071-B08F-2B357305758B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {54A43CDF-471D-4D31-8C77-A4A27B974232}

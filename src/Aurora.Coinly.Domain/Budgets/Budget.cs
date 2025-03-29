@@ -100,14 +100,14 @@ public sealed class Budget : BaseEntity
             return Result.Fail<Budget>(BudgetErrors.TransactionCategoryMismatch);
         }
 
-        if (!Period.Contains(transaction.PaymentDate!.Value))
-        {
-            return Result.Fail<Budget>(BudgetErrors.TransactionPaymentDateOutOfRange);
-        }
-
         if (!transaction.IsPaid)
         {
             return Result.Fail<Budget>(BudgetErrors.TransactionNotPaid);
+        }
+
+        if (!Period.Contains(transaction.PaymentDate!.Value))
+        {
+            return Result.Fail<Budget>(BudgetErrors.TransactionPaymentDateOutOfRange);
         }
 
         Status = BudgetStatus.Active;
@@ -132,7 +132,7 @@ public sealed class Budget : BaseEntity
 
         if (transaction.IsPaid)
         {
-            return Result.Fail<Budget>(TransactionErrors.AlreadyPaid);
+            return Result.Fail<Budget>(BudgetErrors.TransactionAlreadyIsPaid);
         }
 
         _transactions.Remove(_transactions.First(t => t.TransactionId == transaction.Id));
