@@ -42,7 +42,7 @@ internal sealed class WalletHistoryConfiguration : IEntityTypeConfiguration<Wall
         builder.Ignore(x => x.IsIncrement);
 
         builder
-            .HasOne<Wallet>()
+            .HasOne(x => x.Wallet)
             .WithMany(x => x.Operations!)
             .HasForeignKey(x => x.WalletId)
             .IsRequired();
