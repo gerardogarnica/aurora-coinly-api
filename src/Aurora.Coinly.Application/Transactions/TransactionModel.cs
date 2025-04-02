@@ -14,7 +14,9 @@ public sealed record TransactionModel(
     DateOnly? PaymentDate,
     string Currency,
     decimal Amount,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
     TransactionType Type,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
     TransactionStatus Status,
     bool IsPaid,
     Guid? WalletId,

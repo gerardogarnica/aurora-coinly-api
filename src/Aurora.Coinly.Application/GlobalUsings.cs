@@ -5,3 +5,4 @@ global using Aurora.Coinly.Domain.Abstractions;
 global using Aurora.Coinly.Domain.Shared;
 global using FluentValidation;
 global using MediatR;
+global using System.Text.Json.Serialization;
