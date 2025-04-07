@@ -7,38 +7,34 @@ public sealed class WalletHistory
     public Guid? TransactionId { get; set; }
     public WalletHistoryType Type { get; private set; }
     public string Description { get; private set; }
+    public DateOnly Date { get; private set; }
     public Money Amount { get; private set; }
     public Money AvailableBalance { get; private set; }
     public Money SavingsBalance { get; private set; }
-    public DateOnly Date { get; private set; }
     public bool IsIncrement => Type is WalletHistoryType.Created or WalletHistoryType.Deposit or WalletHistoryType.AssignedToAvailable;
-    public Wallet Wallet { get; init; } = null!;
 
-    private WalletHistory()
-    {
-        Id = Guid.NewGuid();
-    }
+    private WalletHistory() { }
 
     internal static WalletHistory Create(
-        Wallet wallet,
+        Guid walletId,
         Guid? transactionId,
         WalletHistoryType type,
         string description,
+        DateOnly date,
         Money amount,
         Money availableBalance,
-        Money savingsBalance,
-        DateOnly date)
+        Money savingsBalance)
     {
         return new WalletHistory
         {
-            WalletId = wallet.Id,
+            WalletId = walletId,
             TransactionId = transactionId,
             Type = type,
             Description = description,
+            Date = date,
             Amount = amount,
             AvailableBalance = availableBalance,
             SavingsBalance = savingsBalance,
-            Date = date
         };
     }
 }

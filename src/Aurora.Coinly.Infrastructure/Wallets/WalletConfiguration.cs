@@ -34,6 +34,5 @@ internal sealed class WalletConfiguration : IEntityTypeConfiguration<Wallet>
         builder.Property(x => x.Type).HasConversion<string>().HasMaxLength(40);
 
         builder.Property(x => x.Notes).HasMaxLength(1000);
-
     }
 }
