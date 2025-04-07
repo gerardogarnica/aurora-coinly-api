@@ -1,5 +1,6 @@
 using Aurora.Coinly.Api.Endpoints;
 using Aurora.Coinly.Api.Extensions;
+using Aurora.Coinly.Api.Middlewares;
 using Aurora.Coinly.Application;
 using Aurora.Coinly.Infrastructure;
 using OpenTelemetry;
@@ -18,6 +19,10 @@ builder.Services.Configure<JsonOptions>(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(cfg => cfg.AddService(builder.Environment.ApplicationName))
@@ -61,5 +66,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseExceptionHandler();
 
 await app.RunAsync();
