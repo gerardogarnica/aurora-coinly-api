@@ -7,4 +7,4 @@ public sealed record CreateWalletCommand(
     string CurrencyCode,
     decimal Amount,
     WalletType Type,
-    string? Notes) : IRequest<Guid>;
+    string? Notes) : ICommand<Guid>;
