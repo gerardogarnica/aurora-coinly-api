@@ -18,6 +18,7 @@ public class WalletTests : BaseTest
             WalletData.AvailableAmount,
             WalletData.Type,
             WalletData.Notes,
+            DateOnly.FromDateTime(DateTime.Now),
             DateTime.Now);
 
         // Assert
@@ -40,6 +41,7 @@ public class WalletTests : BaseTest
             WalletData.AvailableAmount,
             WalletData.Type,
             WalletData.Notes,
+            DateOnly.FromDateTime(DateTime.Now),
             DateTime.Now);
 
         // Assert
@@ -59,6 +61,7 @@ public class WalletTests : BaseTest
             WalletData.AvailableAmount,
             WalletData.Type,
             WalletData.Notes,
+            DateOnly.FromDateTime(DateTime.Now),
             DateTime.Now);
 
         // Assert

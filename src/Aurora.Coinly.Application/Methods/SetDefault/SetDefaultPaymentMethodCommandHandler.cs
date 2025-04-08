@@ -17,10 +17,18 @@ internal sealed class SetDefaultPaymentMethodCommandHandler(
             return Result.Fail<Guid>(PaymentMethodErrors.NotFound);
         }
 
-        // Set as default or not
-        var result = request.IsDefault
-            ? paymentMethod.SetAsDefault(dateTimeService.UtcNow)
-            : paymentMethod.SetAsNotDefault(dateTimeService.UtcNow);
+        // Get existing default method
+        var methods = await paymentMethodRepository.GetListAsync(true);
+
+        var defaultMethod = methods.First(x => x.IsDefault);
+        if (defaultMethod is not null && defaultMethod.Id != paymentMethod.Id)
+        {
+            defaultMethod.SetAsNotDefault(dateTimeService.UtcNow);
+            paymentMethodRepository.Update(defaultMethod);
+        }
+
+        // Set as default
+        var result = paymentMethod.SetAsDefault(dateTimeService.UtcNow);
 
         if (!result.IsSuccessful)
         {
