@@ -15,6 +15,9 @@ public sealed class UpdatePaymentMethod : IBaseEndpoint
                     request.Name,
                     request.AllowRecurring,
                     request.AutoMarkAsPaid,
+                    request.RelatedWalletId,
+                    request.SuggestedPaymentDay,
+                    request.StatementCutoffDay,
                     request.Notes);
 
                 Result result = await sender.Send(command);
@@ -34,5 +37,8 @@ public sealed class UpdatePaymentMethod : IBaseEndpoint
         string Name,
         bool AllowRecurring,
         bool AutoMarkAsPaid,
+        Guid RelatedWalletId,
+        int? SuggestedPaymentDay,
+        int? StatementCutoffDay,
         string? Notes);
 }

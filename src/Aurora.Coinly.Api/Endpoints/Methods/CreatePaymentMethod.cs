@@ -15,6 +15,9 @@ public sealed class CreatePaymentMethod : IBaseEndpoint
                     request.IsDefault,
                     request.AllowRecurring,
                     request.AutoMarkAsPaid,
+                    request.RelatedWalletId,
+                    request.SuggestedPaymentDay,
+                    request.StatementCutoffDay,
                     request.Notes);
 
                 Result<Guid> result = await sender.Send(command);
@@ -35,5 +38,8 @@ public sealed class CreatePaymentMethod : IBaseEndpoint
         bool IsDefault,
         bool AllowRecurring,
         bool AutoMarkAsPaid,
+        Guid RelatedWalletId,
+        int? SuggestedPaymentDay,
+        int? StatementCutoffDay,
         string? Notes);
 }
