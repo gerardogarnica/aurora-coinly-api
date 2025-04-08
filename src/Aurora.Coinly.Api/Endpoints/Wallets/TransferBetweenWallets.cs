@@ -19,7 +19,7 @@ public sealed class TransferBetweenWallets : IBaseEndpoint
                 Result result = await sender.Send(command);
 
                 return result.Match(
-                    () => Results.Created(string.Empty, result),
+                    () => Results.Created(),
                     ApiResponses.Problem);
             })
             .WithName("TransferBetweenWallets")
