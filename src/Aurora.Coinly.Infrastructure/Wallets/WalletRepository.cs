@@ -21,6 +21,8 @@ internal sealed class WalletRepository(
             var operations = await dbContext
                 .WalletHistories
                 .Where(x => x.WalletId == wallet.Id && x.Date >= historyRange.Start && x.Date <= historyRange.End)
+                .OrderBy(x => x.Date)
+                .ThenBy(x => x.CreatedOnUtc)
                 .ToListAsync();
 
             wallet.SetOperations(operations);

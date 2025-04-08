@@ -16,7 +16,8 @@ public sealed class CreateWallet : IBaseEndpoint
                     request.CurrencyCode,
                     request.Amount,
                     request.Type,
-                    request.Notes);
+                    request.Notes,
+                    request.OpenedOn);
 
                 Result<Guid> result = await sender.Send(command);
 
@@ -37,5 +38,6 @@ public sealed class CreateWallet : IBaseEndpoint
         decimal Amount,
         [property: JsonConverter(typeof(JsonStringEnumConverter))]
         WalletType Type,
-        string? Notes);
+        string? Notes,
+        DateOnly OpenedOn);
 }

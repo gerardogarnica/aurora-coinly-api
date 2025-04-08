@@ -12,6 +12,7 @@ public sealed class WalletHistory
     public Money AvailableBalance { get; private set; }
     public Money SavingsBalance { get; private set; }
     public bool IsIncrement => Type is WalletHistoryType.Created or WalletHistoryType.Deposit or WalletHistoryType.AssignedToAvailable;
+    public DateTime CreatedOnUtc { get; private set; }
 
     private WalletHistory() { }
 
@@ -23,7 +24,8 @@ public sealed class WalletHistory
         DateOnly date,
         Money amount,
         Money availableBalance,
-        Money savingsBalance)
+        Money savingsBalance,
+        DateTime createdOn)
     {
         return new WalletHistory
         {
@@ -35,6 +37,7 @@ public sealed class WalletHistory
             Amount = amount,
             AvailableBalance = availableBalance,
             SavingsBalance = savingsBalance,
+            CreatedOnUtc = createdOn
         };
     }
 }

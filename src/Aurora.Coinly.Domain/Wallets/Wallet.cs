@@ -31,6 +31,7 @@ public sealed class Wallet : BaseEntity
         Money amount,
         WalletType type,
         string? notes,
+        DateOnly openedOn,
         DateTime createdOn)
     {
         var wallet = new Wallet
@@ -48,7 +49,8 @@ public sealed class Wallet : BaseEntity
             WalletHistoryType.Created,
             "Wallet created",
             amount,
-            DateOnly.FromDateTime(createdOn));
+            openedOn,
+            createdOn);
 
         wallet.AddDomainEvent(new WalletCreatedEvent(wallet));
 
@@ -84,7 +86,8 @@ public sealed class Wallet : BaseEntity
             WalletHistoryType.AssignedToSavings,
             "Assigned to savings",
             amount,
-            assignedOn);
+            assignedOn,
+            updatedOnUtc);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
@@ -106,7 +109,8 @@ public sealed class Wallet : BaseEntity
             WalletHistoryType.AssignedToAvailable,
             "Assigned to available",
             amount,
-            assignedOn);
+            assignedOn,
+            updatedOnUtc);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
@@ -157,6 +161,7 @@ public sealed class Wallet : BaseEntity
             description,
             amount,
             processedOn,
+            updatedOnUtc,
             transactionId);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
@@ -208,6 +213,7 @@ public sealed class Wallet : BaseEntity
             description,
             amount,
             processedOn,
+            updatedOnUtc,
             transactionId);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
@@ -271,6 +277,7 @@ public sealed class Wallet : BaseEntity
         string description,
         Money amount,
         DateOnly date,
+        DateTime createdOn,
         Guid? transactionId = null)
     {
         var operation = WalletHistory.Create(
@@ -281,7 +288,8 @@ public sealed class Wallet : BaseEntity
             date,
             new Money(amount.Amount, amount.Currency),
             new Money(AvailableAmount.Amount, AvailableAmount.Currency),
-            new Money(SavingsAmount.Amount, SavingsAmount.Currency));
+            new Money(SavingsAmount.Amount, SavingsAmount.Currency),
+            createdOn);
 
         _operations.Add(operation);
     }

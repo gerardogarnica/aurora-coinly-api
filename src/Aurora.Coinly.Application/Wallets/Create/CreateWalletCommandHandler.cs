@@ -16,6 +16,7 @@ internal sealed class CreateWalletCommandHandler(
             new Money(request.Amount, Currency.FromCode(request.CurrencyCode)),
             request.Type,
             request.Notes,
+            request.OpenedOn,
             dateTimeService.UtcNow);
 
         await walletRepository.AddAsync(wallet, cancellationToken);
