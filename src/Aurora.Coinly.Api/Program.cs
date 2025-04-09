@@ -3,6 +3,7 @@ using Aurora.Coinly.Api.Extensions;
 using Aurora.Coinly.Api.Middlewares;
 using Aurora.Coinly.Application;
 using Aurora.Coinly.Infrastructure;
+using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -24,11 +25,14 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(cfg => cfg.AddService(builder.Environment.ApplicationName))
+builder.Services
+    .AddOpenTelemetry()
+    .ConfigureResource(cfg => cfg
+        .AddService(builder.Environment.ApplicationName))
     .WithTracing(cfg => cfg
         .AddHttpClientInstrumentation()
-        .AddAspNetCoreInstrumentation())
+        .AddAspNetCoreInstrumentation()
+        .AddNpgsql())
     .WithMetrics(cfg => cfg
         .AddHttpClientInstrumentation()
         .AddAspNetCoreInstrumentation()
