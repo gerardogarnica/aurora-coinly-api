@@ -64,11 +64,6 @@ internal sealed class CreateTransactionCommandHandler(
                 return Result.Fail<Guid>(WalletErrors.NotFound);
             }
 
-            if (wallet.IsDeleted)
-            {
-                return Result.Fail<Guid>(WalletErrors.IsDeleted);
-            }
-
             result = transaction.Pay(wallet, request.TransactionDate, dateTimeService.UtcNow);
             if (!result.IsSuccessful)
             {

@@ -79,6 +79,16 @@ public sealed class Transaction : BaseEntity
             return Result.Fail<Transaction>(TransactionErrors.NotPending);
         }
 
+        if (wallet.IsDeleted)
+        {
+            return Result.Fail<Transaction>(WalletErrors.IsDeleted);
+        }
+
+        if (paymentDate < TransactionDate)
+        {
+            return Result.Fail<Transaction>(TransactionErrors.InvalidPaymentDate(TransactionDate));
+        }
+
         PaymentDate = paymentDate;
         Status = TransactionStatus.Paid;
         WalletId = wallet.Id;

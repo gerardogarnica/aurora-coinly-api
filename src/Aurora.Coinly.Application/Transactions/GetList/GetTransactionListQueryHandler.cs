@@ -1,16 +1,16 @@
 ﻿using Aurora.Coinly.Domain.Transactions;
 
-namespace Aurora.Coinly.Application.Transactions.GetListByStatus;
+namespace Aurora.Coinly.Application.Transactions.GetList;
 
-internal sealed class GetTransactionListByStatusQueryHandler(
-    ITransactionRepository transactionRepository) : IQueryHandler<GetTransactionListByStatusQuery, IReadOnlyCollection<TransactionModel>>
+internal sealed class GetTransactionListQueryHandler(
+    ITransactionRepository transactionRepository) : IQueryHandler<GetTransactionListQuery, IReadOnlyCollection<TransactionModel>>
 {
     public async Task<Result<IReadOnlyCollection<TransactionModel>>> Handle(
-        GetTransactionListByStatusQuery request,
+        GetTransactionListQuery request,
         CancellationToken cancellationToken)
     {
         // Get transactions
-        var transactions = await transactionRepository.GetListByStatusAsync(
+        var transactions = await transactionRepository.GetListAsync(
             DateRange.Create(request.DateFrom, request.DateTo),
             request.Status,
             request.CategoryId,

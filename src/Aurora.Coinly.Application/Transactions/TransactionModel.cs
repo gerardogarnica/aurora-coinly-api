@@ -1,14 +1,14 @@
-﻿using Aurora.Coinly.Domain.Transactions;
+﻿using Aurora.Coinly.Application.Categories;
+using Aurora.Coinly.Application.Methods;
+using Aurora.Coinly.Domain.Transactions;
 
 namespace Aurora.Coinly.Application.Transactions;
 
 public sealed record TransactionModel(
     Guid TransactionId,
     string Description,
-    Guid CategoryId,
-    string CategoryName,
-    Guid PaymentMethodId,
-    string PaymentMethodName,
+    CategoryModel? Category,
+    PaymentMethodModel? PaymentMethod,
     DateOnly TransactionDate,
     DateOnly MaxPaymentDate,
     DateOnly? PaymentDate,
@@ -29,10 +29,8 @@ internal static class TransactionModelExtensions
     internal static TransactionModel ToModel(this Transaction transaction) => new(
         transaction.Id,
         transaction.Description,
-        transaction.Category.Id,
-        transaction.Category.Name,
-        transaction.PaymentMethod.Id,
-        transaction.PaymentMethod.Name,
+        transaction.Category?.ToModel(),
+        transaction.PaymentMethod?.ToModel(),
         transaction.TransactionDate,
         transaction.MaxPaymentDate,
         transaction.PaymentDate,

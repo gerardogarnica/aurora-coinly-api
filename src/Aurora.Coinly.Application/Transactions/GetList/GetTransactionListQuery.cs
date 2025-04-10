@@ -1,10 +1,10 @@
 ﻿using Aurora.Coinly.Domain.Transactions;
 
-namespace Aurora.Coinly.Application.Transactions.GetListByStatus;
+namespace Aurora.Coinly.Application.Transactions.GetList;
 
-public sealed record GetTransactionListByStatusQuery(
+public sealed record GetTransactionListQuery(
     DateOnly DateFrom,
     DateOnly DateTo,
-    TransactionStatus Status,
+    TransactionStatus? Status,
     Guid? CategoryId,
     Guid? PaymentMethodId) : IQuery<IReadOnlyCollection<TransactionModel>>;

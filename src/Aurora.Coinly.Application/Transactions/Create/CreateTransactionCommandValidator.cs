@@ -13,7 +13,7 @@ internal sealed class CreateTransactionCommandValidator : AbstractValidator<Crea
 
         RuleFor(x => x.PaymentMethodId).NotEmpty();
 
-        RuleFor(x => x.TransactionDate).LessThanOrEqualTo(x => x.MaxPaymentDate);
+        RuleFor(x => x.MaxPaymentDate).GreaterThanOrEqualTo(x => x.TransactionDate);
 
         RuleFor(x => x.CurrencyCode)
             .NotEmpty()
@@ -21,7 +21,7 @@ internal sealed class CreateTransactionCommandValidator : AbstractValidator<Crea
 
         RuleFor(x => x.Amount)
             .GreaterThan(0)
-            .PrecisionScale(2, 9, true);
+            .PrecisionScale(9, 2, true);
 
         RuleFor(x => x.Notes).MaximumLength(1000);
 

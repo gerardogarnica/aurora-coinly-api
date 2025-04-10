@@ -18,39 +18,23 @@ internal sealed class TransactionRepository(
 
     public async Task<IEnumerable<Transaction>> GetListAsync(
         DateRange dateRange,
+        TransactionStatus? status,
         Guid? categoryId,
         Guid? paymentMethodId)
     {
         var query = dbContext
             .Transactions
+            .Include(x => x.Category)
+            .Include(x => x.PaymentMethod)
+            .AsSplitQuery()
             .Where(x => x.TransactionDate >= dateRange.Start && x.TransactionDate <= dateRange.End)
             .AsNoTracking()
             .AsQueryable();
 
-        if (categoryId is not null)
+        if (status is not null)
         {
-            query = query.Where(x => x.CategoryId == categoryId.Value);
+            query = query.Where(x => x.Status == status);
         }
-
-        if (paymentMethodId is not null)
-        {
-            query = query.Where(x => x.PaymentMethodId == paymentMethodId.Value);
-        }
-
-        return await query.OrderBy(x => x.TransactionDate).ToListAsync();
-    }
-
-    public async Task<IEnumerable<Transaction>> GetListByStatusAsync(
-        DateRange dateRange,
-        TransactionStatus status,
-        Guid? categoryId,
-        Guid? paymentMethodId)
-    {
-        var query = dbContext
-            .Transactions
-            .Where(x => x.TransactionDate >= dateRange.Start && x.TransactionDate <= dateRange.End && x.Status == status)
-            .AsNoTracking()
-            .AsQueryable();
 
         if (categoryId is not null)
         {
