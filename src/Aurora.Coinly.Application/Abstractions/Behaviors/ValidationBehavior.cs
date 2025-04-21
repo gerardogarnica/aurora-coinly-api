@@ -1,5 +1,4 @@
 ﻿using FluentValidation.Results;
-using ValidationException = Aurora.Coinly.Application.Abstractions.Exceptions.ValidationException;
 
 namespace Aurora.Coinly.Application.Abstractions.Behaviors;
 
@@ -20,7 +19,7 @@ internal sealed class ValidationBehavior<TRequest, TResponse>(
             return await next(cancellationToken);
         }
 
-        throw new ValidationException(failures);
+        throw new FluentValidation.ValidationException(failures);
     }
 
     private async Task<ValidationFailure[]> ValidateAsync(TRequest request)
