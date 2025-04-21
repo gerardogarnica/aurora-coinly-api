@@ -17,7 +17,7 @@ internal sealed class ValidationBehavior<TRequest, TResponse>(
 
         if (failures.Length == 0)
         {
-            return await next();
+            return await next(cancellationToken);
         }
 
         throw new ValidationException(failures);
