@@ -10,15 +10,14 @@ public sealed class GetTransactions : IBaseEndpoint
     {
         app.MapGet(
             "transactions",
-            async (
-                [FromQuery] DateOnly dateFrom,
-                [FromQuery] DateOnly dateTo,
-                [FromQuery] TransactionStatus? status,
-                [FromQuery] Guid? categoryId,
-                [FromQuery] Guid? paymentMethodId,
-                ISender sender) =>
+            async ([AsParameters] GetTransactionsQueryParameters queryParams, ISender sender) =>
             {
-                var query = new GetTransactionListQuery(dateFrom, dateTo, status, categoryId, paymentMethodId);
+                var query = new GetTransactionListQuery(
+                    queryParams.DateFrom,
+                    queryParams.DateTo,
+                    queryParams.Status,
+                    queryParams.CategoryId,
+                    queryParams.PaymentMethodId);
 
                 Result<IReadOnlyCollection<TransactionModel>> result = await sender.Send(query);
 
@@ -28,5 +27,23 @@ public sealed class GetTransactions : IBaseEndpoint
             .WithTags(EndpointTags.Transactions)
             .Produces<IReadOnlyCollection<TransactionModel>>(StatusCodes.Status200OK)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+    }
+
+    internal sealed record GetTransactionsQueryParameters
+    {
+        [FromQuery(Name = "from")]
+        public DateOnly DateFrom { get; set; }
+
+        [FromQuery(Name = "to")]
+        public DateOnly DateTo { get; set; }
+
+        [FromQuery(Name = "st")]
+        public TransactionStatus? Status { get; set; }
+
+        [FromQuery(Name = "cid")]
+        public Guid? CategoryId { get; set; }
+
+        [FromQuery(Name = "mid")]
+        public Guid? PaymentMethodId { get; set; }
     }
 }

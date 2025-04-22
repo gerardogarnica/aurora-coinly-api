@@ -9,7 +9,7 @@ public sealed class GetCategories : IBaseEndpoint
     {
         app.MapGet(
             "categories",
-            async ([FromQuery] bool showDeleted, ISender sender) =>
+            async ([FromQuery(Name = "deleted")] bool showDeleted, ISender sender) =>
             {
                 var query = new GetCategoryListQuery(showDeleted);
 
