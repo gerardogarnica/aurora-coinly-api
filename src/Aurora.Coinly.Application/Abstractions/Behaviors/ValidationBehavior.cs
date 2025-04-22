@@ -19,7 +19,7 @@ internal sealed class ValidationBehavior<TRequest, TResponse>(
             return await next(cancellationToken);
         }
 
-        throw new FluentValidation.ValidationException(failures);
+        throw new ValidationException(failures);
     }
 
     private async Task<ValidationFailure[]> ValidateAsync(TRequest request)

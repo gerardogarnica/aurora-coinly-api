@@ -22,8 +22,23 @@ builder.Services.Configure<JsonOptions>(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddProblemDetails(cfg =>
+{
+    cfg.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
+    };
+
+    /*
+    cfg.IncludeExceptionDetails = (context, exception) => context.RequestServices.GetService<IHostEnvironment>()?.IsDevelopment() ?? false;
+    cfg.Map<ValidationException>(ex => new ValidationProblemDetails(ex.Errors));
+    cfg.Map<NotFoundException>(ex => new NotFoundProblemDetails(ex.Message));
+    cfg.Map<DomainException>(ex => new DomainProblemDetails(ex.Message));
+    */
+});
+
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Services.AddProblemDetails();
 
 builder.Services
     .AddOpenTelemetry()
