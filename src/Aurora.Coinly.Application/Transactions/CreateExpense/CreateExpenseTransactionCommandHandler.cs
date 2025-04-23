@@ -3,17 +3,17 @@ using Aurora.Coinly.Domain.Methods;
 using Aurora.Coinly.Domain.Transactions;
 using Aurora.Coinly.Domain.Wallets;
 
-namespace Aurora.Coinly.Application.Transactions.Create;
+namespace Aurora.Coinly.Application.Transactions.CreateExpense;
 
-internal sealed class CreateTransactionCommandHandler(
+internal sealed class CreateExpenseTransactionCommandHandler(
     ICategoryRepository categoryRepository,
     IPaymentMethodRepository paymentMethodRepository,
     ITransactionRepository transactionRepository,
     IWalletRepository walletRepository,
-    IDateTimeService dateTimeService) : ICommandHandler<CreateTransactionCommand, Guid>
+    IDateTimeService dateTimeService) : ICommandHandler<CreateExpenseTransactionCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(
-        CreateTransactionCommand request,
+        CreateExpenseTransactionCommand request,
         CancellationToken cancellationToken)
     {
         // Get category
@@ -23,6 +23,11 @@ internal sealed class CreateTransactionCommandHandler(
             return Result.Fail<Guid>(CategoryErrors.NotFound);
         }
 
+        if (category.Type is not TransactionType.Expense)
+        {
+            return Result.Fail<Guid>(CategoryErrors.InvalidType);
+        }
+
         // Get payment method
         var method = await paymentMethodRepository.GetByIdAsync(request.PaymentMethodId);
         if (method is null)
@@ -30,16 +35,25 @@ internal sealed class CreateTransactionCommandHandler(
             return Result.Fail<Guid>(PaymentMethodErrors.NotFound);
         }
 
+        if (method.IsDeleted)
+        {
+            return Result.Fail<Guid>(PaymentMethodErrors.IsDeleted);
+        }
+
+        if (method.AutoMarkAsPaid && request.MaxPaymentDate != request.TransactionDate)
+        {
+            return Result.Fail<Guid>(TransactionErrors.InvalidMaxPaymentDate);
+        }
+
         // Create transaction
         var result = Transaction.Create(
             request.Description,
             category,
             request.TransactionDate,
-            method.AutoMarkAsPaid ? request.TransactionDate : request.MaxPaymentDate,
+            request.MaxPaymentDate,
             new Money(request.Amount, Currency.FromCode(request.CurrencyCode)),
             method,
             request.Notes,
-            method.AutoMarkAsPaid ? 0 : request.Installment,
             dateTimeService.UtcNow);
 
         if (!result.IsSuccessful)
@@ -58,7 +72,6 @@ internal sealed class CreateTransactionCommandHandler(
             }
 
             var wallet = await walletRepository.GetByIdAsync(request.WalletId.Value);
-
             if (wallet is null)
             {
                 return Result.Fail<Guid>(WalletErrors.NotFound);

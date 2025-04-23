@@ -12,6 +12,7 @@ internal sealed class TransactionRepository(
         .Transactions
         .Include(x => x.Category)
         .Include(x => x.PaymentMethod)
+        .Include(x => x.Wallet)
         .AsSplitQuery()
         .Where(x => x.Id == id)
         .FirstOrDefaultAsync();
@@ -26,26 +27,15 @@ internal sealed class TransactionRepository(
             .Transactions
             .Include(x => x.Category)
             .Include(x => x.PaymentMethod)
+            .Include(x => x.Wallet)
             .AsSplitQuery()
-            .Where(x => x.TransactionDate >= dateRange.Start && x.TransactionDate <= dateRange.End)
+            .Where(x => x.MaxPaymentDate >= dateRange.Start && x.MaxPaymentDate <= dateRange.End)
+            .Where(x => status == null || x.Status == status)
+            .Where(x => categoryId == null || x.CategoryId == categoryId.Value)
+            .Where(x => paymentMethodId == null || x.PaymentMethodId == paymentMethodId.Value)
             .AsNoTracking()
             .AsQueryable();
 
-        if (status is not null)
-        {
-            query = query.Where(x => x.Status == status);
-        }
-
-        if (categoryId is not null)
-        {
-            query = query.Where(x => x.CategoryId == categoryId.Value);
-        }
-
-        if (paymentMethodId is not null)
-        {
-            query = query.Where(x => x.PaymentMethodId == paymentMethodId.Value);
-        }
-
-        return await query.OrderBy(x => x.TransactionDate).ToListAsync();
+        return await query.OrderBy(x => x.MaxPaymentDate).ToListAsync();
     }
 }

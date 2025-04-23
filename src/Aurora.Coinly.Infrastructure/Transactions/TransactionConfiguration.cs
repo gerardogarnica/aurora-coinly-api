@@ -41,6 +41,12 @@ internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transa
             .HasOne(x => x.PaymentMethod)
             .WithMany()
             .HasForeignKey(x => x.PaymentMethodId)
-            .IsRequired();
+            .IsRequired(false);
+
+        builder
+            .HasOne(x => x.Wallet)
+            .WithMany()
+            .HasForeignKey(x => x.WalletId)
+            .IsRequired(false);
     }
 }

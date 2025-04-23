@@ -1,17 +1,17 @@
-﻿namespace Aurora.Coinly.Application.Transactions.Create;
+﻿namespace Aurora.Coinly.Application.Transactions.CreateExpense;
 
-internal sealed class CreateTransactionCommandValidator : AbstractValidator<CreateTransactionCommand>
+internal sealed class CreateExpenseTransactionCommandValidator : AbstractValidator<CreateExpenseTransactionCommand>
 {
-    public CreateTransactionCommandValidator()
+    public CreateExpenseTransactionCommandValidator()
     {
+        RuleFor(x => x.CategoryId).NotEmpty();
+
+        RuleFor(x => x.PaymentMethodId).NotEmpty();
+
         RuleFor(x => x.Description)
             .NotEmpty()
             .MinimumLength(3)
             .MaximumLength(100);
-
-        RuleFor(x => x.CategoryId).NotEmpty();
-
-        RuleFor(x => x.PaymentMethodId).NotEmpty();
 
         RuleFor(x => x.MaxPaymentDate).GreaterThanOrEqualTo(x => x.TransactionDate);
 
@@ -24,8 +24,6 @@ internal sealed class CreateTransactionCommandValidator : AbstractValidator<Crea
             .PrecisionScale(9, 2, true);
 
         RuleFor(x => x.Notes).MaximumLength(1000);
-
-        RuleFor(x => x.Installment).GreaterThanOrEqualTo(0);
     }
 
     private static bool BeAValidCurrencyCode(string currencyCode)

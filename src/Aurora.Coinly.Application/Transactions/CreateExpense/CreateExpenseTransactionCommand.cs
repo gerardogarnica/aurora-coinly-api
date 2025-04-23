@@ -1,13 +1,12 @@
-﻿namespace Aurora.Coinly.Application.Transactions.Create;
+﻿namespace Aurora.Coinly.Application.Transactions.CreateExpense;
 
-public sealed record CreateTransactionCommand(
-    string Description,
+public sealed record CreateExpenseTransactionCommand(
     Guid CategoryId,
     Guid PaymentMethodId,
+    string Description,
     DateOnly TransactionDate,
     DateOnly MaxPaymentDate,
     string CurrencyCode,
     decimal Amount,
     string? Notes,
-    int Installment,
     Guid? WalletId) : ICommand<Guid>;
