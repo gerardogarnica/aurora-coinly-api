@@ -11,6 +11,7 @@ public sealed class Transaction : BaseEntity
     public DateOnly TransactionDate { get; private set; }
     public DateOnly MaxPaymentDate { get; private set; }
     public DateOnly? PaymentDate { get; private set; }
+    public DateOnly QueryDate { get; private set; }
     public TransactionType Type => Category.Type;
     public bool IsPaid => Status == TransactionStatus.Paid;
     public Money Amount { get; private set; }
@@ -50,6 +51,7 @@ public sealed class Transaction : BaseEntity
             CategoryId = category.Id,
             TransactionDate = transactionDate,
             MaxPaymentDate = maxPaymentDate,
+            QueryDate = maxPaymentDate,
             Amount = amount,
             PaymentMethodId = paymentMethod?.Id,
             Notes = notes,
@@ -81,6 +83,7 @@ public sealed class Transaction : BaseEntity
         }
 
         PaymentDate = paymentDate;
+        QueryDate = paymentDate;
         Status = TransactionStatus.Paid;
         WalletId = wallet.Id;
         PaidOnUtc = paidOnUtc;
@@ -119,6 +122,7 @@ public sealed class Transaction : BaseEntity
 
         Status = TransactionStatus.Pending;
         PaymentDate = null;
+        QueryDate = MaxPaymentDate;
         WalletId = null;
         PaidOnUtc = null;
 

@@ -29,13 +29,13 @@ internal sealed class TransactionRepository(
             .Include(x => x.PaymentMethod)
             .Include(x => x.Wallet)
             .AsSplitQuery()
-            .Where(x => x.MaxPaymentDate >= dateRange.Start && x.MaxPaymentDate <= dateRange.End)
+            .Where(x => x.QueryDate >= dateRange.Start && x.QueryDate <= dateRange.End)
             .Where(x => status == null || x.Status == status)
             .Where(x => categoryId == null || x.CategoryId == categoryId.Value)
             .Where(x => paymentMethodId == null || x.PaymentMethodId == paymentMethodId.Value)
             .AsNoTracking()
             .AsQueryable();
 
-        return await query.OrderBy(x => x.MaxPaymentDate).ToListAsync();
+        return await query.OrderBy(x => x.QueryDate).ToListAsync();
     }
 }
