@@ -43,7 +43,7 @@ internal sealed class WalletHistoryConfiguration : IEntityTypeConfiguration<Wall
 
         builder
             .HasOne<Wallet>()
-            .WithMany(x => x.Operations!)
+            .WithMany(x => x.Operations)
             .HasForeignKey(x => x.WalletId)
             .IsRequired();
     }

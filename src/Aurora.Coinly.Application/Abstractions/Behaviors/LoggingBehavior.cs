@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Serilog.Context;
 
 namespace Aurora.Coinly.Application.Abstractions.Behaviors;
 
@@ -15,7 +14,7 @@ internal sealed class LoggingBehavior<TRequest, TResponse>(
     {
         logger.LogInformation("Processing request: {Name} {@Request}", typeof(TRequest).Name, request);
 
-        TResponse result = await next();
+        TResponse result = await next(cancellationToken);
 
         if (result.IsSuccessful)
         {
@@ -23,10 +22,7 @@ internal sealed class LoggingBehavior<TRequest, TResponse>(
         }
         else
         {
-            using (LogContext.PushProperty("Errors", result.Error, true))
-            {
-                logger.LogError("Request processed with errors: {Name} {@Response}", typeof(TResponse).Name, result);
-            }
+            logger.LogError("Request processed with errors: {Name} {@Response}", typeof(TResponse).Name, result);
         }
 
         return result;

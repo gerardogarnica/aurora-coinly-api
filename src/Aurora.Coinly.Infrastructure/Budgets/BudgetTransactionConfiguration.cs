@@ -23,7 +23,7 @@ internal sealed class BudgetTransactionConfiguration : IEntityTypeConfiguration<
 
         builder
             .HasOne<Budget>()
-            .WithMany()
+            .WithMany(x => x.Transactions)
             .HasForeignKey(x => x.BudgetId)
             .IsRequired();
     }

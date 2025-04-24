@@ -13,6 +13,7 @@ public sealed record BudgetModel(
     decimal SpentAmount,
     bool IsExceeded,
     string? Notes,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
     BudgetStatus Status,
     List<BudgetTransactionModel> Transactions);
 

@@ -1,23 +1,26 @@
-﻿using Aurora.Coinly.Domain.Transactions;
+﻿using Aurora.Coinly.Application.Categories;
+using Aurora.Coinly.Application.Methods;
+using Aurora.Coinly.Application.Wallets;
+using Aurora.Coinly.Domain.Transactions;
 
 namespace Aurora.Coinly.Application.Transactions;
 
 public sealed record TransactionModel(
     Guid TransactionId,
     string Description,
-    Guid CategoryId,
-    string CategoryName,
-    Guid PaymentMethodId,
-    string PaymentMethodName,
+    CategoryModel? Category,
     DateOnly TransactionDate,
     DateOnly MaxPaymentDate,
     DateOnly? PaymentDate,
     string Currency,
     decimal Amount,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
     TransactionType Type,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
     TransactionStatus Status,
     bool IsPaid,
-    Guid? WalletId,
+    PaymentMethodModel? PaymentMethod,
+    WalletModel? Wallet,
     string? Notes,
     bool IsRecurring,
     int InstallmentNumber);
@@ -27,10 +30,7 @@ internal static class TransactionModelExtensions
     internal static TransactionModel ToModel(this Transaction transaction) => new(
         transaction.Id,
         transaction.Description,
-        transaction.Category.Id,
-        transaction.Category.Name,
-        transaction.PaymentMethod.Id,
-        transaction.PaymentMethod.Name,
+        transaction.Category?.ToModel(),
         transaction.TransactionDate,
         transaction.MaxPaymentDate,
         transaction.PaymentDate,
@@ -39,7 +39,8 @@ internal static class TransactionModelExtensions
         transaction.Type,
         transaction.Status,
         transaction.IsPaid,
-        transaction.WalletId,
+        transaction.PaymentMethod?.ToModel(),
+        transaction.Wallet?.ToModel(),
         transaction.Notes,
         transaction.IsRecurring,
         transaction.InstallmentNumber);

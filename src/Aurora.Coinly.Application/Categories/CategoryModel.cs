@@ -6,6 +6,7 @@ namespace Aurora.Coinly.Application.Categories;
 public sealed record CategoryModel(
     Guid CategoryId,
     string Name,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
     TransactionType Type,
     bool IsDeleted,
     string? Notes);

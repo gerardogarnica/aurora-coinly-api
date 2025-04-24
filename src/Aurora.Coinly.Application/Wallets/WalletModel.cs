@@ -9,6 +9,7 @@ public sealed record WalletModel(
     decimal AvailableAmount,
     decimal SavingsAmount,
     decimal TotalAmount,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
     WalletType Type,
     bool IsDeleted,
     string? Notes,

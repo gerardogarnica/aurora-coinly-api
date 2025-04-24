@@ -4,7 +4,7 @@ namespace Aurora.Coinly.Domain.Wallets;
 
 public sealed class Wallet : BaseEntity
 {
-    private readonly List<WalletHistory> _walletHistory = [];
+    private readonly List<WalletHistory> _operations = [];
 
     public string Name { get; private set; }
     public Money AvailableAmount { get; private set; }
@@ -16,7 +16,7 @@ public sealed class Wallet : BaseEntity
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? UpdatedOnUtc { get; private set; }
     public DateTime? DeletedOnUtc { get; private set; }
-    public IReadOnlyCollection<WalletHistory> Operations => _walletHistory.AsReadOnly();
+    public IReadOnlyCollection<WalletHistory> Operations => _operations.AsReadOnly();
 
     private Wallet() : base(Guid.NewGuid())
     {
@@ -31,12 +31,13 @@ public sealed class Wallet : BaseEntity
         Money amount,
         WalletType type,
         string? notes,
+        DateOnly openedOn,
         DateTime createdOn)
     {
         var wallet = new Wallet
         {
             Name = name,
-            AvailableAmount = amount,
+            AvailableAmount = new Money(amount.Amount, amount.Currency),
             SavingsAmount = Money.Zero(amount.Currency),
             Type = type,
             Notes = notes,
@@ -48,7 +49,8 @@ public sealed class Wallet : BaseEntity
             WalletHistoryType.Created,
             "Wallet created",
             amount,
-            DateOnly.FromDateTime(createdOn));
+            openedOn,
+            createdOn);
 
         wallet.AddDomainEvent(new WalletCreatedEvent(wallet));
 
@@ -84,7 +86,8 @@ public sealed class Wallet : BaseEntity
             WalletHistoryType.AssignedToSavings,
             "Assigned to savings",
             amount,
-            assignedOn);
+            assignedOn,
+            updatedOnUtc);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
@@ -106,16 +109,15 @@ public sealed class Wallet : BaseEntity
             WalletHistoryType.AssignedToAvailable,
             "Assigned to available",
             amount,
-            assignedOn);
+            assignedOn,
+            updatedOnUtc);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
         return this;
     }
 
-    public Result<Wallet> Deposit(
-        Transaction transaction,
-        DateTime updatedOnUtc)
+    public Result<Wallet> Deposit(Transaction transaction, DateTime updatedOnUtc)
     {
         if (!transaction.IsPaid)
         {
@@ -159,6 +161,7 @@ public sealed class Wallet : BaseEntity
             description,
             amount,
             processedOn,
+            updatedOnUtc,
             transactionId);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
@@ -166,9 +169,7 @@ public sealed class Wallet : BaseEntity
         return this;
     }
 
-    public Result<Wallet> Withdraw(
-        Transaction transaction,
-        DateTime updatedOnUtc)
+    public Result<Wallet> Withdraw(Transaction transaction, DateTime updatedOnUtc)
     {
         if (!transaction.IsPaid)
         {
@@ -212,6 +213,7 @@ public sealed class Wallet : BaseEntity
             description,
             amount,
             processedOn,
+            updatedOnUtc,
             transactionId);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
@@ -239,7 +241,7 @@ public sealed class Wallet : BaseEntity
             return Result.Fail<Wallet>(WalletErrors.IsDeleted);
         }
 
-        if (!_walletHistory.Any(t => t.TransactionId == transaction.Id))
+        if (!_operations.Any(t => t.TransactionId == transaction.Id))
         {
             return Result.Fail<Wallet>(WalletErrors.TransactionNotBelongs);
         }
@@ -249,11 +251,25 @@ public sealed class Wallet : BaseEntity
             return Result.Fail<Wallet>(TransactionErrors.AlreadyPaid);
         }
 
-        _walletHistory.Remove(_walletHistory.First(t => t.TransactionId == transaction.Id));
+        // Get the operation associated with the transaction
+        var operation = _operations.First(t => t.TransactionId == transaction.Id);
+
+        AvailableAmount = operation.IsIncrement
+            ? AvailableAmount - operation.Amount
+            : AvailableAmount + operation.Amount;
+
+        _operations.Remove(operation);
 
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
         return this;
+    }
+
+    public void SetOperations(IList<WalletHistory> operations)
+    {
+        _operations.Clear();
+
+        _operations.AddRange(operations);
     }
 
     private void AddOperation(
@@ -261,16 +277,20 @@ public sealed class Wallet : BaseEntity
         string description,
         Money amount,
         DateOnly date,
+        DateTime createdOn,
         Guid? transactionId = null)
     {
-        _walletHistory.Add(WalletHistory.Create(
-            this,
+        var operation = WalletHistory.Create(
+            Id,
             transactionId,
             type,
             description,
-            amount,
-            AvailableAmount,
-            SavingsAmount,
-            date));
+            date,
+            new Money(amount.Amount, amount.Currency),
+            new Money(AvailableAmount.Amount, AvailableAmount.Currency),
+            new Money(SavingsAmount.Amount, SavingsAmount.Currency),
+            createdOn);
+
+        _operations.Add(operation);
     }
 }

@@ -8,9 +8,8 @@ public sealed class BudgetTransaction
     public Guid BudgetId { get; private set; }
     public Guid TransactionId { get; private set; }
     public string Description { get; private set; }
-    public Money Amount { get; private set; }
     public DateOnly TransactionDate { get; private set; }
-    public Budget Budget { get; init; } = null!;
+    public Money Amount { get; private set; }
 
     private BudgetTransaction()
     {
@@ -26,8 +25,8 @@ public sealed class BudgetTransaction
             BudgetId = budget.Id,
             TransactionId = transaction.Id,
             Description = transaction.Description,
-            Amount = transaction.Amount,
-            TransactionDate = transaction.TransactionDate
+            TransactionDate = transaction.TransactionDate,
+            Amount = transaction.Amount
         };
     }
 }

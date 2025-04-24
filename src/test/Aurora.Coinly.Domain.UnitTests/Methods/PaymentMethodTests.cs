@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Domain.UnitTests.Methods;
+﻿using Aurora.Coinly.Domain.UnitTests.Wallets;
+
+namespace Aurora.Coinly.Domain.UnitTests.Methods;
 
 public class PaymentMethodTests : BaseTest
 {
@@ -6,6 +8,7 @@ public class PaymentMethodTests : BaseTest
     public void Create_Should_SetProperties()
     {
         // Arrange
+        var wallet = WalletData.GetWallet();
 
         // Act
         var paymentMethod = PaymentMethod.Create(
@@ -13,6 +16,9 @@ public class PaymentMethodTests : BaseTest
             PaymentMethodData.IsDefault,
             PaymentMethodData.AllowRecurring,
             PaymentMethodData.AutoMarkAsPaid,
+            wallet.Id,
+            PaymentMethodData.SuggestedPaymentDay,
+            PaymentMethodData.StatementCutoffDay,
             PaymentMethodData.Notes,
             DateTime.UtcNow);
 
@@ -21,6 +27,8 @@ public class PaymentMethodTests : BaseTest
         paymentMethod.IsDefault.Should().Be(PaymentMethodData.IsDefault);
         paymentMethod.AllowRecurring.Should().Be(PaymentMethodData.AllowRecurring);
         paymentMethod.AutoMarkAsPaid.Should().Be(PaymentMethodData.AutoMarkAsPaid);
+        paymentMethod.RelatedWalletId.Should().Be(wallet.Id);
+        paymentMethod.SuggestedPaymentDay.Should().Be(PaymentMethodData.SuggestedPaymentDay);
         paymentMethod.Notes.Should().Be(PaymentMethodData.Notes);
         paymentMethod.IsDeleted.Should().Be(false);
     }
@@ -31,6 +39,9 @@ public class PaymentMethodTests : BaseTest
         // Arrange
         var paymentMethod = PaymentMethodData.GetPaymentMethod();
         var updatedName = "Updated Name";
+        var updatedWallet = WalletData.GetWallet();
+        var updatedSuggestedPaymentDay = 20;
+        var updatedStatementCutoffDay = 25;
         var updatedNotes = "Updated Notes";
 
         // Act
@@ -38,6 +49,9 @@ public class PaymentMethodTests : BaseTest
             updatedName,
             PaymentMethodData.AllowRecurring,
             PaymentMethodData.AutoMarkAsPaid,
+            updatedWallet.Id,
+            updatedSuggestedPaymentDay,
+            updatedStatementCutoffDay,
             updatedNotes,
             DateTime.UtcNow);
 
@@ -46,6 +60,9 @@ public class PaymentMethodTests : BaseTest
         paymentMethod.Name.Should().Be(updatedName);
         paymentMethod.AllowRecurring.Should().Be(PaymentMethodData.AllowRecurring);
         paymentMethod.AutoMarkAsPaid.Should().Be(PaymentMethodData.AutoMarkAsPaid);
+        paymentMethod.RelatedWalletId.Should().Be(updatedWallet.Id);
+        paymentMethod.SuggestedPaymentDay.Should().Be(updatedSuggestedPaymentDay);
+        paymentMethod.StatementCutoffDay.Should().Be(updatedStatementCutoffDay);
         paymentMethod.Notes.Should().Be(updatedNotes);
         paymentMethod.UpdatedOnUtc.Should().NotBeNull();
     }
@@ -56,6 +73,9 @@ public class PaymentMethodTests : BaseTest
         // Arrange
         var paymentMethod = PaymentMethodData.GetPaymentMethod();
         var updatedName = "Updated Name";
+        var updatedWallet = WalletData.GetWallet();
+        var updatedSuggestedPaymentDay = 20;
+        var updatedStatementCutoffDay = 25;
         var updatedNotes = "Updated Notes";
 
         paymentMethod.Delete(DateTime.UtcNow);
@@ -65,6 +85,9 @@ public class PaymentMethodTests : BaseTest
             updatedName,
             PaymentMethodData.AllowRecurring,
             PaymentMethodData.AutoMarkAsPaid,
+            updatedWallet.Id,
+            updatedSuggestedPaymentDay,
+            updatedStatementCutoffDay,
             updatedNotes,
             DateTime.UtcNow);
 

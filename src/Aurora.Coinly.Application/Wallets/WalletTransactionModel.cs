@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Wallets;
 
 public sealed record WalletTransactionModel(
     Guid OperationId,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
     WalletHistoryType Type,
     string Description,
     decimal Amount,

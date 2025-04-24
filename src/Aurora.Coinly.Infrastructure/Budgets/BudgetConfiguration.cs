@@ -31,7 +31,7 @@ internal sealed class BudgetConfiguration : IEntityTypeConfiguration<Budget>
         builder.Property(x => x.Notes).HasMaxLength(1000);
 
         builder
-            .HasOne<Category>()
+            .HasOne(x => x.Category)
             .WithMany()
             .HasForeignKey(x => x.CategoryId)
             .IsRequired();

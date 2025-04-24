@@ -14,5 +14,6 @@ internal static class WalletData
         AvailableAmount,
         Type,
         Notes,
+        DateOnly.FromDateTime(DateTime.UtcNow),
         DateTime.UtcNow);
 }

@@ -19,9 +19,9 @@ internal sealed class PaymentMethodRepository(
            .AsNoTracking()
            .AsQueryable();
 
-        if (showDeleted)
+        if (!showDeleted)
         {
-            query = query.Where(x => x.IsDeleted);
+            query = query.Where(x => !x.IsDeleted);
         }
 
         return await query.OrderBy(x => x.Name).ToListAsync();

@@ -1,5 +1,3 @@
 ﻿namespace Aurora.Coinly.Application.Wallets.AddTransaction;
 
-public sealed record AddTransactionToWalletCommand(
-    Guid WalletId,
-    Guid TransactionId) : ICommand;
+public sealed record AddTransactionToWalletCommand(Guid TransactionId) : ICommand;

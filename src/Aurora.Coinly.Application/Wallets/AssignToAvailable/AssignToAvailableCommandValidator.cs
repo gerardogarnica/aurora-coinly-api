@@ -6,6 +6,6 @@ internal sealed class AssignToAvailableCommandValidator : AbstractValidator<Assi
     {
         RuleFor(x => x.Amount)
             .GreaterThan(0)
-            .PrecisionScale(2, 9, true);
+            .PrecisionScale(9, 2, true);
     }
 }

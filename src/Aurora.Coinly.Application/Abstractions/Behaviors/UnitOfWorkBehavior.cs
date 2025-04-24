@@ -14,7 +14,7 @@ internal sealed class UnitOfWorkBehavior<TRequest, TResponse>(
     {
         using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-        var response = await next();
+        var response = await next(cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         transactionScope.Complete();
 

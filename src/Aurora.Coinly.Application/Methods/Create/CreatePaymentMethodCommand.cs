@@ -5,4 +5,7 @@ public sealed record CreatePaymentMethodCommand(
     bool IsDefault,
     bool AllowRecurring,
     bool AutoMarkAsPaid,
+    Guid RelatedWalletId,
+    int? SuggestedPaymentDay,
+    int? StatementCutoffDay,
     string? Notes) : ICommand<Guid>;

@@ -14,6 +14,14 @@ public static class TransactionErrors
         "Transaction.AlreadyRemoved",
         "The transaction has already been removed");
 
+    public static readonly BaseError InvalidMaxPaymentDate = new(
+        "Transaction.InvalidMaxPaymentDate",
+        "The maximum payment date must be equal to the transaction date");
+
+    public static BaseError InvalidPaymentDate(DateOnly transactionDate) => new(
+        "Transaction.InvalidPaymentDate",
+        $"Payment date must be greater than or equal to the '{transactionDate}'");
+
     public static readonly BaseError NotPaid = new(
         "Transaction.NotPaid",
         "The transaction is not in paid status");

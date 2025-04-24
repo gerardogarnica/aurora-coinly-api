@@ -12,56 +12,30 @@ internal sealed class TransactionRepository(
         .Transactions
         .Include(x => x.Category)
         .Include(x => x.PaymentMethod)
+        .Include(x => x.Wallet)
         .AsSplitQuery()
         .Where(x => x.Id == id)
         .FirstOrDefaultAsync();
 
     public async Task<IEnumerable<Transaction>> GetListAsync(
         DateRange dateRange,
+        TransactionStatus? status,
         Guid? categoryId,
         Guid? paymentMethodId)
     {
         var query = dbContext
             .Transactions
-            .Where(x => x.TransactionDate >= dateRange.Start && x.TransactionDate <= dateRange.End)
+            .Include(x => x.Category)
+            .Include(x => x.PaymentMethod)
+            .Include(x => x.Wallet)
+            .AsSplitQuery()
+            .Where(x => x.QueryDate >= dateRange.Start && x.QueryDate <= dateRange.End)
+            .Where(x => status == null || x.Status == status)
+            .Where(x => categoryId == null || x.CategoryId == categoryId.Value)
+            .Where(x => paymentMethodId == null || x.PaymentMethodId == paymentMethodId.Value)
             .AsNoTracking()
             .AsQueryable();
 
-        if (categoryId is not null)
-        {
-            query = query.Where(x => x.CategoryId == categoryId.Value);
-        }
-
-        if (paymentMethodId is not null)
-        {
-            query = query.Where(x => x.PaymentMethodId == paymentMethodId.Value);
-        }
-
-        return await query.OrderBy(x => x.TransactionDate).ToListAsync();
-    }
-
-    public async Task<IEnumerable<Transaction>> GetListByStatusAsync(
-        DateRange dateRange,
-        TransactionStatus status,
-        Guid? categoryId,
-        Guid? paymentMethodId)
-    {
-        var query = dbContext
-            .Transactions
-            .Where(x => x.TransactionDate >= dateRange.Start && x.TransactionDate <= dateRange.End && x.Status == status)
-            .AsNoTracking()
-            .AsQueryable();
-
-        if (categoryId is not null)
-        {
-            query = query.Where(x => x.CategoryId == categoryId.Value);
-        }
-
-        if (paymentMethodId is not null)
-        {
-            query = query.Where(x => x.PaymentMethodId == paymentMethodId.Value);
-        }
-
-        return await query.OrderBy(x => x.TransactionDate).ToListAsync();
+        return await query.OrderBy(x => x.QueryDate).ToListAsync();
     }
 }

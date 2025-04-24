@@ -11,10 +11,11 @@ public sealed class Transaction : BaseEntity
     public DateOnly TransactionDate { get; private set; }
     public DateOnly MaxPaymentDate { get; private set; }
     public DateOnly? PaymentDate { get; private set; }
+    public DateOnly QueryDate { get; private set; }
     public TransactionType Type => Category.Type;
     public bool IsPaid => Status == TransactionStatus.Paid;
     public Money Amount { get; private set; }
-    public Guid PaymentMethodId { get; private set; }
+    public Guid? PaymentMethodId { get; private set; }
     public Guid? WalletId { get; private set; }
     public string? Notes { get; private set; }
     public bool IsRecurring => InstallmentNumber > 0;
@@ -24,13 +25,10 @@ public sealed class Transaction : BaseEntity
     public DateTime? PaidOnUtc { get; private set; }
     public DateTime? RemovedOnUtc { get; private set; }
     public Category Category { get; init; } = null!;
-    public PaymentMethod PaymentMethod { get; init; } = null!;
+    public PaymentMethod? PaymentMethod { get; init; } = null!;
+    public Wallet? Wallet { get; init; } = null!;
 
-    private Transaction() : base(Guid.NewGuid())
-    {
-        Description = string.Empty;
-        Amount = Money.Zero();
-    }
+    private Transaction() : base(Guid.NewGuid()) { }
 
     public static Result<Transaction> Create(
         string description,
@@ -38,19 +36,13 @@ public sealed class Transaction : BaseEntity
         DateOnly transactionDate,
         DateOnly maxPaymentDate,
         Money amount,
-        PaymentMethod paymentMethod,
+        PaymentMethod? paymentMethod,
         string? notes,
-        int installmentNumber,
         DateTime createdOnUtc)
     {
         if (category.IsDeleted)
         {
             return Result.Fail<Transaction>(CategoryErrors.IsDeleted);
-        }
-
-        if (paymentMethod.IsDeleted)
-        {
-            return Result.Fail<Transaction>(PaymentMethodErrors.IsDeleted);
         }
 
         var transaction = new Transaction
@@ -59,10 +51,11 @@ public sealed class Transaction : BaseEntity
             CategoryId = category.Id,
             TransactionDate = transactionDate,
             MaxPaymentDate = maxPaymentDate,
+            QueryDate = maxPaymentDate,
             Amount = amount,
-            PaymentMethodId = paymentMethod.Id,
+            PaymentMethodId = paymentMethod?.Id,
             Notes = notes,
-            InstallmentNumber = installmentNumber,
+            InstallmentNumber = 0,
             Status = TransactionStatus.Pending,
             CreatedOnUtc = createdOnUtc
         };
@@ -79,7 +72,18 @@ public sealed class Transaction : BaseEntity
             return Result.Fail<Transaction>(TransactionErrors.NotPending);
         }
 
+        if (wallet.IsDeleted)
+        {
+            return Result.Fail<Transaction>(WalletErrors.IsDeleted);
+        }
+
+        if (paymentDate < TransactionDate)
+        {
+            return Result.Fail<Transaction>(TransactionErrors.InvalidPaymentDate(TransactionDate));
+        }
+
         PaymentDate = paymentDate;
+        QueryDate = paymentDate;
         Status = TransactionStatus.Paid;
         WalletId = wallet.Id;
         PaidOnUtc = paidOnUtc;
@@ -118,6 +122,7 @@ public sealed class Transaction : BaseEntity
 
         Status = TransactionStatus.Pending;
         PaymentDate = null;
+        QueryDate = MaxPaymentDate;
         WalletId = null;
         PaidOnUtc = null;
 

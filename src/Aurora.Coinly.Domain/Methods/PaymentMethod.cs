@@ -6,6 +6,9 @@ public sealed class PaymentMethod : BaseEntity
     public bool IsDefault { get; private set; }
     public bool AllowRecurring { get; private set; }
     public bool AutoMarkAsPaid { get; private set; }
+    public Guid RelatedWalletId { get; private set; }
+    public int? SuggestedPaymentDay { get; private set; }
+    public int? StatementCutoffDay { get; private set; }
     public string? Notes { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
@@ -25,6 +28,9 @@ public sealed class PaymentMethod : BaseEntity
         bool isDefault,
         bool allowRecurring,
         bool autoMarkAsPaid,
+        Guid relatedWalletId,
+        int? suggestedPaymentDay,
+        int? statementCutoffDay,
         string? notes,
         DateTime createdOnUtc)
     {
@@ -34,6 +40,9 @@ public sealed class PaymentMethod : BaseEntity
             IsDefault = isDefault,
             AllowRecurring = allowRecurring,
             AutoMarkAsPaid = autoMarkAsPaid,
+            RelatedWalletId = relatedWalletId,
+            SuggestedPaymentDay = suggestedPaymentDay,
+            StatementCutoffDay = statementCutoffDay,
             Notes = notes,
             IsDeleted = false,
             CreatedOnUtc = createdOnUtc
@@ -46,6 +55,9 @@ public sealed class PaymentMethod : BaseEntity
         string name,
         bool allowRecurring,
         bool autoMarkAsPaid,
+        Guid relatedWalletId,
+        int? suggestedPaymentDay,
+        int? statementCutoffDay,
         string? notes,
         DateTime updatedOnUtc)
     {
@@ -57,6 +69,9 @@ public sealed class PaymentMethod : BaseEntity
         Name = name;
         AllowRecurring = allowRecurring;
         AutoMarkAsPaid = autoMarkAsPaid;
+        RelatedWalletId = relatedWalletId;
+        SuggestedPaymentDay = suggestedPaymentDay;
+        StatementCutoffDay = statementCutoffDay;
         Notes = notes;
         UpdatedOnUtc = updatedOnUtc;
 

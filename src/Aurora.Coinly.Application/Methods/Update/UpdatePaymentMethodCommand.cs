@@ -5,4 +5,7 @@ public sealed record UpdatePaymentMethodCommand(
     string Name,
     bool AllowRecurring,
     bool AutoMarkAsPaid,
+    Guid RelatedWalletId,
+    int? SuggestedPaymentDay,
+    int? StatementCutoffDay,
     string? Notes) : ICommand;

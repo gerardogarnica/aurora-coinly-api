@@ -8,6 +8,9 @@ public sealed record PaymentMethodModel(
     bool IsDefault,
     bool AllowRecurring,
     bool AutoMarkAsPaid,
+    Guid RelatedWalletId,
+    int? SuggestedPaymentDay,
+    int? StatementCutoffDay,
     bool IsDeleted,
     string? Notes);
 
@@ -19,6 +22,9 @@ internal static class PaymentMethodModelExtensions
         paymentMethod.IsDefault,
         paymentMethod.AllowRecurring,
         paymentMethod.AutoMarkAsPaid,
+        paymentMethod.RelatedWalletId,
+        paymentMethod.SuggestedPaymentDay,
+        paymentMethod.StatementCutoffDay,
         paymentMethod.IsDeleted,
         paymentMethod.Notes);
 }
