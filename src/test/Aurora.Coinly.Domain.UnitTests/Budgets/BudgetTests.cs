@@ -113,7 +113,7 @@ public class BudgetTests : BaseTest
         var category = CategoryData.GetCategory();
         var budget = BudgetData.GetBudget(category);
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
-        transaction.Pay(WalletData.GetWallet(), budget.Period.Start, DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
         var operationsCount = budget.Transactions.Count;
 
         // Act
@@ -132,7 +132,7 @@ public class BudgetTests : BaseTest
         var category = CategoryData.GetCategory();
         var budget = BudgetData.GetBudget(category);
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
-        transaction.Pay(WalletData.GetWallet(), budget.Period.Start, DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
 
         // Act
         var result = budget.AssignTransaction(transaction);
@@ -151,7 +151,7 @@ public class BudgetTests : BaseTest
         var category = CategoryData.GetCategory();
         var budget = BudgetData.GetBudget(category);
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
-        transaction.Pay(WalletData.GetWallet(), budget.Period.Start, DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
         budget.Close(DateTime.UtcNow);
 
         // Act
@@ -204,7 +204,7 @@ public class BudgetTests : BaseTest
         var category = CategoryData.GetCategory();
         var budget = BudgetData.GetBudget(category);
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
-        transaction.Pay(WalletData.GetWallet(), budget.Period.Start.AddDays(-1), DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(1), DateTime.UtcNow);
 
         // Act
         var result = budget.AssignTransaction(transaction);
@@ -222,7 +222,7 @@ public class BudgetTests : BaseTest
         var budget = BudgetData.GetBudget(category);
 
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
-        transaction.Pay(WalletData.GetWallet(), budget.Period.Start, DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
         budget.AssignTransaction(transaction);
         transaction.UndoPayment();
 
@@ -244,7 +244,7 @@ public class BudgetTests : BaseTest
         var budget = BudgetData.GetBudget(category);
 
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
-        transaction.Pay(WalletData.GetWallet(), budget.Period.Start, DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
         budget.AssignTransaction(transaction);
         budget.ClearDomainEvents();
         transaction.UndoPayment();
@@ -309,9 +309,9 @@ public class BudgetTests : BaseTest
         var category = CategoryData.GetCategory();
         var budget = BudgetData.GetBudget(category);
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
-        transaction.Pay(WalletData.GetWallet(), budget.Period.Start, DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
         budget.AssignTransaction(transaction);
-        transaction.Pay(WalletData.GetWallet(), budget.Period.Start, DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
 
         // Act
         var result = budget.RemoveTransaction(transaction);

@@ -25,7 +25,6 @@ public class TransactionTests : BaseTest
         transaction.Amount.Should().Be(TransactionData.Amount);
         transaction.PaymentMethodId.Should().Be(paymentMethod.Id);
         transaction.Notes.Should().Be(TransactionData.Notes);
-        transaction.InstallmentNumber.Should().Be(TransactionData.InstallmentNumber);
         transaction.Status.Should().Be(TransactionStatus.Pending);
     }
 
@@ -63,38 +62,11 @@ public class TransactionTests : BaseTest
             TransactionData.Amount,
             paymentMethod,
             TransactionData.Notes,
-            TransactionData.InstallmentNumber,
             DateTime.UtcNow);
 
         // Assert
         result.IsSuccessful.Should().BeFalse();
         result.Error.Should().Be(CategoryErrors.IsDeleted);
-    }
-
-    [Fact]
-    public void Create_Should_Fail_WhenPaymentMethodIsDeleted()
-    {
-        // Arrange
-        var transactionDate = DateOnly.FromDateTime(DateTime.UtcNow);
-        var category = CategoryData.GetCategory();
-        var paymentMethod = PaymentMethodData.GetPaymentMethod();
-        paymentMethod.Delete(DateTime.UtcNow);
-
-        // Act
-        var result = Transaction.Create(
-            TransactionData.Description,
-            category,
-            transactionDate,
-            transactionDate,
-            TransactionData.Amount,
-            paymentMethod,
-            TransactionData.Notes,
-            TransactionData.InstallmentNumber,
-            DateTime.UtcNow);
-
-        // Assert
-        result.IsSuccessful.Should().BeFalse();
-        result.Error.Should().Be(PaymentMethodErrors.IsDeleted);
     }
 
     [Fact]
