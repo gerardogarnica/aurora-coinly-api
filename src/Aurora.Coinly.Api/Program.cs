@@ -28,13 +28,6 @@ builder.Services.AddProblemDetails(cfg =>
     {
         context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
     };
-
-    /*
-    cfg.IncludeExceptionDetails = (context, exception) => context.RequestServices.GetService<IHostEnvironment>()?.IsDevelopment() ?? false;
-    cfg.Map<ValidationException>(ex => new ValidationProblemDetails(ex.Errors));
-    cfg.Map<NotFoundException>(ex => new NotFoundProblemDetails(ex.Message));
-    cfg.Map<DomainException>(ex => new DomainProblemDetails(ex.Message));
-    */
 });
 
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();

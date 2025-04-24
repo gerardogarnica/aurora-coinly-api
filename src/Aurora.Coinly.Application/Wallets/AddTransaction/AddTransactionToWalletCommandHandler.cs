@@ -12,18 +12,23 @@ internal sealed class AddTransactionToWalletCommandHandler(
         AddTransactionToWalletCommand request,
         CancellationToken cancellationToken)
     {
-        // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId);
-        if (wallet is null)
-        {
-            return Result.Fail(WalletErrors.NotFound);
-        }
-
         // Get transaction
         var transaction = await transactionRepository.GetByIdAsync(request.TransactionId);
         if (transaction is null)
         {
             return Result.Fail(TransactionErrors.NotFound);
+        }
+
+        if (!transaction.IsPaid)
+        {
+            return Result.Fail(TransactionErrors.NotPaid);
+        }
+
+        // Get wallet
+        var wallet = await walletRepository.GetByIdAsync(transaction.Wallet!.Id);
+        if (wallet is null)
+        {
+            return Result.Fail(WalletErrors.NotFound);
         }
 
         // Deposit or withdrawal

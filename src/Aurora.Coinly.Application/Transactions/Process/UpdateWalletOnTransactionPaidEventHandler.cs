@@ -10,9 +10,7 @@ internal sealed class UpdateWalletOnTransactionPaidEventHandler(
         TransactionPaidEvent notification,
         CancellationToken cancellationToken)
     {
-        var command = new AddTransactionToWalletCommand(
-            notification.Transaction.WalletId!.Value,
-            notification.Transaction.Id);
+        var command = new AddTransactionToWalletCommand(notification.Transaction.Id);
 
         Result result = await sender.Send(command, cancellationToken);
         if (!result.IsSuccessful)
