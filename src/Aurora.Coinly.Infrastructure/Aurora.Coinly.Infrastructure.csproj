@@ -1,8 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="EFCore.NamingConventions" />
+    <PackageReference Include="MassTransit" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Quartz.Extensions.Hosting" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aurora.Coinly.Application\Aurora.Coinly.Application.csproj" />
