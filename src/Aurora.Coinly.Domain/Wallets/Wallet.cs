@@ -1,10 +1,12 @@
-﻿using Aurora.Coinly.Domain.Transactions;
+﻿using Aurora.Coinly.Domain.Methods;
+using Aurora.Coinly.Domain.Transactions;
 
 namespace Aurora.Coinly.Domain.Wallets;
 
 public sealed class Wallet : BaseEntity
 {
     private readonly List<WalletHistory> _operations = [];
+    private readonly List<PaymentMethod> _methods = [];
 
     public string Name { get; private set; }
     public Money AvailableAmount { get; private set; }
@@ -17,6 +19,7 @@ public sealed class Wallet : BaseEntity
     public DateTime? UpdatedOnUtc { get; private set; }
     public DateTime? DeletedOnUtc { get; private set; }
     public IReadOnlyCollection<WalletHistory> Operations => _operations.AsReadOnly();
+    public IReadOnlyCollection<PaymentMethod> Methods => _methods.AsReadOnly();
 
     private Wallet() : base(Guid.NewGuid())
     {
@@ -226,6 +229,11 @@ public sealed class Wallet : BaseEntity
         if (IsDeleted)
         {
             return Result.Fail<Wallet>(WalletErrors.IsDeleted);
+        }
+
+        if (_methods.Any(x => !x.IsDeleted))
+        {
+            return Result.Fail<Wallet>(WalletErrors.HasActivePaymentMethods);
         }
 
         IsDeleted = true;

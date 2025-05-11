@@ -20,7 +20,7 @@ internal sealed class UpdatePaymentMethodCommandHandler(
         }
 
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.RelatedWalletId);
+        var wallet = await walletRepository.GetByIdAsync(request.WalletId);
         if (wallet is null)
         {
             return Result.Fail<Guid>(WalletErrors.NotFound);
@@ -31,7 +31,7 @@ internal sealed class UpdatePaymentMethodCommandHandler(
             request.Name,
             request.AllowRecurring,
             request.AutoMarkAsPaid,
-            request.RelatedWalletId,
+            wallet,
             request.SuggestedPaymentDay,
             request.StatementCutoffDay,
             request.Notes,

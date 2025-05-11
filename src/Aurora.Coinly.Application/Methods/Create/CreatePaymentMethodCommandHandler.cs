@@ -13,10 +13,15 @@ internal sealed class CreatePaymentMethodCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.RelatedWalletId);
+        var wallet = await walletRepository.GetByIdAsync(request.WalletId);
         if (wallet is null)
         {
             return Result.Fail<Guid>(WalletErrors.NotFound);
+        }
+
+        if (wallet.IsDeleted)
+        {
+            return Result.Fail<Guid>(WalletErrors.IsDeleted);
         }
 
         // Get other payment methods
@@ -28,7 +33,7 @@ internal sealed class CreatePaymentMethodCommandHandler(
             markAsDefault,
             request.AllowRecurring,
             request.AutoMarkAsPaid,
-            request.RelatedWalletId,
+            wallet,
             request.SuggestedPaymentDay,
             request.StatementCutoffDay,
             request.Notes,

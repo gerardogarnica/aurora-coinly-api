@@ -8,11 +8,15 @@ public static class WalletErrors
 
     public static readonly BaseError IsDeleted = new(
         "Wallet.IsDeleted",
-        "The wallet is deleted");
+        "The wallet is already deleted");
 
     public static readonly BaseError CurrenciesNotMatch = new(
         "Wallet.CurrenciesNotMatch",
         "The currencies of the wallets do not match");
+
+    public static readonly BaseError HasActivePaymentMethods = new(
+        "Wallet.HasActivePaymentMethods",
+        "The wallet has active payment methods");
 
     public static readonly BaseError TransactionNotBelongs = new(
         "Wallet.TransactionNotBelongs",

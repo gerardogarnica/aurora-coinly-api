@@ -11,6 +11,7 @@ public sealed record WalletModel(
     decimal TotalAmount,
     [property: JsonConverter(typeof(JsonStringEnumConverter))]
     WalletType Type,
+    bool CanDelete,
     bool IsDeleted,
     string? Notes,
     List<WalletTransactionModel> Transactions);
@@ -25,6 +26,7 @@ internal static class WalletModelExtensions
         wallet.SavingsAmount.Amount,
         wallet.TotalAmount.Amount,
         wallet.Type,
+        !wallet.Methods.Any(x => !x.IsDeleted) && !wallet.IsDeleted,
         wallet.IsDeleted,
         wallet.Notes,
         [.. wallet.Operations.Select(x => x.ToModel()).OrderBy(x => x.Date)]);

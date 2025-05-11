@@ -13,5 +13,11 @@ internal sealed class PaymentMethodConfiguration : IEntityTypeConfiguration<Paym
         builder.Property(x => x.Name).HasMaxLength(100);
 
         builder.Property(x => x.Notes).HasMaxLength(1000);
+
+        builder
+            .HasOne(x => x.Wallet)
+            .WithMany(x => x.Methods)
+            .HasForeignKey(x => x.WalletId)
+            .IsRequired();
     }
 }

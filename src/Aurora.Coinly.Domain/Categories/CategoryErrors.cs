@@ -12,5 +12,5 @@ public static class CategoryErrors
 
     public static readonly BaseError IsDeleted = new(
         "Category.IsDeleted",
-        "The category is deleted");
+        "The category is already deleted");
 }

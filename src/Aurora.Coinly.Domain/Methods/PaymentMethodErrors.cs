@@ -8,5 +8,5 @@ public static class PaymentMethodErrors
 
     public static readonly BaseError IsDeleted = new(
         "PaymentMethod.IsDeleted",
-        "The payment method is deleted");
+        "The payment method is already deleted");
 }

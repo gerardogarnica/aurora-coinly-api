@@ -9,6 +9,7 @@ internal sealed class PaymentMethodRepository(
 
     public async Task<PaymentMethod?> GetByIdAsync(Guid id) => await dbContext
         .PaymentMethods
+        .Include(x => x.Wallet)
         .Where(x => x.Id == id)
         .FirstOrDefaultAsync();
 
@@ -16,6 +17,7 @@ internal sealed class PaymentMethodRepository(
     {
         var query = dbContext
            .PaymentMethods
+           .Include(x => x.Wallet)
            .AsNoTracking()
            .AsQueryable();
 

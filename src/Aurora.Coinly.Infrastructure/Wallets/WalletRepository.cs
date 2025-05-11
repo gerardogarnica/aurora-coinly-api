@@ -10,6 +10,7 @@ internal sealed class WalletRepository(
 
     public async Task<Wallet?> GetByIdAsync(Guid id) => await dbContext
         .Wallets
+        .Include(x => x.Methods)
         .FirstOrDefaultAsync(x => x.Id == id);
 
     public async Task<Wallet?> GetByIdAsync(Guid id, DateRange historyRange)
@@ -35,6 +36,7 @@ internal sealed class WalletRepository(
     {
         var query = dbContext
             .Wallets
+            .Include(x => x.Methods)
             .AsNoTracking()
             .AsQueryable();
 

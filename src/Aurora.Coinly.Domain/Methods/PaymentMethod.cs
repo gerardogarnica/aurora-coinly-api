@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Domain.Methods;
+﻿using Aurora.Coinly.Domain.Wallets;
+
+namespace Aurora.Coinly.Domain.Methods;
 
 public sealed class PaymentMethod : BaseEntity
 {
@@ -6,7 +8,7 @@ public sealed class PaymentMethod : BaseEntity
     public bool IsDefault { get; private set; }
     public bool AllowRecurring { get; private set; }
     public bool AutoMarkAsPaid { get; private set; }
-    public Guid RelatedWalletId { get; private set; }
+    public Guid WalletId { get; private set; }
     public int? SuggestedPaymentDay { get; private set; }
     public int? StatementCutoffDay { get; private set; }
     public string? Notes { get; private set; }
@@ -14,21 +16,16 @@ public sealed class PaymentMethod : BaseEntity
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? UpdatedOnUtc { get; private set; }
     public DateTime? DeletedOnUtc { get; private set; }
+    public Wallet Wallet { get; init; } = null!;
 
-    private PaymentMethod() : base(Guid.NewGuid())
-    {
-        Name = string.Empty;
-        IsDefault = false;
-        AllowRecurring = false;
-        AutoMarkAsPaid = false;
-    }
+    private PaymentMethod() : base(Guid.NewGuid()) { }
 
     public static PaymentMethod Create(
         string name,
         bool isDefault,
         bool allowRecurring,
         bool autoMarkAsPaid,
-        Guid relatedWalletId,
+        Wallet wallet,
         int? suggestedPaymentDay,
         int? statementCutoffDay,
         string? notes,
@@ -40,7 +37,7 @@ public sealed class PaymentMethod : BaseEntity
             IsDefault = isDefault,
             AllowRecurring = allowRecurring,
             AutoMarkAsPaid = autoMarkAsPaid,
-            RelatedWalletId = relatedWalletId,
+            WalletId = wallet.Id,
             SuggestedPaymentDay = suggestedPaymentDay,
             StatementCutoffDay = statementCutoffDay,
             Notes = notes,
@@ -55,7 +52,7 @@ public sealed class PaymentMethod : BaseEntity
         string name,
         bool allowRecurring,
         bool autoMarkAsPaid,
-        Guid relatedWalletId,
+        Wallet wallet,
         int? suggestedPaymentDay,
         int? statementCutoffDay,
         string? notes,
@@ -66,10 +63,15 @@ public sealed class PaymentMethod : BaseEntity
             return Result.Fail<PaymentMethod>(PaymentMethodErrors.IsDeleted);
         }
 
+        if (wallet.IsDeleted)
+        {
+            return Result.Fail<PaymentMethod>(WalletErrors.IsDeleted);
+        }
+
         Name = name;
         AllowRecurring = allowRecurring;
         AutoMarkAsPaid = autoMarkAsPaid;
-        RelatedWalletId = relatedWalletId;
+        WalletId = wallet.Id;
         SuggestedPaymentDay = suggestedPaymentDay;
         StatementCutoffDay = statementCutoffDay;
         Notes = notes;
