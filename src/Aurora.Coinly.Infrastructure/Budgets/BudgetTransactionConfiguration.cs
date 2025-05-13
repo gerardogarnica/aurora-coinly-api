@@ -22,9 +22,9 @@ internal sealed class BudgetTransactionConfiguration : IEntityTypeConfiguration<
         });
 
         builder
-            .HasOne<Budget>()
+            .HasOne<BudgetPeriod>()
             .WithMany(x => x.Transactions)
-            .HasForeignKey(x => x.BudgetId)
+            .HasForeignKey(x => x.BudgetPeriodId)
             .IsRequired();
     }
 }

@@ -10,34 +10,32 @@ internal sealed class BudgetRepository(
     public async Task<Budget?> GetByIdAsync(Guid id) => await dbContext
         .Budgets
         .Include(x => x.Category)
-        .Include(x => x.Transactions)
+        .Include(x => x.Periods)
+        .ThenInclude(x => x.Transactions)
         .AsSplitQuery()
         .Where(x => x.Id == id)
         .FirstOrDefaultAsync();
 
-    public async Task<Budget?> GetByCategoryIdAsync(Guid categoryId, DateOnly transactionDate) => await dbContext
+    public async Task<Budget?> GetByCategoryIdAsync(Guid categoryId, int year) => await dbContext
         .Budgets
         .Include(x => x.Category)
-        .Include(x => x.Transactions)
+        .Include(x => x.Periods)
+        .ThenInclude(x => x.Transactions)
         .AsSplitQuery()
-        .Where(x => x.CategoryId == categoryId && x.Period.Start >= transactionDate && x.Period.End <= transactionDate)
+        .Where(x => x.CategoryId == categoryId && x.Year == year)
         .FirstOrDefaultAsync();
 
-    public async Task<IEnumerable<Budget>> GetListAsync(int year, Guid? categoryId)
+    public async Task<IEnumerable<Budget>> GetListAsync(int year)
     {
         var query = dbContext
             .Budgets
             .Include(x => x.Category)
+            .Include(x => x.Periods)
             .AsSplitQuery()
-            .Where(x => x.Period.Start.Year == year)
+            .Where(x => x.Year == year)
             .AsNoTracking()
             .AsQueryable();
 
-        if (categoryId is not null)
-        {
-            query = query.Where(x => x.CategoryId == categoryId.Value);
-        }
-
-        return await query.OrderBy(x => x.Period.Start).ToListAsync();
+        return await query.OrderBy(x => x.Category.Name).ToListAsync();
     }
 }

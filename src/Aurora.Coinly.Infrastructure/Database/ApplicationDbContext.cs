@@ -13,7 +13,8 @@ public sealed class ApplicationDbContext(
     internal const string DEFAULT_SCHEMA = "coinly";
 
     public DbSet<Budget> Budgets { get; set; } = null!;
-    public DbSet<BudgetTransaction> BudgetTransactionss { get; set; } = null!;
+    public DbSet<BudgetPeriod> BudgetPeriods { get; set; } = null!;
+    public DbSet<BudgetTransaction> BudgetTransactions { get; set; } = null!;
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<MonthlySummary> MonthlySummaries { get; set; } = null!;
     public DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
