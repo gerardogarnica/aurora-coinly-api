@@ -10,7 +10,7 @@ internal sealed class GetBudgetListQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get budgets
-        var budgets = await budgetRepository.GetListAsync(request.Year, request.CategoryId);
+        var budgets = await budgetRepository.GetListAsync(request.Year);
 
         // Return budget models
         return budgets.Select(x => x.ToModel()).ToList();

@@ -11,18 +11,21 @@ internal sealed class RemoveTransactionFromBudgetCommandHandler(
         RemoveTransactionFromBudgetCommand request,
         CancellationToken cancellationToken)
     {
-        // Get budget
-        var budget = await budgetRepository.GetByIdAsync(request.BudgetId);
-        if (budget is null)
-        {
-            return Result.Fail(BudgetErrors.NotFound);
-        }
-
         // Get transaction
         var transaction = await transactionRepository.GetByIdAsync(request.TransactionId);
         if (transaction is null)
         {
             return Result.Fail(TransactionErrors.NotFound);
+        }
+
+        // Get budget
+        var budget = await budgetRepository.GetByCategoryIdAsync(
+            transaction.CategoryId,
+            transaction.PaymentDate!.Value.Year);
+        if (budget is null)
+        {
+            // Because budget is not necessary for transaction
+            return Result.Ok();
         }
 
         // Remove transaction from budget

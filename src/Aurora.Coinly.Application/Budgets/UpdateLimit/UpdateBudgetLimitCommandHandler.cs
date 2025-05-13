@@ -1,13 +1,13 @@
 ﻿using Aurora.Coinly.Domain.Budgets;
 
-namespace Aurora.Coinly.Application.Budgets.Update;
+namespace Aurora.Coinly.Application.Budgets.UpdateLimit;
 
-internal sealed class UpdateBudgetCommandHandler(
+internal sealed class UpdateBudgetLimitCommandHandler(
     IBudgetRepository budgetRepository,
-    IDateTimeService dateTimeService) : ICommandHandler<UpdateBudgetCommand>
+    IDateTimeService dateTimeService) : ICommandHandler<UpdateBudgetLimitCommand>
 {
     public async Task<Result> Handle(
-        UpdateBudgetCommand request,
+        UpdateBudgetLimitCommand request,
         CancellationToken cancellationToken)
     {
         // Get budget
@@ -17,11 +17,10 @@ internal sealed class UpdateBudgetCommandHandler(
             return Result.Fail(BudgetErrors.NotFound);
         }
 
-        // Update budget
-        var result = budget.Update(
-            new Money(request.AmountLimit, budget.AmountLimit.Currency),
-            DateRange.Create(request.PeriodBegins, request.PeriodEnds),
-            request.Notes,
+        // Update budget limit
+        var result = budget.UpdateLimit(
+            request.PeriodId,
+            new Money(request.AmountLimit, budget.Periods.First().Limit.Currency),
             dateTimeService.UtcNow);
 
         if (!result.IsSuccessful)

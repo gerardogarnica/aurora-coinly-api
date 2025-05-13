@@ -4,6 +4,10 @@ internal sealed class CreateBudgetCommandValidator : AbstractValidator<CreateBud
 {
     public CreateBudgetCommandValidator()
     {
+        RuleFor(x => x.Year)
+            .InclusiveBetween(DateTime.UtcNow.Year, DateTime.UtcNow.Year + 1)
+            .WithMessage("'{PropertyName}' must be between {From} and {To}.");
+
         RuleFor(x => x.CurrencyCode)
             .NotEmpty()
             .Must(BeAValidCurrencyCode).WithMessage("'{PropertyName}' is not a valid currency code.");
@@ -11,11 +15,6 @@ internal sealed class CreateBudgetCommandValidator : AbstractValidator<CreateBud
         RuleFor(x => x.AmountLimit)
             .GreaterThanOrEqualTo(0)
             .PrecisionScale(2, 9, true);
-
-        RuleFor(x => x.PeriodEnds)
-            .GreaterThanOrEqualTo(x => x.PeriodBegins);
-
-        RuleFor(x => x.Notes).MaximumLength(1000);
     }
 
     private static bool BeAValidCurrencyCode(string currencyCode)

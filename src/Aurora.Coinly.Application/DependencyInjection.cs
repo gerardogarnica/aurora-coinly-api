@@ -1,4 +1,5 @@
 ﻿using Aurora.Coinly.Application.Abstractions.Behaviors;
+using Aurora.Coinly.Domain.Budgets;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aurora.Coinly.Application;
@@ -19,6 +20,9 @@ public static class DependencyInjection
 
         // FluentValidation
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
+
+        // Domain services
+        services.AddTransient<BudgetPeriodService>();
 
         return services;
     }

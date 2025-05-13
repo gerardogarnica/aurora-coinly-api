@@ -1,9 +1,10 @@
-﻿namespace Aurora.Coinly.Application.Budgets.Create;
+﻿using Aurora.Coinly.Domain.Budgets;
+
+namespace Aurora.Coinly.Application.Budgets.Create;
 
 public sealed record CreateBudgetCommand(
     Guid CategoryId,
+    int Year,
+    BudgetFrequency Frequency,
     string CurrencyCode,
-    decimal AmountLimit,
-    DateOnly PeriodBegins,
-    DateOnly PeriodEnds,
-    string? Notes) : ICommand<Guid>;
+    decimal AmountLimit) : ICommand<Guid>;
