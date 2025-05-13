@@ -16,7 +16,7 @@ public class PaymentMethodTests : BaseTest
             PaymentMethodData.IsDefault,
             PaymentMethodData.AllowRecurring,
             PaymentMethodData.AutoMarkAsPaid,
-            wallet.Id,
+            wallet,
             PaymentMethodData.SuggestedPaymentDay,
             PaymentMethodData.StatementCutoffDay,
             PaymentMethodData.Notes,
@@ -27,7 +27,7 @@ public class PaymentMethodTests : BaseTest
         paymentMethod.IsDefault.Should().Be(PaymentMethodData.IsDefault);
         paymentMethod.AllowRecurring.Should().Be(PaymentMethodData.AllowRecurring);
         paymentMethod.AutoMarkAsPaid.Should().Be(PaymentMethodData.AutoMarkAsPaid);
-        paymentMethod.RelatedWalletId.Should().Be(wallet.Id);
+        paymentMethod.WalletId.Should().Be(wallet.Id);
         paymentMethod.SuggestedPaymentDay.Should().Be(PaymentMethodData.SuggestedPaymentDay);
         paymentMethod.Notes.Should().Be(PaymentMethodData.Notes);
         paymentMethod.IsDeleted.Should().Be(false);
@@ -49,7 +49,7 @@ public class PaymentMethodTests : BaseTest
             updatedName,
             PaymentMethodData.AllowRecurring,
             PaymentMethodData.AutoMarkAsPaid,
-            updatedWallet.Id,
+            updatedWallet,
             updatedSuggestedPaymentDay,
             updatedStatementCutoffDay,
             updatedNotes,
@@ -60,7 +60,7 @@ public class PaymentMethodTests : BaseTest
         paymentMethod.Name.Should().Be(updatedName);
         paymentMethod.AllowRecurring.Should().Be(PaymentMethodData.AllowRecurring);
         paymentMethod.AutoMarkAsPaid.Should().Be(PaymentMethodData.AutoMarkAsPaid);
-        paymentMethod.RelatedWalletId.Should().Be(updatedWallet.Id);
+        paymentMethod.WalletId.Should().Be(updatedWallet.Id);
         paymentMethod.SuggestedPaymentDay.Should().Be(updatedSuggestedPaymentDay);
         paymentMethod.StatementCutoffDay.Should().Be(updatedStatementCutoffDay);
         paymentMethod.Notes.Should().Be(updatedNotes);
@@ -85,7 +85,7 @@ public class PaymentMethodTests : BaseTest
             updatedName,
             PaymentMethodData.AllowRecurring,
             PaymentMethodData.AutoMarkAsPaid,
-            updatedWallet.Id,
+            updatedWallet,
             updatedSuggestedPaymentDay,
             updatedStatementCutoffDay,
             updatedNotes,

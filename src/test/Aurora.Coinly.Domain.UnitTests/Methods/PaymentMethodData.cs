@@ -17,7 +17,7 @@ internal static class PaymentMethodData
         IsDefault,
         AllowRecurring,
         AutoMarkAsPaid,
-        WalletData.GetWallet().Id,
+        WalletData.GetWallet(),
         SuggestedPaymentDay,
         StatementCutoffDay,
         Notes,
