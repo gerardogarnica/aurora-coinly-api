@@ -5,7 +5,7 @@ namespace Aurora.Coinly.Domain.Budgets;
 public sealed class BudgetTransaction
 {
     public Guid Id { get; private set; }
-    public Guid BudgetId { get; private set; }
+    public Guid BudgetPeriodId { get; private set; }
     public Guid TransactionId { get; private set; }
     public string Description { get; private set; }
     public DateOnly TransactionDate { get; private set; }
@@ -17,12 +17,12 @@ public sealed class BudgetTransaction
     }
 
     internal static BudgetTransaction Create(
-        Budget budget,
+        BudgetPeriod period,
         Transaction transaction)
     {
         return new BudgetTransaction
         {
-            BudgetId = budget.Id,
+            BudgetPeriodId = period.Id,
             TransactionId = transaction.Id,
             Description = transaction.Description,
             TransactionDate = transaction.TransactionDate,

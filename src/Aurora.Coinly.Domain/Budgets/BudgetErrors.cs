@@ -6,9 +6,17 @@ public static class BudgetErrors
         "Budget.NotFound",
         "The budget with the specified identifier was not found");
 
+    public static readonly BaseError BudgetAlreadyExists = new(
+        "Budget.BudgetAlreadyExists",
+        "The budget already exists for the specified category and year");
+
     public static readonly BaseError IsClosed = new(
         "Budget.IsClosed",
         "The budget is closed");
+
+    public static readonly BaseError PeriodNotFound = new(
+        "Budget.PeriodNotFound",
+        "The budget period with the specified identifier was not found");
 
     public static readonly BaseError TransactionAlreadyIsPaid = new(
         "Budget.TransactionAlreadyIsPaid",

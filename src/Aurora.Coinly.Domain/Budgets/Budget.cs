@@ -5,96 +5,70 @@ namespace Aurora.Coinly.Domain.Budgets;
 
 public sealed class Budget : BaseEntity
 {
-    private readonly List<BudgetTransaction> _transactions = [];
+    private readonly List<BudgetPeriod> _periods = [];
 
     public Guid CategoryId { get; private set; }
-    public Money AmountLimit { get; private set; }
-    public DateRange Period { get; private set; }
-    public string? Notes { get; private set; }
-    public BudgetStatus Status { get; private set; }
+    public int Year { get; private set; }
+    public BudgetFrequency Frequency { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? UpdatedOnUtc { get; private set; }
-    public DateTime? ClosedOnUtc { get; private set; }
     public Category Category { get; init; } = null!;
-    public IReadOnlyCollection<BudgetTransaction> Transactions => _transactions.AsReadOnly();
+    public IReadOnlyCollection<BudgetPeriod> Periods => _periods.AsReadOnly();
 
     private Budget() : base(Guid.NewGuid())
     {
         CategoryId = Guid.Empty;
-        AmountLimit = Money.Zero();
     }
 
     public static Budget Create(
         Category category,
-        Money amountLimit,
-        DateRange period,
-        string? notes,
-        DateTime createdOnUtc)
+        int year,
+        BudgetFrequency frequency,
+        Money limit,
+        DateTime createdOnUtc,
+        BudgetPeriodService periodService)
     {
         var budget = new Budget
         {
             CategoryId = category.Id,
-            AmountLimit = amountLimit,
-            Period = period,
-            Notes = notes,
-            Status = BudgetStatus.Draft,
+            Year = year,
+            Frequency = frequency,
             CreatedOnUtc = createdOnUtc
         };
+
+        var periods = periodService.GeneratePeriods(frequency, budget.Year);
+        foreach (var period in periods)
+        {
+            var budgetPeriod = BudgetPeriod.Create(
+                budget,
+                period,
+                limit,
+                createdOnUtc);
+
+            budget._periods.Add(budgetPeriod);
+        }
 
         return budget;
     }
 
-    public Result<Budget> Update(
-        Money amountLimit,
-        DateRange period,
-        string? notes,
+    public Result<Budget> UpdateLimit(
+        Guid periodId,
+        Money limit,
         DateTime updatedOnUtc)
     {
-        if (Status is BudgetStatus.Closed)
+        var period = _periods.FirstOrDefault(p => p.Id == periodId);
+        if (period is null)
         {
-            return Result.Fail<Budget>(BudgetErrors.IsClosed);
+            return Result.Fail<Budget>(BudgetErrors.PeriodNotFound);
         }
 
-        AmountLimit = amountLimit;
-        Period = period;
-        Notes = notes;
-        UpdatedOnUtc = updatedOnUtc;
+        period.Update(limit, updatedOnUtc);
 
         return this;
-    }
-
-    public Result<Budget> Close(DateTime closedOnUtc)
-    {
-        if (Status is BudgetStatus.Closed)
-        {
-            return Result.Fail<Budget>(BudgetErrors.IsClosed);
-        }
-
-        Status = BudgetStatus.Closed;
-        ClosedOnUtc = closedOnUtc;
-
-        return this;
-    }
-
-    public bool IsExceeded()
-    {
-        return GetSpentAmount() > AmountLimit;
-    }
-
-    public Money GetSpentAmount()
-    {
-        return Transactions
-            .Select(t => t.Amount)
-            .Aggregate(Money.Zero(), (acc, amount) => acc + amount);
     }
 
     public Result<Budget> AssignTransaction(Transaction transaction)
     {
-        if (Status is BudgetStatus.Closed)
-        {
-            return Result.Fail<Budget>(BudgetErrors.IsClosed);
-        }
-
         if (transaction.CategoryId != CategoryId)
         {
             return Result.Fail<Budget>(BudgetErrors.TransactionCategoryMismatch);
@@ -105,27 +79,26 @@ public sealed class Budget : BaseEntity
             return Result.Fail<Budget>(BudgetErrors.TransactionNotPaid);
         }
 
-        if (!Period.Contains(transaction.PaymentDate!.Value))
+        var period = _periods.FirstOrDefault(p => p.Period.Contains(transaction.PaymentDate!.Value));
+        if (period is null)
         {
             return Result.Fail<Budget>(BudgetErrors.TransactionPaymentDateOutOfRange);
         }
 
-        Status = BudgetStatus.Active;
-        _transactions.Add(BudgetTransaction.Create(this, transaction));
-
-        AddDomainEvent(new BudgetUpdatedEvent(this));
+        period.AssignTransaction(transaction);
 
         return this;
     }
 
     public Result<Budget> RemoveTransaction(Transaction transaction)
     {
-        if (Status is BudgetStatus.Closed)
+        var period = _periods.FirstOrDefault(p => p.Period.Contains(transaction.PaymentDate!.Value));
+        if (period is null)
         {
-            return Result.Fail<Budget>(BudgetErrors.IsClosed);
+            return Result.Fail<Budget>(BudgetErrors.TransactionPaymentDateOutOfRange);
         }
 
-        if (!_transactions.Any(t => t.TransactionId == transaction.Id))
+        if (!period.Transactions.Any(t => t.TransactionId == transaction.Id))
         {
             return Result.Fail<Budget>(BudgetErrors.TransactionNotBelongs);
         }
@@ -135,9 +108,7 @@ public sealed class Budget : BaseEntity
             return Result.Fail<Budget>(BudgetErrors.TransactionAlreadyIsPaid);
         }
 
-        _transactions.Remove(_transactions.First(t => t.TransactionId == transaction.Id));
-
-        AddDomainEvent(new BudgetUpdatedEvent(this));
+        period.RemoveTransaction(transaction);
 
         return this;
     }
