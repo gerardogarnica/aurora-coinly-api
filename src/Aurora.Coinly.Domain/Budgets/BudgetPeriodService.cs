@@ -15,14 +15,22 @@ public class BudgetPeriodService
                     return DateRange.Create(start, end);
                 }),
 
-            BudgetFrequency.Biweekly => Enumerable.Range(0, 26)
-                .Select(week =>
+            BudgetFrequency.Biweekly => Enumerable.Range(1, 12)
+                .Select(month =>
                 {
-                    var start = new DateOnly(year, 1, 1).AddDays(week * 14);
-                    var end = new DateOnly(year, 1, 1).AddDays((week + 1) * 14 - 1);
+                    var start = new DateOnly(year, month, 1);
+                    var end = new DateOnly(year, month, 15);
 
                     return DateRange.Create(start, end);
-                }),
+                })
+                .Union(Enumerable.Range(1, 12)
+                .Select(month =>
+                {
+                    var start = new DateOnly(year, month, 16);
+                    var end = start.AddMonths(1).AddDays(-1);
+
+                    return DateRange.Create(start, end);
+                })),
 
             BudgetFrequency.Monthly => Enumerable.Range(1, 12)
                 .Select(month =>
@@ -33,10 +41,10 @@ public class BudgetPeriodService
                     return DateRange.Create(start, end);
                 }),
 
-            BudgetFrequency.Quarterly => Enumerable.Range(0, 3)
+            BudgetFrequency.Quarterly => Enumerable.Range(1, 4)
                 .Select(quarter =>
                 {
-                    var start = new DateOnly(year, (quarter * 3) + 1, 1);
+                    var start = new DateOnly(year, (quarter * 3) -2 , 1);
                     var end = start.AddMonths(3).AddDays(-1);
 
                     return DateRange.Create(start, end);
