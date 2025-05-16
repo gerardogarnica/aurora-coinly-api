@@ -4,7 +4,7 @@ public record DateRange
 {
     public DateOnly Start { get; init; }
     public DateOnly End { get; init; }
-    public int LengthinDays => End.DayNumber - Start.DayNumber;
+    public int TotalDays => (End.DayNumber - Start.DayNumber) + 1;
 
     private DateRange() { }
 
