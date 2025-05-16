@@ -50,7 +50,7 @@ public class BudgetPeriod
     {
         return Transactions
             .Select(t => t.Amount)
-            .Aggregate(Money.Zero(), (acc, amount) => acc + amount);
+            .Aggregate(Money.Zero(Currency.Usd), (acc, amount) => acc + amount);
     }
 
     internal void AssignTransaction(Transaction transaction)

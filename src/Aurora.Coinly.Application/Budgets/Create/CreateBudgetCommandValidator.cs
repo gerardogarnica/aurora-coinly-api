@@ -14,7 +14,7 @@ internal sealed class CreateBudgetCommandValidator : AbstractValidator<CreateBud
 
         RuleFor(x => x.AmountLimit)
             .GreaterThanOrEqualTo(0)
-            .PrecisionScale(2, 9, true);
+            .PrecisionScale(9, 2, true);
     }
 
     private static bool BeAValidCurrencyCode(string currencyCode)

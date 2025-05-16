@@ -8,7 +8,7 @@ public sealed class GetBudgets : IBaseEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(
-            "budgets/{year}",
+            "budgets/year/{year}",
             async (int year, ISender sender) =>
             {
                 var query = new GetBudgetListQuery(year);

@@ -39,10 +39,12 @@ public sealed class Budget : BaseEntity
         var periods = periodService.GeneratePeriods(frequency, budget.Year);
         foreach (var period in periods)
         {
+            var periodLimit = new Money(limit.Amount, limit.Currency);
+
             var budgetPeriod = BudgetPeriod.Create(
                 budget,
                 period,
-                limit,
+                periodLimit,
                 createdOnUtc);
 
             budget._periods.Add(budgetPeriod);

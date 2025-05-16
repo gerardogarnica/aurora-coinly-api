@@ -6,6 +6,6 @@ internal sealed class UpdateBudgetLimitCommandValidator : AbstractValidator<Upda
     {
         RuleFor(x => x.AmountLimit)
             .GreaterThanOrEqualTo(0)
-            .PrecisionScale(2, 9, true);
+            .PrecisionScale(9, 2, true);
     }
 }
