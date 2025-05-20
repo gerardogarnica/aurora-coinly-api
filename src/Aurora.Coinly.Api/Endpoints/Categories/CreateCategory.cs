@@ -14,6 +14,7 @@ public sealed class CreateCategory : IBaseEndpoint
                 var command = new CreateCategoryCommand(
                     request.Name,
                     request.Type,
+                    request.Color,
                     request.Notes);
 
                 Result<Guid> result = await sender.Send(command);
@@ -33,5 +34,6 @@ public sealed class CreateCategory : IBaseEndpoint
         string Name,
         [property: JsonConverter(typeof(JsonStringEnumConverter))]
         TransactionType Type,
+        string Color,
         string? Notes);
 }

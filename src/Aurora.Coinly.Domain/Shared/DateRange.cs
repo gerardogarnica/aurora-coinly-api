@@ -1,6 +1,6 @@
 ﻿namespace Aurora.Coinly.Domain.Shared;
 
-public record DateRange
+public sealed record DateRange
 {
     public DateOnly Start { get; init; }
     public DateOnly End { get; init; }

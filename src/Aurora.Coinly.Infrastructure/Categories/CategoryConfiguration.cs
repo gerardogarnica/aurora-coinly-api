@@ -14,6 +14,11 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.Property(x => x.Type).HasConversion<string>().HasMaxLength(40);
 
+        builder.OwnsOne(x => x.Color, y =>
+        {
+            y.Property(x => x.Value).HasColumnName("color").HasMaxLength(7);
+        });
+
         builder.Property(x => x.Notes).HasMaxLength(1000);
     }
 }

@@ -8,6 +8,7 @@ public sealed record CategoryModel(
     string Name,
     [property: JsonConverter(typeof(JsonStringEnumConverter))]
     TransactionType Type,
+    string Color,
     bool IsDeleted,
     string? Notes);
 
@@ -17,6 +18,7 @@ internal static class CategoryModelExtensions
         category.Id,
         category.Name,
         category.Type,
+        category.Color.Value,
         category.IsDeleted,
         category.Notes);
 }

@@ -13,6 +13,7 @@ public sealed class UpdateCategory : IBaseEndpoint
                 var command = new UpdateCategoryCommand(
                     id,
                     request.Name,
+                    request.Color,
                     request.Notes);
 
                 Result result = await sender.Send(command);
@@ -30,5 +31,6 @@ public sealed class UpdateCategory : IBaseEndpoint
 
     internal sealed record UpdateCategoryRequest(
         string Name,
+        string Color,
         string? Notes);
 }

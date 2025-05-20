@@ -14,6 +14,7 @@ internal sealed class CreateCategoryCommandHandler(
         var category = Category.Create(
             request.Name,
             request.Type,
+            Color.FromHex(request.Color),
             request.Notes,
             dateTimeService.UtcNow);
 

@@ -20,6 +20,7 @@ internal sealed class UpdateCategoryCommandHandler(
         // Update category
         var result = category.Update(
             request.Name,
+            Color.FromHex(request.Color),
             request.Notes,
             dateTimeService.UtcNow);
 

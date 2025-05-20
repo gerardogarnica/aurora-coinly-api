@@ -3,4 +3,5 @@
 public sealed record UpdateCategoryCommand(
     Guid Id,
     string Name,
+    string Color,
     string? Notes) : ICommand;

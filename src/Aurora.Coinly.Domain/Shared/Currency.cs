@@ -1,6 +1,6 @@
 ﻿namespace Aurora.Coinly.Domain.Shared;
 
-public record Currency
+public sealed record Currency
 {
     internal static readonly Currency Default = new("");
     public static readonly Currency Usd = new("USD");
@@ -14,7 +14,7 @@ public record Currency
         Eur
     ];
 
-    internal Currency(string code) => Code = code;
+    private Currency(string code) => Code = code;
 
     public static Currency FromCode(string code)
     {

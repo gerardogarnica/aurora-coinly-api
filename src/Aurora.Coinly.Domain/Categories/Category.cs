@@ -6,6 +6,7 @@ public sealed class Category : BaseEntity
 {
     public string Name { get; private set; }
     public TransactionType Type { get; private set; }
+    public Color Color { get; private set; }
     public string? Notes { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
@@ -20,6 +21,7 @@ public sealed class Category : BaseEntity
     public static Category Create(
         string name,
         TransactionType type,
+        Color color,
         string? notes,
         DateTime createdOnUtc)
     {
@@ -27,6 +29,7 @@ public sealed class Category : BaseEntity
         {
             Name = name,
             Type = type,
+            Color = color,
             Notes = notes,
             IsDeleted = false,
             CreatedOnUtc = createdOnUtc
@@ -35,7 +38,11 @@ public sealed class Category : BaseEntity
         return category;
     }
 
-    public Result<Category> Update(string name, string? notes, DateTime updatedOnUtc)
+    public Result<Category> Update(
+        string name,
+        Color color,
+        string? notes,
+        DateTime updatedOnUtc)
     {
         if (IsDeleted)
         {
@@ -43,6 +50,7 @@ public sealed class Category : BaseEntity
         }
 
         Name = name;
+        Color = color;
         Notes = notes;
         UpdatedOnUtc = updatedOnUtc;
 
