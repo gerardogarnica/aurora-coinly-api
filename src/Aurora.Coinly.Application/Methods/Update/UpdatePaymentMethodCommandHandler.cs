@@ -32,6 +32,7 @@ internal sealed class UpdatePaymentMethodCommandHandler(
             request.AllowRecurring,
             request.AutoMarkAsPaid,
             wallet,
+            request.MaxDaysToReverse,
             request.SuggestedPaymentDay,
             request.StatementCutoffDay,
             request.Notes,

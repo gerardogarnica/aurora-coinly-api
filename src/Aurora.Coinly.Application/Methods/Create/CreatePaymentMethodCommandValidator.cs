@@ -9,6 +9,10 @@ internal sealed class CreatePaymentMethodCommandValidator : AbstractValidator<Cr
             .MinimumLength(3)
             .MaximumLength(100);
 
+        RuleFor(x => x.MaxDaysToReverse)
+            .NotEmpty()
+            .InclusiveBetween(0, 15);
+
         RuleFor(x => x.SuggestedPaymentDay)
             .Null()
             .When(x => x.AutoMarkAsPaid);

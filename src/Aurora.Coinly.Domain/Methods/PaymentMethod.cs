@@ -9,6 +9,7 @@ public sealed class PaymentMethod : BaseEntity
     public bool AllowRecurring { get; private set; }
     public bool AutoMarkAsPaid { get; private set; }
     public Guid WalletId { get; private set; }
+    public int MaxDaysToReverse { get; private set; }
     public int? SuggestedPaymentDay { get; private set; }
     public int? StatementCutoffDay { get; private set; }
     public string? Notes { get; private set; }
@@ -26,6 +27,7 @@ public sealed class PaymentMethod : BaseEntity
         bool allowRecurring,
         bool autoMarkAsPaid,
         Wallet wallet,
+        int maxDaysToReverse,
         int? suggestedPaymentDay,
         int? statementCutoffDay,
         string? notes,
@@ -38,6 +40,7 @@ public sealed class PaymentMethod : BaseEntity
             AllowRecurring = allowRecurring,
             AutoMarkAsPaid = autoMarkAsPaid,
             WalletId = wallet.Id,
+            MaxDaysToReverse = maxDaysToReverse,
             SuggestedPaymentDay = suggestedPaymentDay,
             StatementCutoffDay = statementCutoffDay,
             Notes = notes,
@@ -53,6 +56,7 @@ public sealed class PaymentMethod : BaseEntity
         bool allowRecurring,
         bool autoMarkAsPaid,
         Wallet wallet,
+        int maxDaysToReverse,
         int? suggestedPaymentDay,
         int? statementCutoffDay,
         string? notes,
@@ -72,6 +76,7 @@ public sealed class PaymentMethod : BaseEntity
         AllowRecurring = allowRecurring;
         AutoMarkAsPaid = autoMarkAsPaid;
         WalletId = wallet.Id;
+        MaxDaysToReverse = maxDaysToReverse;
         SuggestedPaymentDay = suggestedPaymentDay;
         StatementCutoffDay = statementCutoffDay;
         Notes = notes;

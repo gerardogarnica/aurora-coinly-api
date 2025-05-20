@@ -16,6 +16,7 @@ public sealed class UpdatePaymentMethod : IBaseEndpoint
                     request.AllowRecurring,
                     request.AutoMarkAsPaid,
                     request.RelatedWalletId,
+                    request.MaxDaysToReverse,
                     request.SuggestedPaymentDay,
                     request.StatementCutoffDay,
                     request.Notes);
@@ -38,6 +39,7 @@ public sealed class UpdatePaymentMethod : IBaseEndpoint
         bool AllowRecurring,
         bool AutoMarkAsPaid,
         Guid RelatedWalletId,
+        int MaxDaysToReverse,
         int? SuggestedPaymentDay,
         int? StatementCutoffDay,
         string? Notes);

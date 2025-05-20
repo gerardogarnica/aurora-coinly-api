@@ -34,6 +34,7 @@ internal sealed class CreatePaymentMethodCommandHandler(
             request.AllowRecurring,
             request.AutoMarkAsPaid,
             wallet,
+            request.MaxDaysToReverse,
             request.SuggestedPaymentDay,
             request.StatementCutoffDay,
             request.Notes,
