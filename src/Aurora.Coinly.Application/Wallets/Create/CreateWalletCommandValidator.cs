@@ -17,6 +17,10 @@ internal sealed class CreateWalletCommandValidator : AbstractValidator<CreateWal
             .GreaterThanOrEqualTo(0)
             .PrecisionScale(9, 2, true);
 
+        RuleFor(x => x.Color)
+            .NotEmpty()
+            .Length(7);
+
         RuleFor(x => x.Notes).MaximumLength(1000);
     }
 

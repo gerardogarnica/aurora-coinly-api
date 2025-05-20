@@ -7,5 +7,7 @@ public sealed record CreateWalletCommand(
     string CurrencyCode,
     decimal Amount,
     WalletType Type,
+    bool AllowNegative,
+    string Color,
     string? Notes,
     DateOnly OpenedOn) : ICommand<Guid>;

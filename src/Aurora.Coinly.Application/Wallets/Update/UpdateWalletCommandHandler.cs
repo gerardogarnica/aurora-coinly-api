@@ -20,6 +20,8 @@ internal sealed class UpdateWalletCommandHandler(
         // Update wallet
         var result = wallet.Update(
             request.Name,
+            request.AllowNegative,
+            Color.FromHex(request.Color),
             request.Notes,
             dateTimeService.UtcNow);
 

@@ -17,7 +17,10 @@ internal sealed class WalletHistoryConfiguration : IEntityTypeConfiguration<Wall
 
         builder.OwnsOne(x => x.Amount, y =>
         {
-            y.Property(x => x.Amount).HasColumnType("numeric(9, 2)");
+            y.Property(x => x.Amount)
+                .HasColumnName("amount")
+                .HasColumnType("numeric(9, 2)");
+
             y.Property(x => x.Currency)
                 .HasConversion(x => x.Code, code => Currency.FromCode(code))
                 .HasMaxLength(3);

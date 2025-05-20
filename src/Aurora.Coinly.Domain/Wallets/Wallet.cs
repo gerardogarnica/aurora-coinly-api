@@ -13,6 +13,8 @@ public sealed class Wallet : BaseEntity
     public Money SavingsAmount { get; private set; }
     public Money TotalAmount => AvailableAmount + SavingsAmount;
     public WalletType Type { get; private set; }
+    public bool AllowNegative { get; private set; }
+    public Color Color { get; private set; }
     public string? Notes { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
@@ -33,6 +35,8 @@ public sealed class Wallet : BaseEntity
         string name,
         Money amount,
         WalletType type,
+        bool allowNegative,
+        Color color,
         string? notes,
         DateOnly openedOn,
         DateTime createdOn)
@@ -43,6 +47,8 @@ public sealed class Wallet : BaseEntity
             AvailableAmount = new Money(amount.Amount, amount.Currency),
             SavingsAmount = Money.Zero(amount.Currency),
             Type = type,
+            AllowNegative = allowNegative,
+            Color = color,
             Notes = notes,
             IsDeleted = false,
             CreatedOnUtc = createdOn
@@ -55,12 +61,15 @@ public sealed class Wallet : BaseEntity
             openedOn,
             createdOn);
 
-        wallet.AddDomainEvent(new WalletCreatedEvent(wallet));
-
         return wallet;
     }
 
-    public Result<Wallet> Update(string name, string? notes, DateTime updatedOnUtc)
+    public Result<Wallet> Update(
+        string name,
+        bool allowNegative,
+        Color color,
+        string? notes,
+        DateTime updatedOnUtc)
     {
         if (IsDeleted)
         {
@@ -68,6 +77,8 @@ public sealed class Wallet : BaseEntity
         }
 
         Name = name;
+        AllowNegative = allowNegative;
+        Color = color;
         Notes = notes;
         UpdatedOnUtc = updatedOnUtc;
 
@@ -76,7 +87,7 @@ public sealed class Wallet : BaseEntity
 
     public Result<Wallet> AssignToSavings(Money amount, DateOnly assignedOn, DateTime updatedOnUtc)
     {
-        if (AvailableAmount < amount)
+        if (!AllowNegative && AvailableAmount < amount)
         {
             return Result.Fail<Wallet>(WalletErrors.UnableToAssignToSavings);
         }

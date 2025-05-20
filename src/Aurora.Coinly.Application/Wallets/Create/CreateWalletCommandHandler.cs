@@ -15,6 +15,8 @@ internal sealed class CreateWalletCommandHandler(
             request.Name,
             new Money(request.Amount, Currency.FromCode(request.CurrencyCode)),
             request.Type,
+            request.AllowNegative,
+            Color.FromHex(request.Color),
             request.Notes,
             request.OpenedOn,
             dateTimeService.UtcNow);

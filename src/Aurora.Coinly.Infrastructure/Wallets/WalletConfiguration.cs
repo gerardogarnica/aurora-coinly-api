@@ -15,7 +15,10 @@ internal sealed class WalletConfiguration : IEntityTypeConfiguration<Wallet>
 
         builder.OwnsOne(x => x.AvailableAmount, y =>
         {
-            y.Property(x => x.Amount).HasColumnType("numeric(9, 2)");
+            y.Property(x => x.Amount)
+                .HasColumnName("available_amount")
+                .HasColumnType("numeric(9, 2)");
+
             y.Property(x => x.Currency)
                 .HasConversion(x => x.Code, code => Currency.FromCode(code))
                 .HasMaxLength(3);
@@ -23,7 +26,10 @@ internal sealed class WalletConfiguration : IEntityTypeConfiguration<Wallet>
 
         builder.OwnsOne(x => x.SavingsAmount, y =>
         {
-            y.Property(x => x.Amount).HasColumnType("numeric(9, 2)");
+            y.Property(x => x.Amount)
+                .HasColumnName("savings_amount")
+                .HasColumnType("numeric(9, 2)");
+
             y.Property(x => x.Currency)
                 .HasConversion(x => x.Code, code => Currency.FromCode(code))
                 .HasMaxLength(3);
@@ -32,6 +38,11 @@ internal sealed class WalletConfiguration : IEntityTypeConfiguration<Wallet>
         builder.Ignore(x => x.TotalAmount);
 
         builder.Property(x => x.Type).HasConversion<string>().HasMaxLength(40);
+
+        builder.OwnsOne(x => x.Color, y =>
+        {
+            y.Property(x => x.Value).HasColumnName("color").HasMaxLength(7);
+        });
 
         builder.Property(x => x.Notes).HasMaxLength(1000);
     }

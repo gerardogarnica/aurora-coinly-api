@@ -9,6 +9,10 @@ internal sealed class UpdateWalletCommandValidator : AbstractValidator<UpdateWal
             .MinimumLength(3)
             .MaximumLength(100);
 
+        RuleFor(x => x.Color)
+            .NotEmpty()
+            .Length(7);
+
         RuleFor(x => x.Notes).MaximumLength(1000);
     }
 }

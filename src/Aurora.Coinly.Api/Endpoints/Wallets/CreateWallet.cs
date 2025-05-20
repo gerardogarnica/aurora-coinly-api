@@ -16,6 +16,8 @@ public sealed class CreateWallet : IBaseEndpoint
                     request.CurrencyCode,
                     request.Amount,
                     request.Type,
+                    request.AllowNegative,
+                    request.Color,
                     request.Notes,
                     request.OpenedOn);
 
@@ -38,6 +40,8 @@ public sealed class CreateWallet : IBaseEndpoint
         decimal Amount,
         [property: JsonConverter(typeof(JsonStringEnumConverter))]
         WalletType Type,
+        bool AllowNegative,
+        string Color,
         string? Notes,
         DateOnly OpenedOn);
 }

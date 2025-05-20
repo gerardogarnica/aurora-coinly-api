@@ -10,7 +10,12 @@ public sealed class UpdateWallet : IBaseEndpoint
             "wallets/{id}",
             async (Guid id, [FromBody] UpdateWalletRequest request, ISender sender) =>
             {
-                var command = new UpdateWalletCommand(id, request.Name, request.Notes);
+                var command = new UpdateWalletCommand(
+                    id,
+                    request.Name,
+                    request.AllowNegative,
+                    request.Color,
+                    request.Notes);
 
                 Result result = await sender.Send(command);
 
@@ -25,5 +30,9 @@ public sealed class UpdateWallet : IBaseEndpoint
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
     }
 
-    internal sealed record UpdateWalletRequest(string Name, string? Notes);
+    internal sealed record UpdateWalletRequest(
+        string Name,
+        bool AllowNegative,
+        string Color,
+        string? Notes);
 }

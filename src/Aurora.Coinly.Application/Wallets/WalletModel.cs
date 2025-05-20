@@ -11,6 +11,8 @@ public sealed record WalletModel(
     decimal TotalAmount,
     [property: JsonConverter(typeof(JsonStringEnumConverter))]
     WalletType Type,
+    bool AllowNegative,
+    string Color,
     bool CanDelete,
     bool IsDeleted,
     string? Notes,
@@ -26,6 +28,8 @@ internal static class WalletModelExtensions
         wallet.SavingsAmount.Amount,
         wallet.TotalAmount.Amount,
         wallet.Type,
+        wallet.AllowNegative,
+        wallet.Color.Value,
         !wallet.Methods.Any(x => !x.IsDeleted) && !wallet.IsDeleted,
         wallet.IsDeleted,
         wallet.Notes,
