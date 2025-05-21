@@ -87,7 +87,7 @@ public sealed class Wallet : BaseEntity
 
     public Result<Wallet> AssignToSavings(Money amount, DateOnly assignedOn, DateTime updatedOnUtc)
     {
-        if (!AllowNegative && AvailableAmount < amount)
+        if (IsAvailableForWithdrawal(amount))
         {
             return Result.Fail<Wallet>(WalletErrors.UnableToAssignToSavings);
         }
@@ -311,5 +311,10 @@ public sealed class Wallet : BaseEntity
             createdOn);
 
         _operations.Add(operation);
+    }
+
+    internal bool IsAvailableForWithdrawal(Money amount)
+    {
+        return AllowNegative || AvailableAmount >= amount;
     }
 }

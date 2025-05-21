@@ -3,7 +3,8 @@
 namespace Aurora.Coinly.Application.Transactions.UndoPayment;
 
 internal sealed class UndoTransactionPaymentCommandHandler(
-    ITransactionRepository transactionRepository) : ICommandHandler<UndoTransactionPaymentCommand>
+    ITransactionRepository transactionRepository,
+    IDateTimeService dateTimeService) : ICommandHandler<UndoTransactionPaymentCommand>
 {
     public async Task<Result> Handle(
         UndoTransactionPaymentCommand request,
@@ -17,7 +18,7 @@ internal sealed class UndoTransactionPaymentCommandHandler(
         }
 
         // Undo payment
-        var result = transaction.UndoPayment();
+        var result = transaction.UndoPayment(dateTimeService.UtcNow);
 
         if (!result.IsSuccessful)
         {

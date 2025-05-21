@@ -18,6 +18,10 @@ public static class WalletErrors
         "Wallet.HasActivePaymentMethods",
         "The wallet has active payment methods");
 
+    public static readonly BaseError InsufficientFunds = new(
+        "Wallet.InsufficientFunds",
+        "The wallet does not have sufficient funds to perform this operation");
+
     public static readonly BaseError TransactionNotBelongs = new(
         "Wallet.TransactionNotBelongs",
         "The transaction does not belong to the wallet");

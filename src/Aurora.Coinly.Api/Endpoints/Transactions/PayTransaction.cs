@@ -7,11 +7,11 @@ public sealed class PayTransaction : IBaseEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut(
-            "transactions/{id}/pay",
+            "transactions/pay",
             async (Guid id, [FromBody] PayTransactionRequest request, ISender sender) =>
             {
                 var command = new ProcessTransactionPaymentCommand(
-                    id,
+                    request.TransactionIds,
                     request.WalletId,
                     request.PaymentDate);
 
@@ -28,5 +28,5 @@ public sealed class PayTransaction : IBaseEndpoint
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
     }
 
-    internal sealed record PayTransactionRequest(Guid WalletId, DateOnly PaymentDate);
+    internal sealed record PayTransactionRequest(Guid[] TransactionIds, Guid WalletId, DateOnly PaymentDate);
 }

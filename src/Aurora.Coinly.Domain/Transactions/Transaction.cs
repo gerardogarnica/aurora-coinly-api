@@ -17,10 +17,10 @@ public sealed class Transaction : BaseEntity
     public Money Amount { get; private set; }
     public Guid? PaymentMethodId { get; private set; }
     public Guid? WalletId { get; private set; }
-    public string? Notes { get; private set; }
+    public TransactionStatus Status { get; private set; }
     public bool IsRecurring => InstallmentNumber > 0;
     public int InstallmentNumber { get; private set; }
-    public TransactionStatus Status { get; private set; }
+    public string? Notes { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? PaidOnUtc { get; private set; }
     public DateTime? RemovedOnUtc { get; private set; }
@@ -54,13 +54,12 @@ public sealed class Transaction : BaseEntity
             QueryDate = maxPaymentDate,
             Amount = amount,
             PaymentMethodId = paymentMethod?.Id,
-            Notes = notes,
-            InstallmentNumber = 0,
+            WalletId = paymentMethod?.WalletId,
             Status = TransactionStatus.Pending,
+            InstallmentNumber = 0,
+            Notes = notes,
             CreatedOnUtc = createdOnUtc
         };
-
-        transaction.AddDomainEvent(new TransactionCreatedEvent(transaction));
 
         return transaction;
     }
@@ -75,6 +74,11 @@ public sealed class Transaction : BaseEntity
         if (wallet.IsDeleted)
         {
             return Result.Fail<Transaction>(WalletErrors.IsDeleted);
+        }
+
+        if (Type is TransactionType.Expense && wallet.IsAvailableForWithdrawal(Amount))
+        {
+            return Result.Fail<Transaction>(WalletErrors.InsufficientFunds);
         }
 
         if (paymentDate < TransactionDate)
@@ -108,22 +112,29 @@ public sealed class Transaction : BaseEntity
         Status = TransactionStatus.Removed;
         RemovedOnUtc = removedOnUtc;
 
-        AddDomainEvent(new TransactionRemovedEvent(this));
-
         return this;
     }
 
-    public Result<Transaction> UndoPayment()
+    public Result<Transaction> UndoPayment(DateTime unpaidOnUtc)
     {
         if (Status != TransactionStatus.Paid)
         {
             return Result.Fail<Transaction>(TransactionErrors.NotPaid);
         }
 
-        Status = TransactionStatus.Pending;
+        if (Type is TransactionType.Income && Wallet!.IsAvailableForWithdrawal(Amount))
+        {
+            return Result.Fail<Transaction>(WalletErrors.InsufficientFunds);
+        }
+
+        if (Type is TransactionType.Expense && !PaymentMethod!.IsAvailableToReverse(PaymentDate!.Value, unpaidOnUtc))
+        {
+            return Result.Fail<Transaction>(PaymentMethodErrors.IsUnavailableToReverse);
+        }
+
         PaymentDate = null;
         QueryDate = MaxPaymentDate;
-        WalletId = null;
+        Status = TransactionStatus.Pending;
         PaidOnUtc = null;
 
         AddDomainEvent(new TransactionPaymentUndoneEvent(this));

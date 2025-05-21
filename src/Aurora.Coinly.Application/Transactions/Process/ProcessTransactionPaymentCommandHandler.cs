@@ -12,32 +12,35 @@ internal sealed class ProcessTransactionPaymentCommandHandler(
         ProcessTransactionPaymentCommand request,
         CancellationToken cancellationToken)
     {
-        // Get transaction
-        var transaction = await transactionRepository.GetByIdAsync(request.Id);
-        if (transaction is null)
+        foreach (var transactionId in request.TransactionIds)
         {
-            return Result.Fail(TransactionErrors.NotFound);
+            // Get transaction
+            var transaction = await transactionRepository.GetByIdAsync(transactionId);
+            if (transaction is null)
+            {
+                return Result.Fail(TransactionErrors.NotFound);
+            }
+
+            // Get wallet
+            var wallet = await walletRepository.GetByIdAsync(request.WalletId);
+            if (wallet is null)
+            {
+                return Result.Fail(WalletErrors.NotFound);
+            }
+
+            // Pay transaction
+            var result = transaction.Pay(
+                wallet,
+                request.PaymentDate,
+                dateTimeService.UtcNow);
+
+            if (!result.IsSuccessful)
+            {
+                return Result.Fail(result.Error);
+            }
+
+            transactionRepository.Update(transaction);
         }
-
-        // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId);
-        if (wallet is null)
-        {
-            return Result.Fail(WalletErrors.NotFound);
-        }
-
-        // Pay transaction
-        var result = transaction.Pay(
-            wallet,
-            request.PaymentDate,
-            dateTimeService.UtcNow);
-
-        if (!result.IsSuccessful)
-        {
-            return Result.Fail(result.Error);
-        }
-
-        transactionRepository.Update(transaction);
 
         return Result.Ok();
     }

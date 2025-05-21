@@ -9,4 +9,8 @@ public static class PaymentMethodErrors
     public static readonly BaseError IsDeleted = new(
         "PaymentMethod.IsDeleted",
         "The payment method is already deleted");
+
+    public static readonly BaseError IsUnavailableToReverse = new(
+        "PaymentMethod.IsUnavailableToReverse",
+        "The payment method is unavailable to reverse the transaction");
 }
