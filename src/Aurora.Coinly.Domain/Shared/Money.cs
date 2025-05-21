@@ -26,9 +26,19 @@ public sealed record Money(decimal Amount, Currency Currency)
         return CompareAmounts(first, second) < 0;
     }
 
+    public static bool operator <=(Money first, Money second)
+    {
+        return CompareAmounts(first, second) <= 0;
+    }
+
     public static bool operator >(Money first, Money second)
     {
         return CompareAmounts(first, second) > 0;
+    }
+
+    public static bool operator >=(Money first, Money second)
+    {
+        return CompareAmounts(first, second) >= 0;
     }
 
     private static void ValidateCurrencies(Money first, Money second)
