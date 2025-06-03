@@ -11,7 +11,6 @@ public sealed class Transaction : BaseEntity
     public DateOnly TransactionDate { get; private set; }
     public DateOnly MaxPaymentDate { get; private set; }
     public DateOnly? PaymentDate { get; private set; }
-    public DateOnly QueryDate { get; private set; }
     public TransactionType Type => Category.Type;
     public bool IsPaid => Status == TransactionStatus.Paid;
     public Money Amount { get; private set; }
@@ -51,7 +50,6 @@ public sealed class Transaction : BaseEntity
             CategoryId = category.Id,
             TransactionDate = transactionDate,
             MaxPaymentDate = maxPaymentDate,
-            QueryDate = maxPaymentDate,
             Amount = amount,
             PaymentMethodId = paymentMethod?.Id,
             WalletId = paymentMethod?.WalletId,
@@ -76,7 +74,7 @@ public sealed class Transaction : BaseEntity
             return Result.Fail<Transaction>(WalletErrors.IsDeleted);
         }
 
-        if (Type is TransactionType.Expense && wallet.IsAvailableForWithdrawal(Amount))
+        if (!WalletIsAvailableForPayment(wallet))
         {
             return Result.Fail<Transaction>(WalletErrors.InsufficientFunds);
         }
@@ -87,7 +85,6 @@ public sealed class Transaction : BaseEntity
         }
 
         PaymentDate = paymentDate;
-        QueryDate = paymentDate;
         Status = TransactionStatus.Paid;
         WalletId = wallet.Id;
         PaidOnUtc = paidOnUtc;
@@ -97,7 +94,7 @@ public sealed class Transaction : BaseEntity
         return this;
     }
 
-    public Result<Transaction> Remove(DateTime removedOnUtc)
+    public Result<Transaction> Remove(DateTime removedOnUtc, DateOnly today)
     {
         if (Status == TransactionStatus.Paid)
         {
@@ -109,36 +106,84 @@ public sealed class Transaction : BaseEntity
             return Result.Fail<Transaction>(TransactionErrors.AlreadyRemoved);
         }
 
+        if (!CategoryIsAvailableToReverse(TransactionDate, today))
+        {
+            return Result.Fail<Transaction>(CategoryErrors.IsUnavailableToReverse);
+        }
+
         Status = TransactionStatus.Removed;
         RemovedOnUtc = removedOnUtc;
 
         return this;
     }
 
-    public Result<Transaction> UndoPayment(DateTime unpaidOnUtc)
+    public Result<Transaction> UndoPayment(DateTime unpaidOnUtc, DateOnly today)
     {
-        if (Status != TransactionStatus.Paid)
+        if (Status != TransactionStatus.Paid || PaymentDate is null)
         {
             return Result.Fail<Transaction>(TransactionErrors.NotPaid);
         }
 
-        if (Type is TransactionType.Income && Wallet!.IsAvailableForWithdrawal(Amount))
+        if (!WalletIsAvailableForUndoPayment())
         {
             return Result.Fail<Transaction>(WalletErrors.InsufficientFunds);
         }
 
-        if (Type is TransactionType.Expense && !PaymentMethod!.IsAvailableToReverse(PaymentDate!.Value, unpaidOnUtc))
+        if (!CategoryIsAvailableToReverse(PaymentDate!.Value, today))
+        {
+            return Result.Fail<Transaction>(CategoryErrors.IsUnavailableToReverse);
+        }
+
+        if (!PaymentMethodIsAvailableToReverse(today))
         {
             return Result.Fail<Transaction>(PaymentMethodErrors.IsUnavailableToReverse);
         }
 
+        var paymentDate = PaymentDate.Value;
+
         PaymentDate = null;
-        QueryDate = MaxPaymentDate;
         Status = TransactionStatus.Pending;
         PaidOnUtc = null;
+        RemovedOnUtc = unpaidOnUtc;
 
-        AddDomainEvent(new TransactionPaymentUndoneEvent(this));
+        AddDomainEvent(new TransactionUnpaidEvent(this, paymentDate));
 
         return this;
+    }
+
+    private bool WalletIsAvailableForPayment(Wallet wallet)
+    {
+        return Type switch
+        {
+            TransactionType.Expense => wallet.IsAvailableForWithdrawal(Amount),
+            TransactionType.Income => true,
+            _ => false
+        };
+    }
+
+    private bool WalletIsAvailableForUndoPayment()
+    {
+        return Type switch
+        {
+            TransactionType.Income => Wallet?.IsAvailableForWithdrawal(Amount) ?? false,
+            TransactionType.Expense => true,
+            _ => false
+        };
+    }
+
+    private bool CategoryIsAvailableToReverse(DateOnly dateToCompare, DateOnly today)
+    {
+        return Category.IsAvailableToReverse(dateToCompare, today);
+    }
+
+    private bool PaymentMethodIsAvailableToReverse(DateOnly today)
+    {
+        // Income transactions do not have a payment method to reverse
+        if (Type is TransactionType.Income)
+        {
+            return true;
+        }
+
+        return PaymentMethod?.IsAvailableToReverse(PaymentDate!.Value, today) ?? false;
     }
 }

@@ -12,6 +12,8 @@ public sealed record TransactionModel(
     DateOnly TransactionDate,
     DateOnly MaxPaymentDate,
     DateOnly? PaymentDate,
+    DateOnly DisplayDate,
+    DisplayDateType DisplayDateType,
     string Currency,
     decimal Amount,
     [property: JsonConverter(typeof(JsonStringEnumConverter))]
@@ -27,13 +29,15 @@ public sealed record TransactionModel(
 
 internal static class TransactionModelExtensions
 {
-    internal static TransactionModel ToModel(this Transaction transaction) => new(
+    internal static TransactionModel ToModel(this Transaction transaction, DisplayDateType displayDateType) => new(
         transaction.Id,
         transaction.Description,
         transaction.Category?.ToModel(),
         transaction.TransactionDate,
         transaction.MaxPaymentDate,
         transaction.PaymentDate,
+        GetDisplayDate(transaction, displayDateType),
+        displayDateType,
         transaction.Amount.Currency.Code,
         transaction.Amount.Amount,
         transaction.Type,
@@ -44,4 +48,11 @@ internal static class TransactionModelExtensions
         transaction.Notes,
         transaction.IsRecurring,
         transaction.InstallmentNumber);
+
+    private static DateOnly GetDisplayDate(Transaction transaction, DisplayDateType displayDateType)
+    {
+        return displayDateType == DisplayDateType.TransactionDate
+            ? transaction.TransactionDate
+            : transaction.PaymentDate ?? transaction.TransactionDate;
+    }
 }

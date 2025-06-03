@@ -2,7 +2,7 @@
 
 internal sealed class CreateExpenseTransactionCommandValidator : AbstractValidator<CreateExpenseTransactionCommand>
 {
-    public CreateExpenseTransactionCommandValidator()
+    public CreateExpenseTransactionCommandValidator(IDateTimeService dateTimeService)
     {
         RuleFor(x => x.CategoryId).NotEmpty();
 
@@ -12,6 +12,11 @@ internal sealed class CreateExpenseTransactionCommandValidator : AbstractValidat
             .NotEmpty()
             .MinimumLength(3)
             .MaximumLength(100);
+
+        RuleFor(x => x.TransactionDate)
+            .NotEmpty()
+            .LessThanOrEqualTo(dateTimeService.Today)
+            .WithMessage("'{PropertyName}' must be today or in the past.");
 
         RuleFor(x => x.MaxPaymentDate).GreaterThanOrEqualTo(x => x.TransactionDate);
 

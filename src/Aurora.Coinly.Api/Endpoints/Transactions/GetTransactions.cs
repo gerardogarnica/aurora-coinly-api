@@ -17,7 +17,10 @@ public sealed class GetTransactions : IBaseEndpoint
                     queryParams.DateTo,
                     queryParams.Status,
                     queryParams.CategoryId,
-                    queryParams.PaymentMethodId);
+                    queryParams.PaymentMethodId,
+                    queryParams.DateFilterType == TransactionDateFilterType.Transaction
+                        ? DisplayDateType.TransactionDate
+                        : DisplayDateType.PaymentDate);
 
                 Result<IReadOnlyCollection<TransactionModel>> result = await sender.Send(query);
 
@@ -45,5 +48,14 @@ public sealed class GetTransactions : IBaseEndpoint
 
         [FromQuery(Name = "mid")]
         public Guid? PaymentMethodId { get; set; }
+
+        [FromQuery(Name = "dt")]
+        public TransactionDateFilterType DateFilterType { get; set; } = TransactionDateFilterType.Transaction;
+    }
+
+    internal enum TransactionDateFilterType
+    {
+        Transaction = 0,
+        Payment = 1
     }
 }

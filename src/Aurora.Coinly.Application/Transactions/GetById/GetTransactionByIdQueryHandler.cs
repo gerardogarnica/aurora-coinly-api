@@ -17,6 +17,6 @@ internal sealed class GetTransactionByIdQueryHandler(
         }
 
         // Return transaction model
-        return transaction.ToModel();
+        return transaction.ToModel(DisplayDateType.TransactionDate);
     }
 }

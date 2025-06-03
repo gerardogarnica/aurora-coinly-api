@@ -14,9 +14,10 @@ internal sealed class GetTransactionListQueryHandler(
             DateRange.Create(request.DateFrom, request.DateTo),
             request.Status,
             request.CategoryId,
-            request.PaymentMethodId);
+            request.PaymentMethodId,
+            request.DisplayDateType);
 
         // Return transaction models
-        return transactions.Select(x => x.ToModel()).ToList();
+        return transactions.Select(x => x.ToModel(request.DisplayDateType)).ToList();
     }
 }

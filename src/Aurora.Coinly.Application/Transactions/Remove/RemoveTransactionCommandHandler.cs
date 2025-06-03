@@ -18,7 +18,7 @@ internal sealed class RemoveTransactionCommandHandler(
         }
 
         // Remove transaction
-        var result = transaction.Remove(dateTimeService.UtcNow);
+        var result = transaction.Remove(dateTimeService.UtcNow, dateTimeService.Today);
 
         if (!result.IsSuccessful)
         {

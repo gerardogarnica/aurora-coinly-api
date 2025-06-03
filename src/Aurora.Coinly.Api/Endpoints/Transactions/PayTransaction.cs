@@ -8,7 +8,7 @@ public sealed class PayTransaction : IBaseEndpoint
     {
         app.MapPut(
             "transactions/pay",
-            async (Guid id, [FromBody] PayTransactionRequest request, ISender sender) =>
+            async ([FromBody] PayTransactionRequest request, ISender sender) =>
             {
                 var command = new ProcessTransactionPaymentCommand(
                     request.TransactionIds,

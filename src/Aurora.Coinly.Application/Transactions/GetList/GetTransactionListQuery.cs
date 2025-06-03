@@ -7,4 +7,5 @@ public sealed record GetTransactionListQuery(
     DateOnly DateTo,
     TransactionStatus? Status,
     Guid? CategoryId,
-    Guid? PaymentMethodId) : IQuery<IReadOnlyCollection<TransactionModel>>;
+    Guid? PaymentMethodId,
+    DisplayDateType DisplayDateType) : IQuery<IReadOnlyCollection<TransactionModel>>;

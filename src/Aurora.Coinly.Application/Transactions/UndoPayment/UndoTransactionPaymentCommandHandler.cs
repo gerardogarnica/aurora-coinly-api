@@ -18,7 +18,7 @@ internal sealed class UndoTransactionPaymentCommandHandler(
         }
 
         // Undo payment
-        var result = transaction.UndoPayment(dateTimeService.UtcNow);
+        var result = transaction.UndoPayment(dateTimeService.UtcNow, dateTimeService.Today);
 
         if (!result.IsSuccessful)
         {

@@ -2,7 +2,7 @@
 
 internal sealed class CreateIncomeTransactionCommandValidator : AbstractValidator<CreateIncomeTransactionCommand>
 {
-    public CreateIncomeTransactionCommandValidator()
+    public CreateIncomeTransactionCommandValidator(IDateTimeService dateTimeService)
     {
         RuleFor(x => x.CategoryId).NotEmpty();
 
@@ -10,6 +10,11 @@ internal sealed class CreateIncomeTransactionCommandValidator : AbstractValidato
             .NotEmpty()
             .MinimumLength(3)
             .MaximumLength(100);
+
+        RuleFor(x => x.TransactionDate)
+            .NotEmpty()
+            .LessThanOrEqualTo(dateTimeService.Today)
+            .WithMessage("'{PropertyName}' must be today or in the past.");
 
         RuleFor(x => x.CurrencyCode)
             .NotEmpty()

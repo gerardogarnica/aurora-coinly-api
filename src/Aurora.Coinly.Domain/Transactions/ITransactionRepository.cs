@@ -7,5 +7,6 @@ public interface ITransactionRepository : IRepository<Transaction>
         DateRange dateRange,
         TransactionStatus? status,
         Guid? categoryId,
-        Guid? paymentMethodId);
+        Guid? paymentMethodId,
+        DisplayDateType displayDateType);
 }

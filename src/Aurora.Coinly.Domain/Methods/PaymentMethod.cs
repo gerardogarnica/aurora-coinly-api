@@ -124,8 +124,8 @@ public sealed class PaymentMethod : BaseEntity
         return this;
     }
 
-    internal bool IsAvailableToReverse(DateOnly paymentDate, DateTime currentDate)
+    internal bool IsAvailableToReverse(DateOnly paymentDate, DateOnly currentDate)
     {
-        return paymentDate.AddDays(MaxDaysToReverse) >= new DateOnly(currentDate.Year, currentDate.Month, currentDate.Day);
+        return paymentDate.AddDays(MaxDaysToReverse) >= currentDate;
     }
 }
