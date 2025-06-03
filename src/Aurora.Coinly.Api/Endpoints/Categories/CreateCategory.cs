@@ -14,6 +14,7 @@ public sealed class CreateCategory : IBaseEndpoint
                 var command = new CreateCategoryCommand(
                     request.Name,
                     request.Type,
+                    request.MaxDaysToReverse,
                     request.Color,
                     request.Notes);
 
@@ -34,6 +35,7 @@ public sealed class CreateCategory : IBaseEndpoint
         string Name,
         [property: JsonConverter(typeof(JsonStringEnumConverter))]
         TransactionType Type,
+        int MaxDaysToReverse,
         string Color,
         string? Notes);
 }

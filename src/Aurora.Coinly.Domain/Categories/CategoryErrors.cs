@@ -13,4 +13,8 @@ public static class CategoryErrors
     public static readonly BaseError IsDeleted = new(
         "Category.IsDeleted",
         "The category is already deleted");
+
+    public static readonly BaseError IsUnavailableToReverse = new(
+        "Category.IsUnavailableToReverse",
+        "The category is unavailable to reverse the transaction");
 }

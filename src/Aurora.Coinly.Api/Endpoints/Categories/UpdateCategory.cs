@@ -13,6 +13,7 @@ public sealed class UpdateCategory : IBaseEndpoint
                 var command = new UpdateCategoryCommand(
                     id,
                     request.Name,
+                    request.MaxDaysToReverse,
                     request.Color,
                     request.Notes);
 
@@ -31,6 +32,7 @@ public sealed class UpdateCategory : IBaseEndpoint
 
     internal sealed record UpdateCategoryRequest(
         string Name,
+        int MaxDaysToReverse,
         string Color,
         string? Notes);
 }

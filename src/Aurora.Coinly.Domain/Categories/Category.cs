@@ -6,6 +6,7 @@ public sealed class Category : BaseEntity
 {
     public string Name { get; private set; }
     public TransactionType Type { get; private set; }
+    public int MaxDaysToReverse { get; private set; }
     public Color Color { get; private set; }
     public string? Notes { get; private set; }
     public bool IsDeleted { get; private set; }
@@ -21,6 +22,7 @@ public sealed class Category : BaseEntity
     public static Category Create(
         string name,
         TransactionType type,
+        int maxDaysToReverse,
         Color color,
         string? notes,
         DateTime createdOnUtc)
@@ -29,6 +31,7 @@ public sealed class Category : BaseEntity
         {
             Name = name,
             Type = type,
+            MaxDaysToReverse = maxDaysToReverse,
             Color = color,
             Notes = notes,
             IsDeleted = false,
@@ -40,6 +43,7 @@ public sealed class Category : BaseEntity
 
     public Result<Category> Update(
         string name,
+        int maxDaysToReverse,
         Color color,
         string? notes,
         DateTime updatedOnUtc)
@@ -50,6 +54,7 @@ public sealed class Category : BaseEntity
         }
 
         Name = name;
+        MaxDaysToReverse = maxDaysToReverse;
         Color = color;
         Notes = notes;
         UpdatedOnUtc = updatedOnUtc;
@@ -68,5 +73,10 @@ public sealed class Category : BaseEntity
         DeletedOnUtc = deletedOnUtc;
 
         return this;
+    }
+
+    internal bool IsAvailableToReverse(DateOnly dateToCompare, DateOnly currentDate)
+    {
+        return dateToCompare.AddDays(MaxDaysToReverse) >= currentDate;
     }
 }

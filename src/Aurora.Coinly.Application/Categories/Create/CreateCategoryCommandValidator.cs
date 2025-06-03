@@ -9,6 +9,10 @@ internal sealed class CreateCategoryCommandValidator : AbstractValidator<CreateC
             .MinimumLength(3)
             .MaximumLength(100);
 
+        RuleFor(x => x.MaxDaysToReverse)
+            .NotEmpty()
+            .InclusiveBetween(0, 15);
+
         RuleFor(x => x.Color)
             .NotEmpty()
             .Length(7);
