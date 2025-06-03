@@ -92,9 +92,9 @@ public sealed class Budget : BaseEntity
         return this;
     }
 
-    public Result<Budget> RemoveTransaction(Transaction transaction)
+    public Result<Budget> RemoveTransaction(Transaction transaction, DateOnly originalPaymentDate)
     {
-        var period = _periods.FirstOrDefault(p => p.Period.Contains(transaction.QueryDate));
+        var period = _periods.FirstOrDefault(p => p.Period.Contains(originalPaymentDate));
         if (period is null)
         {
             return Result.Fail<Budget>(BudgetErrors.TransactionPaymentDateOutOfRange);

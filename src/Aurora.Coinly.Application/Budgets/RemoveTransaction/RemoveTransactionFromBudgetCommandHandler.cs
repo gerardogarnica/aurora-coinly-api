@@ -21,7 +21,7 @@ internal sealed class RemoveTransactionFromBudgetCommandHandler(
         // Get budget
         var budget = await budgetRepository.GetByCategoryIdAsync(
             transaction.CategoryId,
-            transaction.PaymentDate!.Value.Year);
+            request.OriginalPaymentDate.Year);
         if (budget is null)
         {
             // Because budget is not necessary for transaction
@@ -29,7 +29,7 @@ internal sealed class RemoveTransactionFromBudgetCommandHandler(
         }
 
         // Remove transaction from budget
-        var result = budget.RemoveTransaction(transaction);
+        var result = budget.RemoveTransaction(transaction, request.OriginalPaymentDate);
 
         if (!result.IsSuccessful)
         {
