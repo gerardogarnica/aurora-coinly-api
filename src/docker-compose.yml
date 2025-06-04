@@ -11,14 +11,28 @@ services:
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aurora.coinly.seq:5341/ingest/otlp
       - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+    depends_on:
+        - aurora.coinly.database
+
+  aurora.coinly.database:
+    image: postgres:latest
+    container_name: Aurora.Coinly.Postgres
+    environment:
+      - POSTGRES_DB=auroracoinly
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./.containers/database:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
 
   aurora.coinly.seq:
     image: datalust/seq:2024.3
+    container_name: Aurora.Coinly.Seq
     environment:
       ACCEPT_EULA: "Y"
     volumes:
       - ./.containers/seq_data:/data
-    container_name: Aurora.Coinly.Seq
     ports:
       - 8080:80
       - 5341:5341
