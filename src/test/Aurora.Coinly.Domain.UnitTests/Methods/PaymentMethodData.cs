@@ -8,6 +8,7 @@ internal static class PaymentMethodData
     public const bool IsDefault = false;
     public const bool AllowRecurring = false;
     public const bool AutoMarkAsPaid = false;
+    public const int MaxDaysToReverse = 10;
     public const int SuggestedPaymentDay = 15;
     public const int StatementCutoffDay = 31;
     public const string? Notes = "Notes of the payment method";
@@ -18,6 +19,7 @@ internal static class PaymentMethodData
         AllowRecurring,
         AutoMarkAsPaid,
         WalletData.GetWallet(),
+        MaxDaysToReverse,
         SuggestedPaymentDay,
         StatementCutoffDay,
         Notes,

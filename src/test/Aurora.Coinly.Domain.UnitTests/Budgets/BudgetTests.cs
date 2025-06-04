@@ -177,11 +177,11 @@ public class BudgetTests : BaseTest
         budget.AssignTransaction(transaction);
         var period = budget.Periods.FirstOrDefault(x => x.Period.Contains(transaction.PaymentDate!.Value))!;
 
-        transaction.UndoPayment();
+        transaction.UndoPayment(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
         var operationsCount = period.Transactions.Count;
 
         // Act
-        var result = budget.RemoveTransaction(transaction);
+        var result = budget.RemoveTransaction(transaction, DateOnly.FromDateTime(DateTime.UtcNow));
 
         // Assert
         result.IsSuccessful.Should().BeTrue();
@@ -195,16 +195,18 @@ public class BudgetTests : BaseTest
         var category = CategoryData.GetCategory();
         var budget = BudgetData.GetBudget(category);
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
-        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
+
+        var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), paymentDate, DateTime.UtcNow);
 
         var newCategory = CategoryData.GetCategory();
         var newBudget = BudgetData.GetBudget(newCategory);
         var newTransaction = TransactionData.GetTransaction(newCategory, PaymentMethodData.GetPaymentMethod());
-        newTransaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
+        newTransaction.Pay(WalletData.GetWallet(), paymentDate, DateTime.UtcNow);
         budget.AssignTransaction(transaction);
 
         // Act
-        var result = newBudget.RemoveTransaction(newTransaction);
+        var result = newBudget.RemoveTransaction(newTransaction, paymentDate);
 
         // Assert
         result.IsSuccessful.Should().BeFalse();
@@ -218,12 +220,14 @@ public class BudgetTests : BaseTest
         var category = CategoryData.GetCategory();
         var budget = BudgetData.GetBudget(category);
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
-        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
+
+        var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), paymentDate, DateTime.UtcNow);
         budget.AssignTransaction(transaction);
-        transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
+        transaction.Pay(WalletData.GetWallet(), paymentDate, DateTime.UtcNow);
 
         // Act
-        var result = budget.RemoveTransaction(transaction);
+        var result = budget.RemoveTransaction(transaction, paymentDate);
 
         // Assert
         result.IsSuccessful.Should().BeFalse();

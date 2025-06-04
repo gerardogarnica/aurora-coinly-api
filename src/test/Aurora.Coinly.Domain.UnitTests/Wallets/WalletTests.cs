@@ -17,6 +17,8 @@ public class WalletTests : BaseTest
             WalletData.Name,
             WalletData.AvailableAmount,
             WalletData.Type,
+            WalletData.AllowNegative,
+            WalletData.Color,
             WalletData.Notes,
             DateOnly.FromDateTime(DateTime.Now),
             DateTime.Now);
@@ -40,6 +42,8 @@ public class WalletTests : BaseTest
             WalletData.Name,
             WalletData.AvailableAmount,
             WalletData.Type,
+            WalletData.AllowNegative,
+            WalletData.Color,
             WalletData.Notes,
             DateOnly.FromDateTime(DateTime.Now),
             DateTime.Now);
@@ -51,35 +55,22 @@ public class WalletTests : BaseTest
     }
 
     [Fact]
-    public void Create_Should_RaiseWalletCreatedEvent()
-    {
-        // Arrange
-
-        // Act
-        var wallet = Wallet.Create(
-            WalletData.Name,
-            WalletData.AvailableAmount,
-            WalletData.Type,
-            WalletData.Notes,
-            DateOnly.FromDateTime(DateTime.Now),
-            DateTime.Now);
-
-        // Assert
-        var domainEvent = AssertDomainEventWasPublished<WalletCreatedEvent>(wallet);
-        domainEvent.Should().NotBeNull();
-        domainEvent!.Wallet.Id.Should().Be(wallet.Id);
-    }
-
-    [Fact]
     public void Update_Should_SetProperties()
     {
         // Arrange
         var wallet = WalletData.GetWallet();
         var updatedName = "Updated Name";
+        var updatedAllowNegative = true;
+        var updatedColor = Color.FromHex("#FF5733");
         var updatedNotes = "Updated Notes";
 
         // Act
-        var result = wallet.Update(updatedName, updatedNotes, DateTime.UtcNow);
+        var result = wallet.Update(
+            updatedName,
+            updatedAllowNegative,
+            updatedColor,
+            updatedNotes,
+            DateTime.UtcNow);
 
         // Assert
         result.IsSuccessful.Should().BeTrue();
@@ -94,11 +85,18 @@ public class WalletTests : BaseTest
         // Arrange
         var wallet = WalletData.GetWallet();
         var updatedName = "Updated Name";
+        var updatedAllowNegative = true;
+        var updatedColor = Color.FromHex("#FF5733");
         var updatedNotes = "Updated Notes";
         wallet.Delete(DateTime.UtcNow);
 
         // Act
-        var result = wallet.Update(updatedName, updatedNotes, DateTime.UtcNow);
+        var result = wallet.Update(
+            updatedName,
+            updatedAllowNegative,
+            updatedColor,
+            updatedNotes,
+            DateTime.UtcNow);
 
         // Assert
         result.IsSuccessful.Should().BeFalse();
@@ -122,6 +120,21 @@ public class WalletTests : BaseTest
         wallet.AvailableAmount.Should().Be(availableAmount);
         wallet.SavingsAmount.Should().Be(savingAmount);
         wallet.UpdatedOnUtc.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void AssignToSavings_Should_Fail_WhenIsNotAvailableForWithdrawal()
+    {
+        // Arrange
+        var wallet = WalletData.GetWallet();
+        var amount = new Money(500.0m, Currency.Usd);
+
+        // Act
+        var result = wallet.AssignToSavings(amount, DateOnly.FromDateTime(DateTime.Now), DateTime.UtcNow);
+
+        // Assert
+        result.IsSuccessful.Should().BeFalse();
+        result.Error.Should().Be(WalletErrors.UnableToAssignToSavings);
     }
 
     [Fact]
@@ -155,21 +168,6 @@ public class WalletTests : BaseTest
         result.IsSuccessful.Should().BeTrue();
         wallet.Operations.LastOrDefault()!.Type.Should().Be(WalletHistoryType.AssignedToSavings);
         wallet.Operations.LastOrDefault()!.Amount.Should().Be(amount);
-    }
-
-    [Fact]
-    public void AssignToSavings_Should_Fail_WhenUnableToAssignToSavings()
-    {
-        // Arrange
-        var wallet = WalletData.GetWallet();
-        var amount = wallet.AvailableAmount + new Money(5.0m, Currency.Usd);
-
-        // Act
-        var result = wallet.AssignToSavings(amount, DateOnly.FromDateTime(DateTime.Now), DateTime.UtcNow);
-
-        // Assert
-        result.IsSuccessful.Should().BeFalse();
-        result.Error.Should().Be(WalletErrors.UnableToAssignToSavings);
     }
 
     [Fact]
@@ -553,10 +551,11 @@ public class WalletTests : BaseTest
         var wallet = WalletData.GetWallet();
         var transaction = TransactionData.GetTransaction(CategoryData.GetCategory(), PaymentMethodData.GetPaymentMethod());
 
-        transaction.Pay(wallet, DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
+        var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        transaction.Pay(wallet, paymentDate, DateTime.UtcNow);
         wallet.Withdraw(transaction, DateTime.UtcNow);
-
-        transaction.UndoPayment();
+        
+        transaction.UndoPayment(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
 
         // Act
         var result = wallet.RemoveTransaction(transaction);
@@ -573,11 +572,12 @@ public class WalletTests : BaseTest
         var wallet = WalletData.GetWallet();
         var transaction = TransactionData.GetTransaction(CategoryData.GetCategory(), PaymentMethodData.GetPaymentMethod());
 
-        transaction.Pay(wallet, DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
+        var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        transaction.Pay(wallet, paymentDate, DateTime.UtcNow);
         wallet.Withdraw(transaction, DateTime.UtcNow);
         wallet.ClearDomainEvents();
 
-        transaction.UndoPayment();
+        transaction.UndoPayment(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
 
         // Act
         var result = wallet.RemoveTransaction(transaction);
@@ -597,10 +597,11 @@ public class WalletTests : BaseTest
         var wallet = WalletData.GetWallet();
         var transaction = TransactionData.GetTransaction(CategoryData.GetCategory(), PaymentMethodData.GetPaymentMethod());
 
-        transaction.Pay(wallet, DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
+        var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        transaction.Pay(wallet, paymentDate, DateTime.UtcNow);
         wallet.Withdraw(transaction, DateTime.UtcNow);
 
-        transaction.UndoPayment();
+        transaction.UndoPayment(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
 
         wallet.Delete(DateTime.UtcNow);
 

@@ -11,6 +11,8 @@ public class CategoryTests : BaseTest
         var category = Category.Create(
             CategoryData.Name,
             CategoryData.Type,
+            CategoryData.MaxDaysToReverse,
+            CategoryData.Color,
             CategoryData.Notes,
             DateTime.UtcNow);
 
@@ -27,10 +29,17 @@ public class CategoryTests : BaseTest
         // Arrange
         var category = CategoryData.GetCategory();
         var updatedName = "Updated Name";
+        var updatedMaxDaysToReverse = 15;
+        var updatedColor = Color.FromHex("#FF0000");
         var updatedNotes = "Updated Notes";
 
         // Act
-        var result = category.Update(updatedName, updatedNotes, DateTime.UtcNow);
+        var result = category.Update(
+            updatedName,
+            updatedMaxDaysToReverse,
+            updatedColor,
+            updatedNotes,
+            DateTime.UtcNow);
 
         // Assert
         result.IsSuccessful.Should().BeTrue();
@@ -45,12 +54,19 @@ public class CategoryTests : BaseTest
         // Arrange
         var category = CategoryData.GetCategory();
         var updatedName = "Updated Name";
+        var updatedMaxDaysToReverse = 15;
+        var updatedColor = Color.FromHex("#FF0000");
         var updatedNotes = "Updated Notes";
 
         category.Delete(DateTime.UtcNow);
 
         // Act
-        var result = category.Update(updatedName, updatedNotes, DateTime.UtcNow);
+        var result = category.Update(
+            updatedName,
+            updatedMaxDaysToReverse,
+            updatedColor,
+            updatedNotes,
+            DateTime.UtcNow);
 
         // Assert
         result.IsSuccessful.Should().BeFalse();

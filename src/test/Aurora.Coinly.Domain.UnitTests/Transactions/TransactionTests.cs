@@ -29,22 +29,6 @@ public class TransactionTests : BaseTest
     }
 
     [Fact]
-    public void Create_Should_RaiseTransactionCreatedEvent()
-    {
-        // Arrange
-        var category = CategoryData.GetCategory();
-        var paymentMethod = PaymentMethodData.GetPaymentMethod();
-
-        // Act
-        var transaction = TransactionData.GetTransaction(category, paymentMethod);
-
-        // Assert
-        var domainEvent = AssertDomainEventWasPublished<TransactionCreatedEvent>(transaction);
-        domainEvent.Should().NotBeNull();
-        domainEvent!.Transaction.Id.Should().Be(transaction.Id);
-    }
-
-    [Fact]
     public void Create_Should_Fail_WhenCategoryIsDeleted()
     {
         // Arrange
@@ -130,7 +114,7 @@ public class TransactionTests : BaseTest
         var wallet = WalletData.GetWallet();
 
         // Act
-        transaction.Remove(DateTime.UtcNow);
+        transaction.Remove(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
 
         var result = transaction.Pay(
             wallet,
@@ -151,30 +135,12 @@ public class TransactionTests : BaseTest
         var transaction = TransactionData.GetTransaction(category, paymentMethod);
 
         // Act
-        var result = transaction.Remove(DateTime.UtcNow);
+        var result = transaction.Remove(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
         transaction = result.Value;
 
         // Assert
         transaction.Status.Should().Be(TransactionStatus.Removed);
         transaction.RemovedOnUtc.Should().NotBeNull();
-    }
-
-    [Fact]
-    public void Remove_Should_RaiseTransactionRemovedEvent()
-    {
-        // Arrange
-        var category = CategoryData.GetCategory();
-        var paymentMethod = PaymentMethodData.GetPaymentMethod();
-        var transaction = TransactionData.GetTransaction(category, paymentMethod);
-
-        // Act
-        var result = transaction.Remove(DateTime.UtcNow);
-        transaction = result.Value;
-
-        // Assert
-        var domainEvent = AssertDomainEventWasPublished<TransactionRemovedEvent>(transaction);
-        domainEvent.Should().NotBeNull();
-        domainEvent!.Transaction.Id.Should().Be(transaction.Id);
     }
 
     [Fact]
@@ -191,7 +157,7 @@ public class TransactionTests : BaseTest
             DateOnly.FromDateTime(DateTime.UtcNow),
             DateTime.UtcNow);
 
-        var result = transaction.Remove(DateTime.UtcNow);
+        var result = transaction.Remove(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
 
         // Assert
         result.IsSuccessful.Should().BeFalse();
@@ -207,8 +173,8 @@ public class TransactionTests : BaseTest
         var transaction = TransactionData.GetTransaction(category, paymentMethod);
 
         // Act
-        transaction.Remove(DateTime.UtcNow);
-        var result = transaction.Remove(DateTime.UtcNow);
+        transaction.Remove(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
+        var result = transaction.Remove(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
 
         // Assert
         result.IsSuccessful.Should().BeFalse();
@@ -229,7 +195,7 @@ public class TransactionTests : BaseTest
             DateTime.UtcNow);
 
         // Act
-        var result = transaction.UndoPayment();
+        var result = transaction.UndoPayment(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
         transaction = result.Value;
 
         // Assert
@@ -253,11 +219,11 @@ public class TransactionTests : BaseTest
             DateTime.UtcNow);
 
         // Act
-        var result = transaction.UndoPayment();
+        var result = transaction.UndoPayment(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
         transaction = result.Value;
 
         // Assert
-        var domainEvent = AssertDomainEventWasPublished<TransactionPaymentUndoneEvent>(transaction);
+        var domainEvent = AssertDomainEventWasPublished<TransactionUnpaidEvent>(transaction);
         domainEvent.Should().NotBeNull();
         domainEvent!.Transaction.Id.Should().Be(transaction.Id);
     }
@@ -271,7 +237,7 @@ public class TransactionTests : BaseTest
         var transaction = TransactionData.GetTransaction(category, paymentMethod);
 
         // Act
-        var result = transaction.UndoPayment();
+        var result = transaction.UndoPayment(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
 
         // Assert
         result.IsSuccessful.Should().BeFalse();

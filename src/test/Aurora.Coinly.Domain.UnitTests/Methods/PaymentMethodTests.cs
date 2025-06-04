@@ -17,6 +17,7 @@ public class PaymentMethodTests : BaseTest
             PaymentMethodData.AllowRecurring,
             PaymentMethodData.AutoMarkAsPaid,
             wallet,
+            PaymentMethodData.MaxDaysToReverse,
             PaymentMethodData.SuggestedPaymentDay,
             PaymentMethodData.StatementCutoffDay,
             PaymentMethodData.Notes,
@@ -40,6 +41,7 @@ public class PaymentMethodTests : BaseTest
         var paymentMethod = PaymentMethodData.GetPaymentMethod();
         var updatedName = "Updated Name";
         var updatedWallet = WalletData.GetWallet();
+        var updatedMaxDaysToReverse = 15;
         var updatedSuggestedPaymentDay = 20;
         var updatedStatementCutoffDay = 25;
         var updatedNotes = "Updated Notes";
@@ -50,6 +52,7 @@ public class PaymentMethodTests : BaseTest
             PaymentMethodData.AllowRecurring,
             PaymentMethodData.AutoMarkAsPaid,
             updatedWallet,
+            updatedMaxDaysToReverse,
             updatedSuggestedPaymentDay,
             updatedStatementCutoffDay,
             updatedNotes,
@@ -74,6 +77,7 @@ public class PaymentMethodTests : BaseTest
         var paymentMethod = PaymentMethodData.GetPaymentMethod();
         var updatedName = "Updated Name";
         var updatedWallet = WalletData.GetWallet();
+        var updatedMaxDaysToReverse = 15;
         var updatedSuggestedPaymentDay = 20;
         var updatedStatementCutoffDay = 25;
         var updatedNotes = "Updated Notes";
@@ -86,6 +90,7 @@ public class PaymentMethodTests : BaseTest
             PaymentMethodData.AllowRecurring,
             PaymentMethodData.AutoMarkAsPaid,
             updatedWallet,
+            updatedMaxDaysToReverse,
             updatedSuggestedPaymentDay,
             updatedStatementCutoffDay,
             updatedNotes,
