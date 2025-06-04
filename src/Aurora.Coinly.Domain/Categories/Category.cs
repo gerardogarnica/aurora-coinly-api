@@ -8,6 +8,7 @@ public sealed class Category : BaseEntity
     public TransactionType Type { get; private set; }
     public int MaxDaysToReverse { get; private set; }
     public Color Color { get; private set; }
+    public CategoryIcon Icon { get; private set; } = CategoryIcon.Folder;
     public string? Notes { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
