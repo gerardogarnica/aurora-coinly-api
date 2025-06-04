@@ -56,7 +56,9 @@ public sealed class Transaction : BaseEntity
             Status = TransactionStatus.Pending,
             InstallmentNumber = 0,
             Notes = notes,
-            CreatedOnUtc = createdOnUtc
+            CreatedOnUtc = createdOnUtc,
+            Category = category,
+            PaymentMethod = paymentMethod
         };
 
         return transaction;
@@ -119,7 +121,7 @@ public sealed class Transaction : BaseEntity
 
     public Result<Transaction> UndoPayment(DateTime unpaidOnUtc, DateOnly today)
     {
-        if (Status != TransactionStatus.Paid || PaymentDate is null)
+        if (Status != TransactionStatus.Paid)
         {
             return Result.Fail<Transaction>(TransactionErrors.NotPaid);
         }
@@ -144,6 +146,7 @@ public sealed class Transaction : BaseEntity
         PaymentDate = null;
         Status = TransactionStatus.Pending;
         PaidOnUtc = null;
+        WalletId = null;
         RemovedOnUtc = unpaidOnUtc;
 
         AddDomainEvent(new TransactionUnpaidEvent(this, paymentDate));
