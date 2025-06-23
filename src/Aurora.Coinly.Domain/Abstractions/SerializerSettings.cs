@@ -7,6 +7,7 @@ public sealed class SerializerSettings
     public static readonly JsonSerializerSettings Instance = new()
     {
         TypeNameHandling = TypeNameHandling.All,
-        MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
+        MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead,
+        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
     };
 }
