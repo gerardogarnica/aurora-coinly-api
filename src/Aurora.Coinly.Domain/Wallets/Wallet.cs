@@ -1,5 +1,6 @@
 ﻿using Aurora.Coinly.Domain.Methods;
 using Aurora.Coinly.Domain.Transactions;
+using Newtonsoft.Json;
 
 namespace Aurora.Coinly.Domain.Wallets;
 
@@ -17,10 +18,14 @@ public sealed class Wallet : BaseEntity
     public Color Color { get; private set; }
     public string? Notes { get; private set; }
     public bool IsDeleted { get; private set; }
+    public DateOnly OpenedOn { get; private set; }
+    public DateOnly LastOperationOn { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? UpdatedOnUtc { get; private set; }
     public DateTime? DeletedOnUtc { get; private set; }
+    [JsonIgnore]
     public IReadOnlyCollection<WalletHistory> Operations => _operations.AsReadOnly();
+    [JsonIgnore]
     public IReadOnlyCollection<PaymentMethod> Methods => _methods.AsReadOnly();
 
     private Wallet() : base(Guid.NewGuid())
@@ -282,6 +287,12 @@ public sealed class Wallet : BaseEntity
         AddDomainEvent(new WalletBalanceUpdatedEvent(this));
 
         return this;
+    }
+
+    public void SetOpenAndLastOperationDates(DateOnly openedOn, DateOnly lastOperationOn)
+    {
+        OpenedOn = openedOn;
+        LastOperationOn = lastOperationOn;
     }
 
     public void SetOperations(IList<WalletHistory> operations)

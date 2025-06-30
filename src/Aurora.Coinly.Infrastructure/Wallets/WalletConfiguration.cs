@@ -45,5 +45,8 @@ internal sealed class WalletConfiguration : IEntityTypeConfiguration<Wallet>
         });
 
         builder.Property(x => x.Notes).HasMaxLength(1000);
+
+        builder.Ignore(x => x.OpenedOn);
+        builder.Ignore(x => x.LastOperationOn);
     }
 }

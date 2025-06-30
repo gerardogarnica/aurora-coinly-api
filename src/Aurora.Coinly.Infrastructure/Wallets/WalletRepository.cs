@@ -8,10 +8,22 @@ internal sealed class WalletRepository(
 {
     public IUnitOfWork UnitOfWork => dbContext;
 
-    public async Task<Wallet?> GetByIdAsync(Guid id) => await dbContext
-        .Wallets
-        .Include(x => x.Methods)
-        .FirstOrDefaultAsync(x => x.Id == id);
+    public async Task<Wallet?> GetByIdAsync(Guid id)
+    {
+        var wallet = await dbContext
+            .Wallets
+            .Include(x => x.Methods)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (wallet is null)
+        {
+            return null;
+        }
+
+        SetOpenAndLastOperationDates(wallet);
+
+        return wallet;
+    }
 
     public async Task<Wallet?> GetByIdAsync(Guid id, DateRange historyRange)
     {
@@ -45,6 +57,55 @@ internal sealed class WalletRepository(
             query = query.Where(x => !x.IsDeleted);
         }
 
-        return await query.OrderBy(x => x.Name).ToListAsync();
+        var wallets = await query.OrderBy(x => x.Name).ToListAsync();
+        foreach (var wallet in wallets)
+        {
+            SetOpenAndLastOperationDates(wallet);
+        }
+
+        return wallets;
     }
+
+    private void SetOpenAndLastOperationDates(Wallet wallet)
+    {
+        var openedOnDate = GetOpenedOnDate(wallet);
+        var lastOperationOn = GetLastOperationDate(wallet);
+        wallet.SetOpenAndLastOperationDates(openedOnDate.OperationOn, lastOperationOn.OperationOn);
+    }
+
+    private WalletOperationDate GetOpenedOnDate(Wallet wallet)
+    {
+        string sql = $"""
+            SELECT "date"
+            FROM {ApplicationDbContext.DEFAULT_SCHEMA}.wallet_history
+            WHERE wallet_id = '{wallet.Id}'
+            AND type = 'Created'
+            LIMIT 1
+            """;
+
+        IEnumerable<WalletOperationDate> openedOn = dbContext
+            .Database
+            .SqlQueryRaw<WalletOperationDate>(sql);
+
+        return openedOn.FirstOrDefault();
+    }
+
+    private WalletOperationDate GetLastOperationDate(Wallet wallet)
+    {
+        string sql = $"""
+            SELECT "date"
+            FROM {ApplicationDbContext.DEFAULT_SCHEMA}.wallet_history
+            WHERE wallet_id = '{wallet.Id}'
+            ORDER BY date desc
+            LIMIT 1
+            """;
+
+        IEnumerable<WalletOperationDate> lastOperationOn = dbContext
+            .Database
+            .SqlQueryRaw<WalletOperationDate>(sql);
+
+        return lastOperationOn.FirstOrDefault();
+    }
+
+    internal sealed record WalletOperationDate(DateOnly OperationOn);
 }

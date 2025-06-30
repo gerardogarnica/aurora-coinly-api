@@ -16,6 +16,8 @@ public sealed record WalletModel(
     bool CanDelete,
     bool IsDeleted,
     string? Notes,
+    DateOnly OpenedOn,
+    DateOnly LastOperationOn,
     List<WalletTransactionModel> Transactions);
 
 internal static class WalletModelExtensions
@@ -33,5 +35,7 @@ internal static class WalletModelExtensions
         !wallet.Methods.Any(x => !x.IsDeleted) && !wallet.IsDeleted,
         wallet.IsDeleted,
         wallet.Notes,
+        wallet.OpenedOn,
+        wallet.LastOperationOn,
         [.. wallet.Operations.Select(x => x.ToModel()).OrderBy(x => x.Date)]);
 }
