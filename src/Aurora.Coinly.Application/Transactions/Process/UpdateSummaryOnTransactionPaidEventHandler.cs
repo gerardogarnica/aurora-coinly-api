@@ -10,7 +10,7 @@ internal sealed class UpdateSummaryOnTransactionPaidEventHandler(
         TransactionPaidEvent notification,
         CancellationToken cancellationToken)
     {
-        var command = new AddTransactionToSummaryCommand(notification.Transaction.Id);
+        var command = new AddTransactionToSummaryCommand(notification.TransactionId);
 
         Result result = await sender.Send(command, cancellationToken);
         if (!result.IsSuccessful)

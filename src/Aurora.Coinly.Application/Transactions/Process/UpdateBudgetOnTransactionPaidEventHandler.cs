@@ -10,7 +10,7 @@ internal sealed class UpdateBudgetOnTransactionPaidEventHandler(
         TransactionPaidEvent notification,
         CancellationToken cancellationToken)
     {
-        var command = new AddTransactionToBudgetCommand(notification.Transaction.Id);
+        var command = new AddTransactionToBudgetCommand(notification.TransactionId);
 
         Result result = await sender.Send(command, cancellationToken);
         if (!result.IsSuccessful)

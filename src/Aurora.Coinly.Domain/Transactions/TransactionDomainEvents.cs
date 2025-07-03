@@ -1,12 +1,12 @@
 ﻿namespace Aurora.Coinly.Domain.Transactions;
 
-public sealed class TransactionPaidEvent(Transaction transaction) : DomainEvent
+public sealed class TransactionPaidEvent(Guid transactionId) : DomainEvent
 {
-    public Transaction Transaction { get; init; } = transaction;
+    public Guid TransactionId { get; init; } = transactionId;
 }
 
-public sealed class TransactionUnpaidEvent(Transaction transaction, DateOnly paymentDate) : DomainEvent
+public sealed class TransactionUnpaidEvent(Guid transactionId, DateOnly paymentDate) : DomainEvent
 {
-    public Transaction Transaction { get; init; } = transaction;
+    public Guid TransactionId { get; init; } = transactionId;
     public DateOnly PaymentDate { get; init; } = paymentDate;
 }

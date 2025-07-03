@@ -91,7 +91,7 @@ public sealed class Transaction : BaseEntity
         WalletId = wallet.Id;
         PaidOnUtc = paidOnUtc;
 
-        AddDomainEvent(new TransactionPaidEvent(this));
+        AddDomainEvent(new TransactionPaidEvent(Id));
 
         return this;
     }
@@ -149,7 +149,7 @@ public sealed class Transaction : BaseEntity
         WalletId = null;
         RemovedOnUtc = unpaidOnUtc;
 
-        AddDomainEvent(new TransactionUnpaidEvent(this, paymentDate));
+        AddDomainEvent(new TransactionUnpaidEvent(Id, paymentDate));
 
         return this;
     }

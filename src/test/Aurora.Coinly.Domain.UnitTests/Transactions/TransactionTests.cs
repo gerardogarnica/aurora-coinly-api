@@ -100,7 +100,7 @@ public class TransactionTests : BaseTest
         // Assert
         var domainEvent = AssertDomainEventWasPublished<TransactionPaidEvent>(transaction);
         domainEvent.Should().NotBeNull();
-        domainEvent!.Transaction.Id.Should().Be(transaction.Id);
+        domainEvent!.TransactionId.Should().Be(transaction.Id);
     }
 
     [Fact]
@@ -225,7 +225,7 @@ public class TransactionTests : BaseTest
         // Assert
         var domainEvent = AssertDomainEventWasPublished<TransactionUnpaidEvent>(transaction);
         domainEvent.Should().NotBeNull();
-        domainEvent!.Transaction.Id.Should().Be(transaction.Id);
+        domainEvent!.TransactionId.Should().Be(transaction.Id);
     }
 
     [Fact]
