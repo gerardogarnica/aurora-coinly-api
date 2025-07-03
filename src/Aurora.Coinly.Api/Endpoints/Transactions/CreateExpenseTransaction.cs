@@ -15,10 +15,10 @@ public sealed class CreateExpenseTransaction : IBaseEndpoint
                     request.PaymentMethodId,
                     request.Description,
                     request.TransactionDate,
-                    request.MaxPaymentDate,
                     request.CurrencyCode,
                     request.Amount,
                     request.Notes,
+                    request.MakePayment,
                     request.WalletId);
 
                 Result<Guid> result = await sender.Send(command);
@@ -39,9 +39,9 @@ public sealed class CreateExpenseTransaction : IBaseEndpoint
         Guid PaymentMethodId,
         string Description,
         DateOnly TransactionDate,
-        DateOnly MaxPaymentDate,
         string CurrencyCode,
         decimal Amount,
         string? Notes,
+        bool MakePayment,
         Guid? WalletId);
 }

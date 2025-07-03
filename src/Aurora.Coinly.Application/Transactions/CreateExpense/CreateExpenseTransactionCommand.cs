@@ -5,8 +5,8 @@ public sealed record CreateExpenseTransactionCommand(
     Guid PaymentMethodId,
     string Description,
     DateOnly TransactionDate,
-    DateOnly MaxPaymentDate,
     string CurrencyCode,
     decimal Amount,
     string? Notes,
+    bool MakePayment,
     Guid? WalletId) : ICommand<Guid>;

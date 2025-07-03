@@ -18,8 +18,6 @@ internal sealed class CreateExpenseTransactionCommandValidator : AbstractValidat
             .LessThanOrEqualTo(dateTimeService.Today)
             .WithMessage("'{PropertyName}' must be today or in the past.");
 
-        RuleFor(x => x.MaxPaymentDate).GreaterThanOrEqualTo(x => x.TransactionDate);
-
         RuleFor(x => x.CurrencyCode)
             .NotEmpty()
             .Must(BeAValidCurrencyCode).WithMessage("'{PropertyName}' is not a valid currency code.");
@@ -29,6 +27,10 @@ internal sealed class CreateExpenseTransactionCommandValidator : AbstractValidat
             .PrecisionScale(9, 2, true);
 
         RuleFor(x => x.Notes).MaximumLength(1000);
+
+        RuleFor(x => x.WalletId)
+            .NotNull()
+            .When(x => x.MakePayment);
     }
 
     private static bool BeAValidCurrencyCode(string currencyCode)

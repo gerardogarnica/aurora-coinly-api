@@ -40,17 +40,12 @@ internal sealed class CreateExpenseTransactionCommandHandler(
             return Result.Fail<Guid>(PaymentMethodErrors.IsDeleted);
         }
 
-        if (method.AutoMarkAsPaid && request.MaxPaymentDate != request.TransactionDate)
-        {
-            return Result.Fail<Guid>(TransactionErrors.InvalidMaxPaymentDate);
-        }
-
         // Create transaction
         var result = Transaction.Create(
             request.Description,
             category,
             request.TransactionDate,
-            request.MaxPaymentDate,
+            GetMaxPaymentDate(method, request.TransactionDate),
             new Money(request.Amount, Currency.FromCode(request.CurrencyCode)),
             method,
             request.Notes,
@@ -63,8 +58,8 @@ internal sealed class CreateExpenseTransactionCommandHandler(
 
         var transaction = result.Value;
 
-        // Pay transaction when payment method is auto mark as paid
-        if (method.AutoMarkAsPaid)
+        // Pay transaction when requested from the command
+        if (request.MakePayment)
         {
             if (request.WalletId is null)
             {
@@ -87,5 +82,29 @@ internal sealed class CreateExpenseTransactionCommandHandler(
         await transactionRepository.AddAsync(transaction, cancellationToken);
 
         return transaction.Id;
+    }
+
+    private DateOnly GetMaxPaymentDate(PaymentMethod method, DateOnly transactionDate)
+    {
+        var maxPaymentDate = transactionDate;
+
+        if (method.AutoMarkAsPaid)
+        {
+            return maxPaymentDate;
+        }
+
+        var suggestedPaymentDay = method.SuggestedPaymentDay ?? 1;
+        var statementCutoffDay = method.StatementCutoffDay ?? 1;
+
+        maxPaymentDate = transactionDate.Day < statementCutoffDay
+            ? new DateOnly(transactionDate.Year, transactionDate.Month, suggestedPaymentDay)
+            : new DateOnly(transactionDate.Year, transactionDate.Month + 1, suggestedPaymentDay);
+
+        if (statementCutoffDay > suggestedPaymentDay)
+        {
+            maxPaymentDate = maxPaymentDate.AddMonths(1);
+        }
+
+        return maxPaymentDate;
     }
 }
