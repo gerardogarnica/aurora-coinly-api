@@ -1,6 +1,6 @@
 ﻿namespace Aurora.Coinly.Domain.Wallets;
 
-public sealed class WalletBalanceUpdatedEvent(Wallet wallet) : DomainEvent
+public sealed class WalletBalanceUpdatedEvent(Guid walletId) : DomainEvent
 {
-    public Wallet Wallet { get; init; } = wallet;
+    public Guid WalletId { get; init; } = walletId;
 }

@@ -1,6 +1,5 @@
 ﻿using Aurora.Coinly.Domain.Methods;
 using Aurora.Coinly.Domain.Transactions;
-using Newtonsoft.Json;
 
 namespace Aurora.Coinly.Domain.Wallets;
 
@@ -23,9 +22,7 @@ public sealed class Wallet : BaseEntity
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? UpdatedOnUtc { get; private set; }
     public DateTime? DeletedOnUtc { get; private set; }
-    [JsonIgnore]
     public IReadOnlyCollection<WalletHistory> Operations => _operations.AsReadOnly();
-    [JsonIgnore]
     public IReadOnlyCollection<PaymentMethod> Methods => _methods.AsReadOnly();
 
     private Wallet() : base(Guid.NewGuid())
@@ -108,7 +105,7 @@ public sealed class Wallet : BaseEntity
             assignedOn,
             updatedOnUtc);
 
-        AddDomainEvent(new WalletBalanceUpdatedEvent(this));
+        AddDomainEvent(new WalletBalanceUpdatedEvent(Id));
 
         return this;
     }
@@ -131,7 +128,7 @@ public sealed class Wallet : BaseEntity
             assignedOn,
             updatedOnUtc);
 
-        AddDomainEvent(new WalletBalanceUpdatedEvent(this));
+        AddDomainEvent(new WalletBalanceUpdatedEvent(Id));
 
         return this;
     }
@@ -183,7 +180,7 @@ public sealed class Wallet : BaseEntity
             updatedOnUtc,
             transactionId);
 
-        AddDomainEvent(new WalletBalanceUpdatedEvent(this));
+        AddDomainEvent(new WalletBalanceUpdatedEvent(Id));
 
         return this;
     }
@@ -235,7 +232,7 @@ public sealed class Wallet : BaseEntity
             updatedOnUtc,
             transactionId);
 
-        AddDomainEvent(new WalletBalanceUpdatedEvent(this));
+        AddDomainEvent(new WalletBalanceUpdatedEvent(Id));
 
         return this;
     }
@@ -284,7 +281,7 @@ public sealed class Wallet : BaseEntity
 
         _operations.Remove(operation);
 
-        AddDomainEvent(new WalletBalanceUpdatedEvent(this));
+        AddDomainEvent(new WalletBalanceUpdatedEvent(Id));
 
         return this;
     }

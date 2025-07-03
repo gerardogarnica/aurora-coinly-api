@@ -151,7 +151,7 @@ public class WalletTests : BaseTest
         result.IsSuccessful.Should().BeTrue();
         var domainEvent = AssertDomainEventWasPublished<WalletBalanceUpdatedEvent>(wallet);
         domainEvent.Should().NotBeNull();
-        domainEvent!.Wallet.Id.Should().Be(wallet.Id);
+        domainEvent!.WalletId.Should().Be(wallet.Id);
     }
 
     [Fact]
@@ -208,7 +208,7 @@ public class WalletTests : BaseTest
         result.IsSuccessful.Should().BeTrue();
         var domainEvent = AssertDomainEventWasPublished<WalletBalanceUpdatedEvent>(wallet);
         domainEvent.Should().NotBeNull();
-        domainEvent!.Wallet.Id.Should().Be(wallet.Id);
+        domainEvent!.WalletId.Should().Be(wallet.Id);
     }
 
     [Fact]
@@ -278,7 +278,7 @@ public class WalletTests : BaseTest
         result.IsSuccessful.Should().BeTrue();
         var domainEvent = AssertDomainEventWasPublished<WalletBalanceUpdatedEvent>(wallet);
         domainEvent.Should().NotBeNull();
-        domainEvent!.Wallet.Id.Should().Be(wallet.Id);
+        domainEvent!.WalletId.Should().Be(wallet.Id);
     }
 
     [Fact]
@@ -355,7 +355,7 @@ public class WalletTests : BaseTest
         result.IsSuccessful.Should().BeTrue();
         var domainEvent = AssertDomainEventWasPublished<WalletBalanceUpdatedEvent>(wallet);
         domainEvent.Should().NotBeNull();
-        domainEvent!.Wallet.Id.Should().Be(wallet.Id);
+        domainEvent!.WalletId.Should().Be(wallet.Id);
     }
 
     [Fact]
@@ -413,7 +413,7 @@ public class WalletTests : BaseTest
         result.IsSuccessful.Should().BeTrue();
         var domainEvent = AssertDomainEventWasPublished<WalletBalanceUpdatedEvent>(wallet);
         domainEvent.Should().NotBeNull();
-        domainEvent!.Wallet.Id.Should().Be(wallet.Id);
+        domainEvent!.WalletId.Should().Be(wallet.Id);
     }
 
     [Fact]
@@ -490,7 +490,7 @@ public class WalletTests : BaseTest
         result.IsSuccessful.Should().BeTrue();
         var domainEvent = AssertDomainEventWasPublished<WalletBalanceUpdatedEvent>(wallet);
         domainEvent.Should().NotBeNull();
-        domainEvent!.Wallet.Id.Should().Be(wallet.Id);
+        domainEvent!.WalletId.Should().Be(wallet.Id);
     }
 
     [Fact]
@@ -587,7 +587,7 @@ public class WalletTests : BaseTest
         result.IsSuccessful.Should().BeTrue();
         var domainEvent = AssertDomainEventWasPublished<WalletBalanceUpdatedEvent>(wallet);
         domainEvent.Should().NotBeNull();
-        domainEvent!.Wallet.Id.Should().Be(wallet.Id);
+        domainEvent!.WalletId.Should().Be(wallet.Id);
     }
 
     [Fact]
