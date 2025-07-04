@@ -41,7 +41,7 @@ internal sealed class AddTransactionToBudgetCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        budgetRepository.Update(budget);
+        await budgetRepository.AddTransactionAsync(result.Value);
 
         return Result.Ok();
     }

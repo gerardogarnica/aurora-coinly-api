@@ -53,9 +53,13 @@ public class BudgetPeriod
             .Aggregate(Money.Zero(Currency.Usd), (acc, amount) => acc + amount);
     }
 
-    internal void AssignTransaction(Transaction transaction)
+    internal BudgetTransaction AssignTransaction(Transaction transaction)
     {
-        _transactions.Add(BudgetTransaction.Create(this, transaction));
+        var budgetTransaction = BudgetTransaction.Create(this, transaction);
+
+        _transactions.Add(budgetTransaction);
+
+        return budgetTransaction;
     }
 
     internal void RemoveTransaction(Transaction transaction)

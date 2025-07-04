@@ -101,15 +101,15 @@ public class BudgetTests : BaseTest
         var transaction = TransactionData.GetTransaction(category, PaymentMethodData.GetPaymentMethod());
         transaction.Pay(WalletData.GetWallet(), DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
 
-        var period = budget.Periods.FirstOrDefault(x => x.Period.Contains(transaction.PaymentDate!.Value))!;
-        var operationsCount = period.Transactions.Count;
-
         // Act
         var result = budget.AssignTransaction(transaction);
+        var budgetTransaction = result.Value!;
 
         // Assert
         result.IsSuccessful.Should().BeTrue();
-        period.Transactions.Should().HaveCount(operationsCount + 1);
+        budgetTransaction.TransactionId.Should().Be(transaction.Id);
+        budgetTransaction.Description.Should().Be(transaction.Description);
+        budgetTransaction.Amount.Should().Be(transaction.Amount);
     }
 
     [Fact]

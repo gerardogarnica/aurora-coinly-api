@@ -69,27 +69,25 @@ public sealed class Budget : BaseEntity
         return this;
     }
 
-    public Result<Budget> AssignTransaction(Transaction transaction)
+    public Result<BudgetTransaction> AssignTransaction(Transaction transaction)
     {
         if (transaction.CategoryId != CategoryId)
         {
-            return Result.Fail<Budget>(BudgetErrors.TransactionCategoryMismatch);
+            return Result.Fail<BudgetTransaction>(BudgetErrors.TransactionCategoryMismatch);
         }
 
         if (!transaction.IsPaid)
         {
-            return Result.Fail<Budget>(BudgetErrors.TransactionNotPaid);
+            return Result.Fail<BudgetTransaction>(BudgetErrors.TransactionNotPaid);
         }
 
         var period = _periods.FirstOrDefault(p => p.Period.Contains(transaction.PaymentDate!.Value));
         if (period is null)
         {
-            return Result.Fail<Budget>(BudgetErrors.TransactionPaymentDateOutOfRange);
+            return Result.Fail<BudgetTransaction>(BudgetErrors.TransactionPaymentDateOutOfRange);
         }
 
-        period.AssignTransaction(transaction);
-
-        return this;
+        return period.AssignTransaction(transaction);
     }
 
     public Result<Budget> RemoveTransaction(Transaction transaction, DateOnly originalPaymentDate)

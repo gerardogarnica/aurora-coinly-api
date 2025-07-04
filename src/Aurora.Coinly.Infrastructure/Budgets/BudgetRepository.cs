@@ -7,6 +7,11 @@ internal sealed class BudgetRepository(
 {
     public IUnitOfWork UnitOfWork => dbContext;
 
+    public async Task AddTransactionAsync(BudgetTransaction budgetTransaction)
+    {
+        await dbContext.BudgetTransactions.AddAsync(budgetTransaction);
+    }
+
     public async Task<Budget?> GetByIdAsync(Guid id) => await dbContext
         .Budgets
         .Include(x => x.Category)
