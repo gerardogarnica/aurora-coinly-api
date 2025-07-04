@@ -105,7 +105,7 @@ public sealed class Wallet : BaseEntity
             assignedOn,
             updatedOnUtc);
 
-        AddDomainEvent(new WalletSavingsUpdatedEvent(Id, amount, true));
+        AddDomainEvent(new WalletSavingsUpdatedEvent(Id, amount, assignedOn, true));
 
         return this;
     }
@@ -128,7 +128,7 @@ public sealed class Wallet : BaseEntity
             assignedOn,
             updatedOnUtc);
 
-        AddDomainEvent(new WalletSavingsUpdatedEvent(Id, amount, false));
+        AddDomainEvent(new WalletSavingsUpdatedEvent(Id, amount, assignedOn, false));
 
         return this;
     }

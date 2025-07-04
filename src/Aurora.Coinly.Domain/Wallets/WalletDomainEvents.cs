@@ -5,9 +5,10 @@ public sealed class WalletBalanceUpdatedEvent(Guid walletId) : DomainEvent
     public Guid WalletId { get; init; } = walletId;
 }
 
-public sealed class WalletSavingsUpdatedEvent(Guid walletId, Money amount, bool IsIncrement) : DomainEvent
+public sealed class WalletSavingsUpdatedEvent(Guid walletId, Money amount, DateOnly AssignedOn, bool IsIncrement) : DomainEvent
 {
     public Guid WalletId { get; init; } = walletId;
     public Money Amount { get; init; } = amount;
+    public DateOnly AssignedOn { get; init; } = AssignedOn;
     public bool IsIncrement { get; init; } = IsIncrement;
 }
