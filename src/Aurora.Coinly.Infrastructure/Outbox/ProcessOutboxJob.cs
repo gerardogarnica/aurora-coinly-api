@@ -12,6 +12,8 @@ internal sealed class ProcessOutboxJob(
     IOptions<OutboxOptions> options,
     ILogger<ProcessOutboxJob> logger) : IJob
 {
+    private const int ErrorMessageMaxLength = 4000;
+
     public async Task Execute(IJobExecutionContext context)
     {
         logger.LogInformation("Starting to process Coinly outbox messages.");
@@ -71,8 +73,14 @@ internal sealed class ProcessOutboxJob(
 
     private async Task UpdateOutboxMessageAsync(OutboxMessageResponse messageResponse, Exception? exception)
     {
+        var messageError = exception is null ? string.Empty : exception.ToString();
+        if (messageError.Length > ErrorMessageMaxLength)
+        {
+            messageError = messageError[..ErrorMessageMaxLength];
+        }
+
         var processedOnUtc = new NpgsqlParameter("ProcessedOnUtc", dateTimeService.UtcNow);
-        var error = new NpgsqlParameter("Error", exception is null ? string.Empty : exception.ToString());
+        var error = new NpgsqlParameter("Error", messageError);
         var outboxId = new NpgsqlParameter("OutboxId", messageResponse.OutboxId);
 
         string sql = $"""
