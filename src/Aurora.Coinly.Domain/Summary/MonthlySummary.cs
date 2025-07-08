@@ -7,9 +7,10 @@ public sealed class MonthlySummary : BaseEntity
     public int Year { get; private set; }
     public int Month { get; private set; }
     public Currency Currency { get; private set; }
-    public Money TotalIncome { get; private set; }
-    public Money TotalExpense { get; private set; }
-    public Money Balance => TotalIncome - TotalExpense;
+    public decimal TotalIncome { get; private set; }
+    public decimal TotalExpense { get; private set; }
+    public decimal Balance => TotalIncome - TotalExpense;
+    public decimal Savings { get; private set; }
 
     private MonthlySummary() : base(Guid.NewGuid()) { }
 
@@ -23,8 +24,9 @@ public sealed class MonthlySummary : BaseEntity
             Year = year,
             Month = month,
             Currency = currency,
-            TotalIncome = Money.Zero(currency),
-            TotalExpense = Money.Zero(currency)
+            TotalIncome = decimal.Zero,
+            TotalExpense = decimal.Zero,
+            Savings = decimal.Zero
         };
 
         return summary;
@@ -49,11 +51,11 @@ public sealed class MonthlySummary : BaseEntity
 
         if (transaction.Type is TransactionType.Income)
         {
-            TotalIncome += transaction.Amount;
+            TotalIncome += transaction.Amount.Amount;
         }
         else
         {
-            TotalExpense += transaction.Amount;
+            TotalExpense += transaction.Amount.Amount;
         }
 
         return this;
@@ -78,11 +80,30 @@ public sealed class MonthlySummary : BaseEntity
 
         if (transaction.Type is TransactionType.Income)
         {
-            TotalIncome -= transaction.Amount;
+            TotalIncome -= transaction.Amount.Amount;
         }
         else
         {
-            TotalExpense -= transaction.Amount;
+            TotalExpense -= transaction.Amount.Amount;
+        }
+
+        return this;
+    }
+
+    public Result<MonthlySummary> UpdateSavings(Money amount, DateOnly assignedOn, bool isIncrement)
+    {
+        if (!GetSummaryPeriod().Contains(assignedOn))
+        {
+            return Result.Fail<MonthlySummary>(SummaryErrors.TransactionNotInPeriod);
+        }
+
+        if (isIncrement)
+        {
+            Savings += amount.Amount;
+        }
+        else
+        {
+            Savings -= amount.Amount;
         }
 
         return this;

@@ -8,7 +8,8 @@ public sealed record MonthlySummaryModel(
     string CurrencyCode,
     decimal TotalIncome,
     decimal TotalExpense,
-    decimal Balance);
+    decimal Balance,
+    decimal Savings);
 
 internal static class MonthlySummaryModelExtensions
 {
@@ -18,8 +19,9 @@ internal static class MonthlySummaryModelExtensions
             summary.Year,
             summary.Month,
             summary.Currency.Code,
-            summary.TotalIncome.Amount,
-            summary.TotalExpense.Amount,
-            summary.Balance.Amount);
+            summary.TotalIncome,
+            summary.TotalExpense,
+            summary.Balance,
+            summary.Savings);
     }
 }

@@ -16,21 +16,9 @@ internal sealed class MonthlySummaryConfiguration : IEntityTypeConfiguration<Mon
             y.Property(x => x.Code).HasMaxLength(3);
         });
 
-        builder.OwnsOne(x => x.TotalIncome, y =>
-        {
-            y.Property(x => x.Amount).HasColumnType("numeric(9, 2)");
-            y.Property(x => x.Currency)
-                .HasConversion(x => x.Code, code => Currency.FromCode(code))
-                .HasMaxLength(3);
-        });
-
-        builder.OwnsOne(x => x.TotalExpense, y =>
-        {
-            y.Property(x => x.Amount).HasColumnType("numeric(9, 2)");
-            y.Property(x => x.Currency)
-                .HasConversion(x => x.Code, code => Currency.FromCode(code))
-                .HasMaxLength(3);
-        });
+        builder.Property(x => x.TotalIncome).HasColumnType("numeric(9, 2)");
+        builder.Property(x => x.TotalExpense).HasColumnType("numeric(9, 2)");
+        builder.Property(x => x.Savings).HasColumnType("numeric(9, 2)");
 
         builder.Ignore(x => x.Balance);
     }

@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Domain.Shared;
+﻿using Newtonsoft.Json;
+
+namespace Aurora.Coinly.Domain.Shared;
 
 public sealed record Currency
 {
@@ -13,6 +15,9 @@ public sealed record Currency
         Usd,
         Eur
     ];
+
+    [JsonConstructor]
+    public Currency() { }
 
     private Currency(string code) => Code = code;
 
