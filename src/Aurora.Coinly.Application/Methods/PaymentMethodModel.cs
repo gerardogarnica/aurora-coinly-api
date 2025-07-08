@@ -5,7 +5,7 @@ namespace Aurora.Coinly.Application.Methods;
 
 public sealed record PaymentMethodModel(
     Guid PaymentMethodId,
-    WalletModel Wallet,
+    WalletModel? Wallet,
     string Name,
     bool IsDefault,
     bool AllowRecurring,
@@ -20,7 +20,7 @@ internal static class PaymentMethodModelExtensions
 {
     internal static PaymentMethodModel ToModel(this PaymentMethod paymentMethod) => new(
         paymentMethod.Id,
-        paymentMethod.Wallet.ToModel(),
+        paymentMethod.Wallet?.ToModel(),
         paymentMethod.Name,
         paymentMethod.IsDefault,
         paymentMethod.AllowRecurring,
