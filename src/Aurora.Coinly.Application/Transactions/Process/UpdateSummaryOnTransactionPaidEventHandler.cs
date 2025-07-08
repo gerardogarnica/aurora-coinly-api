@@ -10,12 +10,12 @@ internal sealed class UpdateSummaryOnTransactionPaidEventHandler(
         TransactionPaidEvent notification,
         CancellationToken cancellationToken)
     {
-        var command = new AddTransactionToSummaryCommand(notification.TransactionId);
+        var command = new AddSummaryTransactionCommand(notification.TransactionId);
 
         Result result = await sender.Send(command, cancellationToken);
         if (!result.IsSuccessful)
         {
-            throw new AuroraCoinlyException(nameof(AddTransactionToSummaryCommand), result.Error);
+            throw new AuroraCoinlyException(nameof(AddSummaryTransactionCommand), result.Error);
         }
     }
 }

@@ -3,12 +3,12 @@ using Aurora.Coinly.Domain.Transactions;
 
 namespace Aurora.Coinly.Application.Summary.AddTransaction;
 
-internal sealed class AddTransactionToSummaryCommandHandler(
+internal sealed class AddSummaryTransactionCommandHandler(
     IMonthlySummaryRepository summaryRepository,
-    ITransactionRepository transactionRepository) : ICommandHandler<AddTransactionToSummaryCommand>
+    ITransactionRepository transactionRepository) : ICommandHandler<AddSummaryTransactionCommand>
 {
     public async Task<Result> Handle(
-        AddTransactionToSummaryCommand request,
+        AddSummaryTransactionCommand request,
         CancellationToken cancellationToken)
     {
         // Get transaction
@@ -31,9 +31,13 @@ internal sealed class AddTransactionToSummaryCommandHandler(
 
         var isNewSummary = monthlySummary is null;
 
-        var result = isNewSummary
-            ? CreateSummary(transaction)
-            : UpdateSummary(monthlySummary!, transaction);
+        monthlySummary ??= MonthlySummary.Create(
+            transaction.PaymentDate!.Value.Year,
+            transaction.PaymentDate!.Value.Month,
+            transaction.Amount.Currency);
+
+        // Apply transaction to summary
+        var result = monthlySummary.ApplyTransaction(transaction);
 
         if (!result.IsSuccessful)
         {
@@ -50,20 +54,5 @@ internal sealed class AddTransactionToSummaryCommandHandler(
         }
 
         return Result.Ok();
-    }
-
-    private Result<MonthlySummary> CreateSummary(Transaction transaction)
-    {
-        var summary = MonthlySummary.Create(
-            transaction.PaymentDate!.Value.Year,
-            transaction.PaymentDate!.Value.Month,
-            transaction.Amount.Currency);
-
-        return summary.ApplyTransaction(transaction);
-    }
-
-    private Result<MonthlySummary> UpdateSummary(MonthlySummary summary, Transaction transaction)
-    {
-        return summary.ApplyTransaction(transaction);
     }
 }
