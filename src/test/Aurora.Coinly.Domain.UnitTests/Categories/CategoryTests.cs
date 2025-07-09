@@ -13,12 +13,14 @@ public class CategoryTests : BaseTest
             CategoryData.Type,
             CategoryData.MaxDaysToReverse,
             CategoryData.Color,
+            CategoryData.Group,
             CategoryData.Notes,
             DateTime.UtcNow);
 
         // Assert
         category.Name.Should().Be(CategoryData.Name);
         category.Type.Should().Be(CategoryData.Type);
+        category.Group.Should().Be(CategoryData.Group);
         category.Notes.Should().Be(CategoryData.Notes);
         category.IsDeleted.Should().Be(false);
     }
@@ -31,6 +33,7 @@ public class CategoryTests : BaseTest
         var updatedName = "Updated Name";
         var updatedMaxDaysToReverse = 15;
         var updatedColor = Color.FromHex("#FF0000");
+        var updatedGroup = CategoryGroup.Entertainment;
         var updatedNotes = "Updated Notes";
 
         // Act
@@ -38,6 +41,7 @@ public class CategoryTests : BaseTest
             updatedName,
             updatedMaxDaysToReverse,
             updatedColor,
+            updatedGroup,
             updatedNotes,
             DateTime.UtcNow);
 
@@ -56,6 +60,7 @@ public class CategoryTests : BaseTest
         var updatedName = "Updated Name";
         var updatedMaxDaysToReverse = 15;
         var updatedColor = Color.FromHex("#FF0000");
+        var updatedGroup = CategoryGroup.Entertainment;
         var updatedNotes = "Updated Notes";
 
         category.Delete(DateTime.UtcNow);
@@ -65,6 +70,7 @@ public class CategoryTests : BaseTest
             updatedName,
             updatedMaxDaysToReverse,
             updatedColor,
+            updatedGroup,
             updatedNotes,
             DateTime.UtcNow);
 

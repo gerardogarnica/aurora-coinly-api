@@ -22,6 +22,7 @@ internal sealed class UpdateCategoryCommandHandler(
             request.Name,
             request.MaxDaysToReverse,
             Color.FromHex(request.Color),
+            request.Group,
             request.Notes,
             dateTimeService.UtcNow);
 

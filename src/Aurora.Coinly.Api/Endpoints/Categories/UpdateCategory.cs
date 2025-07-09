@@ -1,4 +1,5 @@
 ﻿using Aurora.Coinly.Application.Categories.Update;
+using Aurora.Coinly.Domain.Categories;
 
 namespace Aurora.Coinly.Api.Endpoints.Categories;
 
@@ -15,6 +16,7 @@ public sealed class UpdateCategory : IBaseEndpoint
                     request.Name,
                     request.MaxDaysToReverse,
                     request.Color,
+                    request.Group,
                     request.Notes);
 
                 Result result = await sender.Send(command);
@@ -34,5 +36,7 @@ public sealed class UpdateCategory : IBaseEndpoint
         string Name,
         int MaxDaysToReverse,
         string Color,
+        [property: JsonConverter(typeof(JsonStringEnumConverter))]
+        CategoryGroup Group,
         string? Notes);
 }

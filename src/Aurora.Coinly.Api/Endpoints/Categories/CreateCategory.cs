@@ -1,4 +1,5 @@
 ﻿using Aurora.Coinly.Application.Categories.Create;
+using Aurora.Coinly.Domain.Categories;
 using Aurora.Coinly.Domain.Transactions;
 
 namespace Aurora.Coinly.Api.Endpoints.Categories;
@@ -16,6 +17,7 @@ public sealed class CreateCategory : IBaseEndpoint
                     request.Type,
                     request.MaxDaysToReverse,
                     request.Color,
+                    request.Group,
                     request.Notes);
 
                 Result<Guid> result = await sender.Send(command);
@@ -37,5 +39,7 @@ public sealed class CreateCategory : IBaseEndpoint
         TransactionType Type,
         int MaxDaysToReverse,
         string Color,
+        [property: JsonConverter(typeof(JsonStringEnumConverter))]
+        CategoryGroup Group,
         string? Notes);
 }

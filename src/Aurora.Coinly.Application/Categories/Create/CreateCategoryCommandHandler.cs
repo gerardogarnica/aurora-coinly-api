@@ -16,6 +16,7 @@ internal sealed class CreateCategoryCommandHandler(
             request.Type,
             request.MaxDaysToReverse,
             Color.FromHex(request.Color),
+            request.Group,
             request.Notes,
             dateTimeService.UtcNow);
 

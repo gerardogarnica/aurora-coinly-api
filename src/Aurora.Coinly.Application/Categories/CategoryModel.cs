@@ -10,6 +10,8 @@ public sealed record CategoryModel(
     TransactionType Type,
     int MaxDaysToReverse,
     string Color,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
+    CategoryGroup Group,
     bool IsDeleted,
     string? Notes);
 
@@ -21,6 +23,7 @@ internal static class CategoryModelExtensions
         category.Type,
         category.MaxDaysToReverse,
         category.Color.Value,
+        category.Group,
         category.IsDeleted,
         category.Notes);
 }

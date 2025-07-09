@@ -1,4 +1,5 @@
-﻿using Aurora.Coinly.Domain.Transactions;
+﻿using Aurora.Coinly.Domain.Categories;
+using Aurora.Coinly.Domain.Transactions;
 
 namespace Aurora.Coinly.Application.Categories.Create;
 
@@ -7,4 +8,5 @@ public sealed record CreateCategoryCommand(
     TransactionType Type,
     int MaxDaysToReverse,
     string Color,
+    CategoryGroup Group,
     string? Notes) : ICommand<Guid>;

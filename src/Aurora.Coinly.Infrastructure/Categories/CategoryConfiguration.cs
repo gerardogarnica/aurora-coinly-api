@@ -19,7 +19,7 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
             y.Property(x => x.Value).HasColumnName("color").HasMaxLength(7);
         });
 
-        builder.Property(x => x.Icon).HasConversion<string>().HasMaxLength(40);
+        builder.Property(x => x.Group).HasConversion<string>().HasMaxLength(40);
 
         builder.Property(x => x.Notes).HasMaxLength(1000);
     }
