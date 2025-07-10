@@ -3,6 +3,7 @@ using Aurora.Coinly.Domain.Categories;
 using Aurora.Coinly.Domain.Methods;
 using Aurora.Coinly.Domain.Summary;
 using Aurora.Coinly.Domain.Transactions;
+using Aurora.Coinly.Domain.Users;
 using Aurora.Coinly.Domain.Wallets;
 
 namespace Aurora.Coinly.Infrastructure.Database;
@@ -19,6 +20,7 @@ public sealed class ApplicationDbContext(
     public DbSet<MonthlySummary> MonthlySummaries { get; set; } = null!;
     public DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
     public DbSet<Wallet> Wallets { get; set; } = null!;
     public DbSet<WalletHistory> WalletHistories { get; set; } = null!;
 
