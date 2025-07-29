@@ -1,5 +1,4 @@
-﻿using Aurora.Coinly.Application.Abstractions.Exceptions;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace Aurora.Coinly.Infrastructure.Authentication;
 

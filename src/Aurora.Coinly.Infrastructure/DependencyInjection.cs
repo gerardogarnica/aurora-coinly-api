@@ -4,6 +4,7 @@ using Aurora.Coinly.Domain.Methods;
 using Aurora.Coinly.Domain.Summary;
 using Aurora.Coinly.Domain.Transactions;
 using Aurora.Coinly.Domain.Wallets;
+using Aurora.Coinly.Infrastructure.Authentication;
 using Aurora.Coinly.Infrastructure.Budgets;
 using Aurora.Coinly.Infrastructure.Categories;
 using Aurora.Coinly.Infrastructure.Interceptors;
@@ -50,7 +51,10 @@ public static class DependencyInjection
         services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
         services.AddScoped<IMonthlySummaryRepository, MonthlySummaryRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
-        services.AddScoped<IWalletRepository, WalletRepository>(); 
+        services.AddScoped<IWalletRepository, WalletRepository>();
+
+        // User context implementation
+        services.AddScoped<IUserContext, UserContext>();
 
         // Outbox pattern implementation
         services.AddOptions<OutboxOptions>().BindConfiguration("Outbox");
