@@ -7,15 +7,16 @@ internal sealed class CategoryRepository(
 {
     public IUnitOfWork UnitOfWork => dbContext;
 
-    public async Task<Category?> GetByIdAsync(Guid id) => await dbContext
+    public async Task<Category?> GetByIdAsync(Guid id, Guid userId) => await dbContext
         .Categories
-        .Where(x => x.Id == id)
+        .Where(x => x.Id == id && x.UserId == userId)
         .FirstOrDefaultAsync();
 
-    public async Task<IEnumerable<Category>> GetListAsync(bool showDeleted)
+    public async Task<IEnumerable<Category>> GetListAsync(Guid userId, bool showDeleted)
     {
         var query = dbContext
             .Categories
+            .Where(x => x.UserId == userId)
             .AsNoTracking()
             .AsQueryable();
 

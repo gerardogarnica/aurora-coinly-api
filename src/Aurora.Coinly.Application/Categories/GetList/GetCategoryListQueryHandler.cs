@@ -10,7 +10,7 @@ internal sealed class GetCategoryListQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get categories
-        var categories = await categoryRepository.GetListAsync(request.ShowDeleted);
+        var categories = await categoryRepository.GetListAsync(request.UserId, request.ShowDeleted);
 
         // Return category models
         return categories.Select(x => x.ToModel()).ToList();

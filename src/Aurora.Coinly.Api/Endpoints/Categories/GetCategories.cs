@@ -9,14 +9,15 @@ public sealed class GetCategories : IBaseEndpoint
     {
         app.MapGet(
             "categories",
-            async ([FromQuery(Name = "deleted")] bool showDeleted, ISender sender) =>
+            async ([FromQuery(Name = "deleted")] bool showDeleted, IUserContext userContext, ISender sender) =>
             {
-                var query = new GetCategoryListQuery(showDeleted);
+                var query = new GetCategoryListQuery(userContext.UserId, showDeleted);
 
                 Result<IReadOnlyCollection<CategoryModel>> result = await sender.Send(query);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("GetCategories")
             .WithTags(EndpointTags.Categories)
             .Produces<IReadOnlyCollection<CategoryModel>>(StatusCodes.Status200OK)

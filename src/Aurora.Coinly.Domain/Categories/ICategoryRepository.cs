@@ -2,6 +2,6 @@
 
 public interface ICategoryRepository : IRepository<Category>
 {
-    Task<Category?> GetByIdAsync(Guid id);
-    Task<IEnumerable<Category>> GetListAsync(bool showDeleted);
+    Task<Category?> GetByIdAsync(Guid id, Guid userId);
+    Task<IEnumerable<Category>> GetListAsync(Guid userId, bool showDeleted);
 }

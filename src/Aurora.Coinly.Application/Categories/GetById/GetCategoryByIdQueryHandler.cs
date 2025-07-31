@@ -10,7 +10,7 @@ internal sealed class GetCategoryByIdQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.Id);
+        var category = await categoryRepository.GetByIdAsync(request.Id, request.UserId);
         if (category is null)
         {
             return Result.Fail<CategoryModel>(CategoryErrors.NotFound);

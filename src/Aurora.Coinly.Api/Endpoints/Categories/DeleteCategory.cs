@@ -8,9 +8,9 @@ public sealed class DeleteCategory : IBaseEndpoint
     {
         app.MapDelete(
             "categories/{id}",
-            async (Guid id, ISender sender) =>
+            async (Guid id, IUserContext userContext, ISender sender) =>
             {
-                var command = new DeleteCategoryCommand(id);
+                var command = new DeleteCategoryCommand(id, userContext.UserId);
 
                 Result result = await sender.Send(command);
 
@@ -18,6 +18,7 @@ public sealed class DeleteCategory : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("DeleteCategory")
             .WithTags(EndpointTags.Categories)
             .Produces(StatusCodes.Status202Accepted)

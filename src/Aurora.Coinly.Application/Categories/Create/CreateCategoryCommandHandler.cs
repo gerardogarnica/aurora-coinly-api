@@ -12,11 +12,12 @@ internal sealed class CreateCategoryCommandHandler(
     {
         // Create category
         var category = Category.Create(
+            request.UserId,
             request.Name,
+            request.Group,
             request.Type,
             request.MaxDaysToReverse,
             Color.FromHex(request.Color),
-            request.Group,
             request.Notes,
             dateTimeService.UtcNow);
 

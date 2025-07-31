@@ -4,11 +4,12 @@ namespace Aurora.Coinly.Domain.Categories;
 
 public sealed class Category : BaseEntity
 {
+    public Guid UserId { get; private set; }
     public string Name { get; private set; }
+    public CategoryGroup Group { get; private set; } = CategoryGroup.Other;
     public TransactionType Type { get; private set; }
     public int MaxDaysToReverse { get; private set; }
     public Color Color { get; private set; }
-    public CategoryGroup Group { get; private set; } = CategoryGroup.Other;
     public string? Notes { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
@@ -21,21 +22,23 @@ public sealed class Category : BaseEntity
     }
 
     public static Category Create(
+        Guid userId,
         string name,
+        CategoryGroup group,
         TransactionType type,
         int maxDaysToReverse,
         Color color,
-        CategoryGroup group,
         string? notes,
         DateTime createdOnUtc)
     {
         var category = new Category
         {
+            UserId = userId,
             Name = name,
+            Group = group,
             Type = type,
             MaxDaysToReverse = maxDaysToReverse,
             Color = color,
-            Group = group,
             Notes = notes,
             IsDeleted = false,
             CreatedOnUtc = createdOnUtc

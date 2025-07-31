@@ -9,14 +9,15 @@ public sealed class GetCategoryById : IBaseEndpoint
     {
         app.MapGet(
             "categories/{id}",
-            async (Guid id, ISender sender) =>
+            async (Guid id, IUserContext userContext, ISender sender) =>
             {
-                var query = new GetCategoryByIdQuery(id);
+                var query = new GetCategoryByIdQuery(id, userContext.UserId);
 
                 Result<CategoryModel> result = await sender.Send(query);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("GetCategoryById")
             .WithTags(EndpointTags.Categories)
             .Produces<CategoryModel>(StatusCodes.Status200OK)

@@ -9,10 +9,11 @@ public sealed class UpdateCategory : IBaseEndpoint
     {
         app.MapPut(
             "categories/{id}",
-            async (Guid id, [FromBody] UpdateCategoryRequest request, ISender sender) =>
+            async (Guid id, [FromBody] UpdateCategoryRequest request, IUserContext userContext, ISender sender) =>
             {
                 var command = new UpdateCategoryCommand(
                     id,
+                    userContext.UserId,
                     request.Name,
                     request.MaxDaysToReverse,
                     request.Color,
@@ -25,6 +26,7 @@ public sealed class UpdateCategory : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("UpdateCategory")
             .WithTags(EndpointTags.Categories)
             .Produces(StatusCodes.Status202Accepted)

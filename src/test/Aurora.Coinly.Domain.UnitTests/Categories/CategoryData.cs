@@ -10,11 +10,12 @@ internal static class CategoryData
     public const string? Notes = "Notes of the category";
 
     public static Category GetCategory() => Category.Create(
+        Guid.NewGuid(),
         Name,
+        Group,
         Type,
         MaxDaysToReverse,
         Color,
-        Group,
         Notes,
         DateTime.UtcNow);
 }

@@ -4,6 +4,8 @@ internal sealed class UpdateCategoryCommandValidator : AbstractValidator<UpdateC
 {
     public UpdateCategoryCommandValidator()
     {
+        RuleFor(x => x.UserId).NotEmpty();
+
         RuleFor(x => x.Name)
             .NotEmpty()
             .MinimumLength(3)

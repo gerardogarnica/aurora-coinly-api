@@ -1,3 +1,3 @@
 ﻿namespace Aurora.Coinly.Application.Categories.GetById;
 
-public sealed record GetCategoryByIdQuery(Guid Id) : IQuery<CategoryModel>;
+public sealed record GetCategoryByIdQuery(Guid Id, Guid UserId) : IQuery<CategoryModel>;

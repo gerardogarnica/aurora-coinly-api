@@ -4,6 +4,8 @@ internal sealed class CreateCategoryCommandValidator : AbstractValidator<CreateC
 {
     public CreateCategoryCommandValidator()
     {
+        RuleFor(x => x.UserId).NotEmpty();
+
         RuleFor(x => x.Name)
             .NotEmpty()
             .MinimumLength(3)
