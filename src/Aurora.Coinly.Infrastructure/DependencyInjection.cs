@@ -24,6 +24,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // Authentication
+        services.AddCoinlyAuthentication();
+
         // Quartz configuration
         services.AddQuartz();
         services.AddQuartzHostedService(cfg => cfg.WaitForJobsToComplete = true);
@@ -62,6 +65,19 @@ public static class DependencyInjection
 
         // DateTime services
         services.TryAddSingleton<IDateTimeService, DateTimeService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddCoinlyAuthentication(this IServiceCollection services)
+    {
+        services.AddAuthorization();
+
+        services.AddAuthentication().AddJwtBearer();
+
+        services.AddHttpContextAccessor();
+
+        services.ConfigureOptions<JwtBearerConfigureOptions>();
 
         return services;
     }
