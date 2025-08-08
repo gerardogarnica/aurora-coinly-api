@@ -31,6 +31,9 @@ public static class DependencyInjection
         services.AddQuartz();
         services.AddQuartzHostedService(cfg => cfg.WaitForJobsToComplete = true);
 
+        // Encryption services
+        services.AddEncryptionServices(configuration);
+
         // Outbox interceptor
         services.TryAddSingleton<InsertOutboxMessagesInterceptor>();
 
@@ -78,6 +81,15 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
 
         services.ConfigureOptions<JwtBearerConfigureOptions>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddEncryptionServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<EncryptionOptions>(configuration.GetSection(EncryptionOptions.SectionName));
+
+        services.AddTransient<EncryptionService>();
 
         return services;
     }
