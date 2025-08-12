@@ -3,14 +3,15 @@
 namespace Aurora.Coinly.Application.Categories.GetById;
 
 internal sealed class GetCategoryByIdQueryHandler(
-    ICategoryRepository categoryRepository) : IQueryHandler<GetCategoryByIdQuery, CategoryModel>
+    ICategoryRepository categoryRepository,
+    IUserContext userContext) : IQueryHandler<GetCategoryByIdQuery, CategoryModel>
 {
     public async Task<Result<CategoryModel>> Handle(
         GetCategoryByIdQuery request,
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.Id, request.UserId);
+        var category = await categoryRepository.GetByIdAsync(request.Id, userContext.UserId);
         if (category is null)
         {
             return Result.Fail<CategoryModel>(CategoryErrors.NotFound);

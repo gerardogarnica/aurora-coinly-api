@@ -9,9 +9,9 @@ public sealed class GetCategories : IBaseEndpoint
     {
         app.MapGet(
             "categories",
-            async ([FromQuery(Name = "deleted")] bool showDeleted, IUserContext userContext, ISender sender) =>
+            async ([FromQuery(Name = "deleted")] bool showDeleted, ISender sender) =>
             {
-                var query = new GetCategoryListQuery(userContext.UserId, showDeleted);
+                var query = new GetCategoryListQuery(showDeleted);
 
                 Result<IReadOnlyCollection<CategoryModel>> result = await sender.Send(query);
 

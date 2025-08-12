@@ -10,10 +10,9 @@ public sealed class CreateCategory : IBaseEndpoint
     {
         app.MapPost(
             "categories",
-            async ([FromBody] CreateCategoryRequest request, IUserContext userContext, ISender sender) =>
+            async ([FromBody] CreateCategoryRequest request, ISender sender) =>
             {
                 var command = new CreateCategoryCommand(
-                    userContext.UserId,
                     request.Name,
                     request.Group,
                     request.Type,

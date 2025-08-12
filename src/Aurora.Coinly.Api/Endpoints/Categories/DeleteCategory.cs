@@ -8,9 +8,9 @@ public sealed class DeleteCategory : IBaseEndpoint
     {
         app.MapDelete(
             "categories/{id}",
-            async (Guid id, IUserContext userContext, ISender sender) =>
+            async (Guid id, ISender sender) =>
             {
-                var command = new DeleteCategoryCommand(id, userContext.UserId);
+                var command = new DeleteCategoryCommand(id);
 
                 Result result = await sender.Send(command);
 

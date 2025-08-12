@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Categories.Create;
 
 internal sealed class CreateCategoryCommandHandler(
     ICategoryRepository categoryRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateCategoryCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(
@@ -12,7 +13,7 @@ internal sealed class CreateCategoryCommandHandler(
     {
         // Create category
         var category = Category.Create(
-            request.UserId,
+            userContext.UserId,
             request.Name,
             request.Group,
             request.Type,

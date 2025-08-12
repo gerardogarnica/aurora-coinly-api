@@ -9,9 +9,9 @@ public sealed class GetCategoryById : IBaseEndpoint
     {
         app.MapGet(
             "categories/{id}",
-            async (Guid id, IUserContext userContext, ISender sender) =>
+            async (Guid id, ISender sender) =>
             {
-                var query = new GetCategoryByIdQuery(id, userContext.UserId);
+                var query = new GetCategoryByIdQuery(id);
 
                 Result<CategoryModel> result = await sender.Send(query);
 

@@ -4,7 +4,6 @@ using Aurora.Coinly.Domain.Transactions;
 namespace Aurora.Coinly.Application.Categories.Create;
 
 public sealed record CreateCategoryCommand(
-    Guid UserId,
     string Name,
     CategoryGroup Group,
     TransactionType Type,

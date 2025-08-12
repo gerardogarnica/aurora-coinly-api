@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Categories.Delete;
 
 internal sealed class DeleteCategoryCommandHandler(
     ICategoryRepository categoryRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<DeleteCategoryCommand>
 {
     public async Task<Result> Handle(
@@ -11,7 +12,7 @@ internal sealed class DeleteCategoryCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.Id, request.UserId);
+        var category = await categoryRepository.GetByIdAsync(request.Id, userContext.UserId);
         if (category is null)
         {
             return Result.Fail(CategoryErrors.NotFound);
