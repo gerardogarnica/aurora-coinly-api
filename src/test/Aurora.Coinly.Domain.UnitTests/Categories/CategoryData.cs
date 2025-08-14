@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Domain.UnitTests.Categories;
+﻿using Aurora.Coinly.Domain.UnitTests.Users;
+
+namespace Aurora.Coinly.Domain.UnitTests.Categories;
 
 internal static class CategoryData
 {
@@ -10,7 +12,7 @@ internal static class CategoryData
     public const string? Notes = "Notes of the category";
 
     public static Category GetCategory() => Category.Create(
-        Guid.NewGuid(),
+        UserData.GetUser().Id,
         Name,
         Group,
         Type,

@@ -1,4 +1,5 @@
-﻿using Aurora.Coinly.Domain.Wallets;
+﻿using Aurora.Coinly.Domain.UnitTests.Users;
+using Aurora.Coinly.Domain.Wallets;
 
 namespace Aurora.Coinly.Domain.UnitTests.Wallets;
 
@@ -12,6 +13,7 @@ internal static class WalletData
     public const string? Notes = "Notes of the category";
 
     public static Wallet GetWallet() => Wallet.Create(
+        UserData.GetUser().Id,
         Name,
         AvailableAmount,
         Type,

@@ -1,6 +1,7 @@
 ﻿using Aurora.Coinly.Domain.UnitTests.Categories;
 using Aurora.Coinly.Domain.UnitTests.Methods;
 using Aurora.Coinly.Domain.UnitTests.Transactions;
+using Aurora.Coinly.Domain.UnitTests.Users;
 using Aurora.Coinly.Domain.UnitTests.Wallets;
 
 namespace Aurora.Coinly.Domain.UnitTests.Budgets;
@@ -15,6 +16,7 @@ public class BudgetTests : BaseTest
 
         // Act
         var budget = Budget.Create(
+            UserData.GetUser().Id,
             category,
             BudgetData.Year,
             BudgetData.Frequency,
@@ -36,6 +38,7 @@ public class BudgetTests : BaseTest
 
         // Act
         var budget = Budget.Create(
+            UserData.GetUser().Id,
             category,
             BudgetData.Year,
             BudgetData.Frequency,

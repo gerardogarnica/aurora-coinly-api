@@ -1,4 +1,5 @@
-﻿using Aurora.Coinly.Domain.UnitTests.Wallets;
+﻿using Aurora.Coinly.Domain.UnitTests.Users;
+using Aurora.Coinly.Domain.UnitTests.Wallets;
 
 namespace Aurora.Coinly.Domain.UnitTests.Methods;
 
@@ -12,6 +13,7 @@ public class PaymentMethodTests : BaseTest
 
         // Act
         var paymentMethod = PaymentMethod.Create(
+            UserData.GetUser().Id,
             PaymentMethodData.Name,
             PaymentMethodData.IsDefault,
             PaymentMethodData.AllowRecurring,

@@ -1,6 +1,7 @@
 ﻿using Aurora.Coinly.Domain.UnitTests.Categories;
 using Aurora.Coinly.Domain.UnitTests.Methods;
 using Aurora.Coinly.Domain.UnitTests.Transactions;
+using Aurora.Coinly.Domain.UnitTests.Users;
 using Aurora.Coinly.Domain.Wallets;
 
 namespace Aurora.Coinly.Domain.UnitTests.Wallets;
@@ -14,6 +15,7 @@ public class WalletTests : BaseTest
 
         // Act
         var wallet = Wallet.Create(
+            UserData.GetUser().Id,
             WalletData.Name,
             WalletData.AvailableAmount,
             WalletData.Type,
@@ -39,6 +41,7 @@ public class WalletTests : BaseTest
 
         // Act
         var wallet = Wallet.Create(
+            UserData.GetUser().Id,
             WalletData.Name,
             WalletData.AvailableAmount,
             WalletData.Type,

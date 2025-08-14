@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Domain.UnitTests.Categories;
+﻿using Aurora.Coinly.Domain.UnitTests.Users;
+
+namespace Aurora.Coinly.Domain.UnitTests.Categories;
 
 public class CategoryTests : BaseTest
 {
@@ -9,11 +11,12 @@ public class CategoryTests : BaseTest
 
         // Act
         var category = Category.Create(
+            UserData.GetUser().Id,
             CategoryData.Name,
+            CategoryData.Group,
             CategoryData.Type,
             CategoryData.MaxDaysToReverse,
             CategoryData.Color,
-            CategoryData.Group,
             CategoryData.Notes,
             DateTime.UtcNow);
 

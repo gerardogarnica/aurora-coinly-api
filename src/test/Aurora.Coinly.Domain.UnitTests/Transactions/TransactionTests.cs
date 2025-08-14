@@ -1,5 +1,6 @@
 ﻿using Aurora.Coinly.Domain.UnitTests.Categories;
 using Aurora.Coinly.Domain.UnitTests.Methods;
+using Aurora.Coinly.Domain.UnitTests.Users;
 using Aurora.Coinly.Domain.UnitTests.Wallets;
 
 namespace Aurora.Coinly.Domain.UnitTests.Transactions;
@@ -39,6 +40,7 @@ public class TransactionTests : BaseTest
 
         // Act
         var result = Transaction.Create(
+            UserData.GetUser().Id,
             TransactionData.Description,
             category,
             transactionDate,

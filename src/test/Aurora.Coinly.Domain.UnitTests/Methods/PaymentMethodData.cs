@@ -1,4 +1,5 @@
-﻿using Aurora.Coinly.Domain.UnitTests.Wallets;
+﻿using Aurora.Coinly.Domain.UnitTests.Users;
+using Aurora.Coinly.Domain.UnitTests.Wallets;
 
 namespace Aurora.Coinly.Domain.UnitTests.Methods;
 
@@ -14,6 +15,7 @@ internal static class PaymentMethodData
     public const string? Notes = "Notes of the payment method";
 
     public static PaymentMethod GetPaymentMethod() => PaymentMethod.Create(
+        UserData.GetUser().Id,
         Name,
         IsDefault,
         AllowRecurring,

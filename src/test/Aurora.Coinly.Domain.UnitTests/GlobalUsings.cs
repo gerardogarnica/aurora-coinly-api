@@ -5,4 +5,5 @@ global using Aurora.Coinly.Domain.Methods;
 global using Aurora.Coinly.Domain.Shared;
 global using Aurora.Coinly.Domain.Transactions;
 global using Aurora.Coinly.Domain.UnitTests.Abstractions;
+global using Aurora.Coinly.Domain.Users;
 global using FluentAssertions;
