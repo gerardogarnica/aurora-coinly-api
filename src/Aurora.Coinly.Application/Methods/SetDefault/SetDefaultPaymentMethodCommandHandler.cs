@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Methods.SetDefault;
 
 internal sealed class SetDefaultPaymentMethodCommandHandler(
     IPaymentMethodRepository paymentMethodRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<SetDefaultPaymentMethodCommand>
 {
     public async Task<Result> Handle(
@@ -11,14 +12,14 @@ internal sealed class SetDefaultPaymentMethodCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get payment method
-        var paymentMethod = await paymentMethodRepository.GetByIdAsync(request.Id);
+        var paymentMethod = await paymentMethodRepository.GetByIdAsync(userContext.UserId, request.Id);
         if (paymentMethod is null)
         {
             return Result.Fail<Guid>(PaymentMethodErrors.NotFound);
         }
 
         // Get existing default method
-        var methods = await paymentMethodRepository.GetListAsync(true);
+        var methods = await paymentMethodRepository.GetListAsync(userContext.UserId, true);
 
         var defaultMethod = methods.First(x => x.IsDefault);
         if (defaultMethod is not null && defaultMethod.Id != paymentMethod.Id)

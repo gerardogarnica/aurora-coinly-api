@@ -17,6 +17,7 @@ public sealed class GetPaymentMethods : IBaseEndpoint
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("GetPaymentMethods")
             .WithTags(EndpointTags.PaymentMethods)
             .Produces<IReadOnlyCollection<PaymentMethodModel>>(StatusCodes.Status200OK)

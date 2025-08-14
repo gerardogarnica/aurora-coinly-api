@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Methods.Delete;
 
 internal sealed class DeletePaymentMethodCommandHandler(
     IPaymentMethodRepository paymentMethodRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<DeletePaymentMethodCommand>
 {
     public async Task<Result> Handle(
@@ -11,7 +12,7 @@ internal sealed class DeletePaymentMethodCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get payment method
-        var paymentMethod = await paymentMethodRepository.GetByIdAsync(request.Id);
+        var paymentMethod = await paymentMethodRepository.GetByIdAsync(userContext.UserId, request.Id);
         if (paymentMethod is null)
         {
             return Result.Fail<Guid>(PaymentMethodErrors.NotFound);

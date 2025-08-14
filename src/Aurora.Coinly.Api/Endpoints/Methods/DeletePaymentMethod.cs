@@ -18,6 +18,7 @@ public sealed class DeletePaymentMethod : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("DeletePaymentMethod")
             .WithTags(EndpointTags.PaymentMethods)
             .Produces(StatusCodes.Status202Accepted)

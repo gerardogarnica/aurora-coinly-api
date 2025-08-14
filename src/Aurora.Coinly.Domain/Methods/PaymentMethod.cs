@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Domain.Methods;
 
 public sealed class PaymentMethod : BaseEntity
 {
+    public Guid UserId { get; private set; }
     public string Name { get; private set; }
     public bool IsDefault { get; private set; }
     public bool AllowRecurring { get; private set; }
@@ -22,6 +23,7 @@ public sealed class PaymentMethod : BaseEntity
     private PaymentMethod() : base(Guid.NewGuid()) { }
 
     public static PaymentMethod Create(
+        Guid userId,
         string name,
         bool isDefault,
         bool allowRecurring,
@@ -35,6 +37,7 @@ public sealed class PaymentMethod : BaseEntity
     {
         var paymentMethod = new PaymentMethod
         {
+            UserId = userId,
             Name = name,
             IsDefault = isDefault,
             AllowRecurring = allowRecurring,

@@ -27,6 +27,7 @@ public sealed class UpdatePaymentMethod : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("UpdatePaymentMethod")
             .WithTags(EndpointTags.PaymentMethods)
             .Produces(StatusCodes.Status202Accepted)

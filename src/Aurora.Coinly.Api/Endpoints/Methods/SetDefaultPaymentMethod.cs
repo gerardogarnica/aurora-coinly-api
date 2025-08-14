@@ -18,6 +18,7 @@ public sealed class SetDefaultPaymentMethod : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("SetDefaultPaymentMethod")
             .WithTags(EndpointTags.PaymentMethods)
             .Produces(StatusCodes.Status202Accepted)

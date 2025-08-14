@@ -6,6 +6,7 @@ namespace Aurora.Coinly.Application.Methods.Create;
 internal sealed class CreatePaymentMethodCommandHandler(
     IPaymentMethodRepository paymentMethodRepository,
     IWalletRepository walletRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreatePaymentMethodCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(
@@ -29,6 +30,7 @@ internal sealed class CreatePaymentMethodCommandHandler(
 
         // Create payment method
         var paymentMethod = PaymentMethod.Create(
+            userContext.UserId,
             request.Name,
             markAsDefault,
             request.AllowRecurring,
@@ -47,7 +49,7 @@ internal sealed class CreatePaymentMethodCommandHandler(
 
     private async Task<bool> IsSetAsDefault(bool isDefault)
     {
-        var methods = await paymentMethodRepository.GetListAsync(true);
+        var methods = await paymentMethodRepository.GetListAsync(userContext.UserId, true);
         if (!methods.Any())
         {
             return true;

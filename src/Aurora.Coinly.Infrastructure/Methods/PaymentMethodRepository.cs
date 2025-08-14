@@ -7,17 +7,18 @@ internal sealed class PaymentMethodRepository(
 {
     public IUnitOfWork UnitOfWork => dbContext;
 
-    public async Task<PaymentMethod?> GetByIdAsync(Guid id) => await dbContext
+    public async Task<PaymentMethod?> GetByIdAsync(Guid id, Guid userId) => await dbContext
         .PaymentMethods
         .Include(x => x.Wallet)
-        .Where(x => x.Id == id)
+        .Where(x => x.Id == id && x.UserId == userId)
         .FirstOrDefaultAsync();
 
-    public async Task<IEnumerable<PaymentMethod>> GetListAsync(bool showDeleted)
+    public async Task<IEnumerable<PaymentMethod>> GetListAsync(Guid userId, bool showDeleted)
     {
         var query = dbContext
            .PaymentMethods
            .Include(x => x.Wallet)
+           .Where(x => x.UserId == userId)
            .AsNoTracking()
            .AsQueryable();
 

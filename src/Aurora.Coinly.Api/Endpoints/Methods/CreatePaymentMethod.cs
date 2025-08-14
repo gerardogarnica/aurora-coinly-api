@@ -27,6 +27,7 @@ public sealed class CreatePaymentMethod : IBaseEndpoint
                     () => Results.Created(string.Empty, result.Value),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("CreatePaymentMethod")
             .WithTags(EndpointTags.PaymentMethods)
             .Produces<Guid>(StatusCodes.Status201Created)
