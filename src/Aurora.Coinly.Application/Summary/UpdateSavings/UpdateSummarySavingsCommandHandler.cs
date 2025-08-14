@@ -12,7 +12,7 @@ internal sealed class UpdateSummarySavingsCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId);
+        var wallet = await walletRepository.GetByIdAsync(request.WalletId, request.UserId);
         if (wallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);
@@ -20,6 +20,7 @@ internal sealed class UpdateSummarySavingsCommandHandler(
 
         // Get monthly summary
         var monthlySummary = await summaryRepository.GetSummaryAsync(
+            wallet.UserId,
             request.AssignedOn.Year,
             request.AssignedOn.Month,
             request.Amount.Currency.Code);
@@ -27,6 +28,7 @@ internal sealed class UpdateSummarySavingsCommandHandler(
         var isNewSummary = monthlySummary is null;
 
         monthlySummary ??= MonthlySummary.Create(
+            wallet.UserId,
             request.AssignedOn.Year,
             request.AssignedOn.Month,
             request.Amount.Currency);

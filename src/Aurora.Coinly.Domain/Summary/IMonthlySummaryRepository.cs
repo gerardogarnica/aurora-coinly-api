@@ -2,6 +2,6 @@
 
 public interface IMonthlySummaryRepository : IRepository<MonthlySummary>
 {
-    Task<MonthlySummary?> GetSummaryAsync(int year, int month, string currencyCode);
-    Task<IEnumerable<MonthlySummary>> GetListAsync(int year, string currencyCode);
+    Task<MonthlySummary?> GetSummaryAsync(Guid userId, int year, int month, string currencyCode);
+    Task<IEnumerable<MonthlySummary>> GetListAsync(Guid userId, int year, string currencyCode);
 }

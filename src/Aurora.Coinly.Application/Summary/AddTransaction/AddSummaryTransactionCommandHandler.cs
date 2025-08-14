@@ -25,6 +25,7 @@ internal sealed class AddSummaryTransactionCommandHandler(
 
         // Get monthly summary
         var monthlySummary = await summaryRepository.GetSummaryAsync(
+            transaction.UserId,
             transaction.PaymentDate!.Value.Year,
             transaction.PaymentDate!.Value.Month,
             transaction.Amount.Currency.Code);
@@ -32,6 +33,7 @@ internal sealed class AddSummaryTransactionCommandHandler(
         var isNewSummary = monthlySummary is null;
 
         monthlySummary ??= MonthlySummary.Create(
+            transaction.UserId,
             transaction.PaymentDate!.Value.Year,
             transaction.PaymentDate!.Value.Month,
             transaction.Amount.Currency);

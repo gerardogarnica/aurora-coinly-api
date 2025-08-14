@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Domain.Summary;
 
 public sealed class MonthlySummary : BaseEntity
 {
+    public Guid UserId { get; private set; }
     public int Year { get; private set; }
     public int Month { get; private set; }
     public Currency Currency { get; private set; }
@@ -15,12 +16,14 @@ public sealed class MonthlySummary : BaseEntity
     private MonthlySummary() : base(Guid.NewGuid()) { }
 
     public static MonthlySummary Create(
+        Guid userId,
         int year,
         int month,
         Currency currency)
     {
         var summary = new MonthlySummary
         {
+            UserId = userId,
             Year = year,
             Month = month,
             Currency = currency,
