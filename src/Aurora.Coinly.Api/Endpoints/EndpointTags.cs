@@ -2,6 +2,7 @@
 
 internal static class EndpointTags
 {
+    internal const string Authentication = "Authentication";
     internal const string Budgets = "Budgets";
     internal const string Categories = "Categories";
     internal const string PaymentMethods = "PaymentMethods";

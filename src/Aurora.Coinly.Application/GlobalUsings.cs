@@ -1,4 +1,5 @@
-﻿global using Aurora.Coinly.Application.Abstractions.Exceptions;
+﻿global using Aurora.Coinly.Application.Abstractions.Authentication;
+global using Aurora.Coinly.Application.Abstractions.Exceptions;
 global using Aurora.Coinly.Application.Abstractions.Messaging;
 global using Aurora.Coinly.Application.Abstractions.Time;
 global using Aurora.Coinly.Domain.Abstractions;
