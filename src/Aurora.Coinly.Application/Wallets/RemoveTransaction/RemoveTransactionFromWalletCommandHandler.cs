@@ -11,18 +11,18 @@ internal sealed class RemoveTransactionFromWalletCommandHandler(
         RemoveTransactionFromWalletCommand request,
         CancellationToken cancellationToken)
     {
-        // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId);
-        if (wallet is null)
-        {
-            return Result.Fail(WalletErrors.NotFound);
-        }
-
         // Get transaction
         var transaction = await transactionRepository.GetByIdAsync(request.TransactionId);
         if (transaction is null)
         {
             return Result.Fail(TransactionErrors.NotFound);
+        }
+
+        // Get wallet
+        var wallet = await walletRepository.GetByIdAsync(request.WalletId, transaction.UserId);
+        if (wallet is null)
+        {
+            return Result.Fail(WalletErrors.NotFound);
         }
 
         // Remove transaction from wallet

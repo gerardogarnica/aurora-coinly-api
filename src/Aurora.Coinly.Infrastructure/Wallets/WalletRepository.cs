@@ -8,12 +8,12 @@ internal sealed class WalletRepository(
 {
     public IUnitOfWork UnitOfWork => dbContext;
 
-    public async Task<Wallet?> GetByIdAsync(Guid id)
+    public async Task<Wallet?> GetByIdAsync(Guid id, Guid userId)
     {
         var wallet = await dbContext
             .Wallets
             .Include(x => x.Methods)
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (wallet is null)
         {
@@ -25,9 +25,9 @@ internal sealed class WalletRepository(
         return wallet;
     }
 
-    public async Task<Wallet?> GetByIdAsync(Guid id, DateRange historyRange)
+    public async Task<Wallet?> GetByIdAsync(Guid id, Guid userId, DateRange historyRange)
     {
-        var wallet = await GetByIdAsync(id);
+        var wallet = await GetByIdAsync(id, userId);
 
         if (wallet is not null)
         {
@@ -44,11 +44,12 @@ internal sealed class WalletRepository(
         return wallet;
     }
 
-    public async Task<IEnumerable<Wallet>> GetListAsync(bool showDeleted)
+    public async Task<IEnumerable<Wallet>> GetListAsync(Guid userId, bool showDeleted)
     {
         var query = dbContext
             .Wallets
             .Include(x => x.Methods)
+            .Where(x => x.UserId == userId)
             .AsNoTracking()
             .AsQueryable();
 

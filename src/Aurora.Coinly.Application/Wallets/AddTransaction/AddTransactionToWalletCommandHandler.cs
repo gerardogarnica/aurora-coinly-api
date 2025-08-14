@@ -25,7 +25,7 @@ internal sealed class AddTransactionToWalletCommandHandler(
         }
 
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(transaction.Wallet!.Id);
+        var wallet = await walletRepository.GetByIdAsync(transaction.Wallet!.Id, transaction.UserId);
         if (wallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);

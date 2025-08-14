@@ -18,6 +18,7 @@ public sealed class AssignToAvailableWallet : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("AssignToAvailableWallet")
             .WithTags(EndpointTags.Wallets)
             .Produces(StatusCodes.Status202Accepted)

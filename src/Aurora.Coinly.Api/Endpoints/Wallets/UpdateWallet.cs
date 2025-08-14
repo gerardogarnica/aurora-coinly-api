@@ -23,6 +23,7 @@ public sealed class UpdateWallet : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("UpdateWallet")
             .WithTags(EndpointTags.Wallets)
             .Produces(StatusCodes.Status202Accepted)

@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Wallets.Create;
 
 internal sealed class CreateWalletCommandHandler(
     IWalletRepository walletRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateWalletCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(
@@ -12,6 +13,7 @@ internal sealed class CreateWalletCommandHandler(
     {
         // Create wallet
         var wallet = Wallet.Create(
+            userContext.UserId,
             request.Name,
             new Money(request.Amount, Currency.FromCode(request.CurrencyCode)),
             request.Type,

@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Wallets.Delete;
 
 internal sealed class DeleteWalletCommandHandler(
     IWalletRepository walletRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<DeleteWalletCommand>
 {
     public async Task<Result> Handle(
@@ -11,7 +12,7 @@ internal sealed class DeleteWalletCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.Id);
+        var wallet = await walletRepository.GetByIdAsync(request.Id, userContext.UserId);
         if (wallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);

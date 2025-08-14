@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Wallets.AssignToSavings;
 
 internal sealed class AssignToSavingsCommandHandler(
     IWalletRepository walletRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<AssignToSavingsCommand>
 {
     public async Task<Result> Handle(
@@ -11,7 +12,7 @@ internal sealed class AssignToSavingsCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId);
+        var wallet = await walletRepository.GetByIdAsync(request.WalletId, userContext.UserId);
         if (wallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);

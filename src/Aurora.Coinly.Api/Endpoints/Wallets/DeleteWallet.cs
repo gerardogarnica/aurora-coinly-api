@@ -18,6 +18,7 @@ public sealed class DeleteWallet : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("DeleteWallet")
             .WithTags(EndpointTags.Wallets)
             .Produces(StatusCodes.Status202Accepted)

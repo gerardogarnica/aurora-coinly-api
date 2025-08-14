@@ -17,6 +17,7 @@ public sealed class GetWalletHistory : IBaseEndpoint
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("GetWalletHistory")
             .WithTags(EndpointTags.Wallets)
             .Produces<WalletModel>(StatusCodes.Status200OK)

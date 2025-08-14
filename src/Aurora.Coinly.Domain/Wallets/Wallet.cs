@@ -8,6 +8,7 @@ public sealed class Wallet : BaseEntity
     private readonly List<WalletHistory> _operations = [];
     private readonly List<PaymentMethod> _methods = [];
 
+    public Guid UserId { get; private set; }
     public string Name { get; private set; }
     public Money AvailableAmount { get; private set; }
     public Money SavingsAmount { get; private set; }
@@ -34,6 +35,7 @@ public sealed class Wallet : BaseEntity
     }
 
     public static Wallet Create(
+        Guid userId,
         string name,
         Money amount,
         WalletType type,
@@ -45,6 +47,7 @@ public sealed class Wallet : BaseEntity
     {
         var wallet = new Wallet
         {
+            UserId = userId,
             Name = name,
             AvailableAmount = new Money(amount.Amount, amount.Currency),
             SavingsAmount = Money.Zero(amount.Currency),

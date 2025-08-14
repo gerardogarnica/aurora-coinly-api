@@ -22,6 +22,7 @@ public sealed class TransferBetweenWallets : IBaseEndpoint
                     () => Results.Created(),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("TransferBetweenWallets")
             .WithTags(EndpointTags.Wallets)
             .Produces(StatusCodes.Status201Created)

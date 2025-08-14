@@ -5,6 +5,7 @@ namespace Aurora.Coinly.Application.Wallets.Transfer;
 
 internal sealed class TransferBetweenWalletsCommandHandler(
     IWalletRepository walletRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<TransferBetweenWalletsCommand>
 {
     public async Task<Result> Handle(
@@ -12,14 +13,14 @@ internal sealed class TransferBetweenWalletsCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get source wallet
-        var sourceWallet = await walletRepository.GetByIdAsync(request.SourceWalletId);
+        var sourceWallet = await walletRepository.GetByIdAsync(request.SourceWalletId, userContext.UserId);
         if (sourceWallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);
         }
 
         // Get destination wallet
-        var destinationWallet = await walletRepository.GetByIdAsync(request.DestinationWalletId);
+        var destinationWallet = await walletRepository.GetByIdAsync(request.DestinationWalletId, userContext.UserId);
         if (destinationWallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);

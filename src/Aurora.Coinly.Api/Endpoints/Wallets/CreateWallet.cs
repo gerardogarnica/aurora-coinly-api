@@ -27,6 +27,7 @@ public sealed class CreateWallet : IBaseEndpoint
                     () => Results.Created(string.Empty, result.Value),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("CreateWallet")
             .WithTags(EndpointTags.Wallets)
             .Produces<Guid>(StatusCodes.Status201Created)

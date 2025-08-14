@@ -17,6 +17,7 @@ public sealed class GetWallets : IBaseEndpoint
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("GetWallets")
             .WithTags(EndpointTags.Wallets)
             .Produces<IReadOnlyCollection<WalletModel>>(StatusCodes.Status200OK)

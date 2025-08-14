@@ -17,6 +17,7 @@ public sealed class GetWalletById : IBaseEndpoint
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("GetWalletById")
             .WithTags(EndpointTags.Wallets)
             .Produces<WalletModel>(StatusCodes.Status200OK)
