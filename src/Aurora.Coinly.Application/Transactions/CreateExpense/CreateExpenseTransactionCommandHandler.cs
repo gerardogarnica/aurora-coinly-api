@@ -10,6 +10,7 @@ internal sealed class CreateExpenseTransactionCommandHandler(
     IPaymentMethodRepository paymentMethodRepository,
     ITransactionRepository transactionRepository,
     IWalletRepository walletRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateExpenseTransactionCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(
@@ -17,7 +18,7 @@ internal sealed class CreateExpenseTransactionCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.CategoryId);
+        var category = await categoryRepository.GetByIdAsync(request.CategoryId, userContext.UserId);
         if (category is null)
         {
             return Result.Fail<Guid>(CategoryErrors.NotFound);
@@ -29,7 +30,7 @@ internal sealed class CreateExpenseTransactionCommandHandler(
         }
 
         // Get payment method
-        var method = await paymentMethodRepository.GetByIdAsync(request.PaymentMethodId);
+        var method = await paymentMethodRepository.GetByIdAsync(request.PaymentMethodId, userContext.UserId);
         if (method is null)
         {
             return Result.Fail<Guid>(PaymentMethodErrors.NotFound);
@@ -42,6 +43,7 @@ internal sealed class CreateExpenseTransactionCommandHandler(
 
         // Create transaction
         var result = Transaction.Create(
+            userContext.UserId,
             request.Description,
             category,
             request.TransactionDate,
@@ -66,7 +68,7 @@ internal sealed class CreateExpenseTransactionCommandHandler(
                 return Result.Fail<Guid>(WalletErrors.NotFound);
             }
 
-            var wallet = await walletRepository.GetByIdAsync(request.WalletId.Value);
+            var wallet = await walletRepository.GetByIdAsync(request.WalletId.Value, userContext.UserId);
             if (wallet is null)
             {
                 return Result.Fail<Guid>(WalletErrors.NotFound);

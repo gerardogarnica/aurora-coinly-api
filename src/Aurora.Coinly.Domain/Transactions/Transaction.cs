@@ -6,6 +6,7 @@ namespace Aurora.Coinly.Domain.Transactions;
 
 public sealed class Transaction : BaseEntity
 {
+    public Guid UserId { get; private set; }
     public string Description { get; private set; }
     public Guid CategoryId { get; private set; }
     public DateOnly TransactionDate { get; private set; }
@@ -30,6 +31,7 @@ public sealed class Transaction : BaseEntity
     private Transaction() : base(Guid.NewGuid()) { }
 
     public static Result<Transaction> Create(
+        Guid userId,
         string description,
         Category category,
         DateOnly transactionDate,
@@ -46,6 +48,7 @@ public sealed class Transaction : BaseEntity
 
         var transaction = new Transaction
         {
+            UserId = userId,
             Description = description,
             CategoryId = category.Id,
             TransactionDate = transactionDate,

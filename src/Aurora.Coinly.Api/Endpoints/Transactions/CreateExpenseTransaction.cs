@@ -27,6 +27,7 @@ public sealed class CreateExpenseTransaction : IBaseEndpoint
                     () => Results.Created(string.Empty, result.Value),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("CreateExpenseTransaction")
             .WithTags(EndpointTags.Transactions)
             .Produces<Guid>(StatusCodes.Status201Created)

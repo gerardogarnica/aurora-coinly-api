@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Transactions.Remove;
 
 internal sealed class RemoveTransactionCommandHandler(
     ITransactionRepository transactionRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<RemoveTransactionCommand>
 {
     public async Task<Result> Handle(
@@ -11,7 +12,7 @@ internal sealed class RemoveTransactionCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get transaction
-        var transaction = await transactionRepository.GetByIdAsync(request.Id);
+        var transaction = await transactionRepository.GetByIdAsync(request.Id, userContext.UserId);
         if (transaction is null)
         {
             return Result.Fail(TransactionErrors.NotFound);

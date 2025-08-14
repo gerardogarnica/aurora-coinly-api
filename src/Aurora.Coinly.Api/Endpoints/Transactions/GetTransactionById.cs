@@ -17,6 +17,7 @@ public sealed class GetTransactionById : IBaseEndpoint
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("GetTransactionById")
             .WithTags(EndpointTags.Transactions)
             .Produces<TransactionModel>(StatusCodes.Status200OK)

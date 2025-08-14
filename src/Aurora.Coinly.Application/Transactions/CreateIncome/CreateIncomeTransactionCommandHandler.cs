@@ -8,6 +8,7 @@ internal sealed class CreateIncomeTransactionCommandHandler(
     ICategoryRepository categoryRepository,
     ITransactionRepository transactionRepository,
     IWalletRepository walletRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateIncomeTransactionCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(
@@ -15,7 +16,7 @@ internal sealed class CreateIncomeTransactionCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.CategoryId);
+        var category = await categoryRepository.GetByIdAsync(request.CategoryId, userContext.UserId);
         if (category is null)
         {
             return Result.Fail<Guid>(CategoryErrors.NotFound);
@@ -28,6 +29,7 @@ internal sealed class CreateIncomeTransactionCommandHandler(
 
         // Create transaction
         var result = Transaction.Create(
+            userContext.UserId,
             request.Description,
             category,
             request.TransactionDate,
@@ -45,7 +47,7 @@ internal sealed class CreateIncomeTransactionCommandHandler(
         var transaction = result.Value;
 
         // Pay transaction
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId);
+        var wallet = await walletRepository.GetByIdAsync(request.WalletId, userContext.UserId);
         if (wallet is null)
         {
             return Result.Fail<Guid>(WalletErrors.NotFound);

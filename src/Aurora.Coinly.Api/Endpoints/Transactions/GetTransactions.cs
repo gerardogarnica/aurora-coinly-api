@@ -26,6 +26,7 @@ public sealed class GetTransactions : IBaseEndpoint
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("GetTransactions")
             .WithTags(EndpointTags.Transactions)
             .Produces<IReadOnlyCollection<TransactionModel>>(StatusCodes.Status200OK)

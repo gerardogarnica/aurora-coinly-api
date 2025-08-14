@@ -18,6 +18,7 @@ public sealed class UndoTransactionPayment : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("UndoTransactionPayment")
             .WithTags(EndpointTags.Transactions)
             .Produces(StatusCodes.Status202Accepted)

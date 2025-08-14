@@ -25,6 +25,7 @@ public sealed class CreateIncomeTransaction : IBaseEndpoint
                     () => Results.Created(string.Empty, result.Value),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("CreateIncomeTransaction")
             .WithTags(EndpointTags.Transactions)
             .Produces<Guid>(StatusCodes.Status201Created)

@@ -3,14 +3,15 @@
 namespace Aurora.Coinly.Application.Transactions.GetById;
 
 internal sealed class GetTransactionByIdQueryHandler(
-    ITransactionRepository transactionRepository) : IQueryHandler<GetTransactionByIdQuery, TransactionModel>
+    ITransactionRepository transactionRepository,
+    IUserContext userContext) : IQueryHandler<GetTransactionByIdQuery, TransactionModel>
 {
     public async Task<Result<TransactionModel>> Handle(
         GetTransactionByIdQuery request,
         CancellationToken cancellationToken)
     {
         // Get transaction
-        var transaction = await transactionRepository.GetByIdAsync(request.Id);
+        var transaction = await transactionRepository.GetByIdAsync(request.Id, userContext.UserId);
         if (transaction is null)
         {
             return Result.Fail<TransactionModel>(TransactionErrors.NotFound);

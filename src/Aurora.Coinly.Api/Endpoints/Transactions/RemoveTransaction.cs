@@ -18,6 +18,7 @@ public sealed class RemoveTransaction : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("RemoveTransaction")
             .WithTags(EndpointTags.Transactions)
             .Produces(StatusCodes.Status202Accepted)

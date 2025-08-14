@@ -17,7 +17,17 @@ internal sealed class TransactionRepository(
         .Where(x => x.Id == id)
         .FirstOrDefaultAsync();
 
+    public async Task<Transaction?> GetByIdAsync(Guid id, Guid userId) => await dbContext
+        .Transactions
+        .Include(x => x.Category)
+        .Include(x => x.PaymentMethod)
+        .Include(x => x.Wallet)
+        .AsSplitQuery()
+        .Where(x => x.Id == id && x.UserId == userId)
+        .FirstOrDefaultAsync();
+
     public async Task<IEnumerable<Transaction>> GetListAsync(
+        Guid userId,
         DateRange dateRange,
         TransactionStatus? status,
         Guid? categoryId,
@@ -30,6 +40,7 @@ internal sealed class TransactionRepository(
             .Include(x => x.PaymentMethod)
             .Include(x => x.Wallet)
             .AsSplitQuery()
+            .Where(x => x.UserId == userId)
             .Where(x => displayDateType == DisplayDateType.TransactionDate
                 ? x.TransactionDate >= dateRange.Start && x.TransactionDate <= dateRange.End
                 : x.PaymentDate! >= dateRange.Start && x.PaymentDate! <= dateRange.End)

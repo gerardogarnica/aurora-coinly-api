@@ -21,6 +21,7 @@ public sealed class PayTransaction : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("PayTransaction")
             .WithTags(EndpointTags.Transactions)
             .Produces(StatusCodes.Status202Accepted)

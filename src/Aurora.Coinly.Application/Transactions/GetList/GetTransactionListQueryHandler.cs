@@ -3,7 +3,8 @@
 namespace Aurora.Coinly.Application.Transactions.GetList;
 
 internal sealed class GetTransactionListQueryHandler(
-    ITransactionRepository transactionRepository) : IQueryHandler<GetTransactionListQuery, IReadOnlyCollection<TransactionModel>>
+    ITransactionRepository transactionRepository,
+    IUserContext userContext) : IQueryHandler<GetTransactionListQuery, IReadOnlyCollection<TransactionModel>>
 {
     public async Task<Result<IReadOnlyCollection<TransactionModel>>> Handle(
         GetTransactionListQuery request,
@@ -11,6 +12,7 @@ internal sealed class GetTransactionListQueryHandler(
     {
         // Get transactions
         var transactions = await transactionRepository.GetListAsync(
+            userContext.UserId,
             DateRange.Create(request.DateFrom, request.DateTo),
             request.Status,
             request.CategoryId,

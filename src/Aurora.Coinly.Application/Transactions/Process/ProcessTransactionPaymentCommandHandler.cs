@@ -6,6 +6,7 @@ namespace Aurora.Coinly.Application.Transactions.Process;
 internal sealed class ProcessTransactionPaymentCommandHandler(
     ITransactionRepository transactionRepository,
     IWalletRepository walletRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<ProcessTransactionPaymentCommand>
 {
     public async Task<Result> Handle(
@@ -15,14 +16,14 @@ internal sealed class ProcessTransactionPaymentCommandHandler(
         foreach (var transactionId in request.TransactionIds)
         {
             // Get transaction
-            var transaction = await transactionRepository.GetByIdAsync(transactionId);
+            var transaction = await transactionRepository.GetByIdAsync(transactionId, userContext.UserId);
             if (transaction is null)
             {
                 return Result.Fail(TransactionErrors.NotFound);
             }
 
             // Get wallet
-            var wallet = await walletRepository.GetByIdAsync(request.WalletId);
+            var wallet = await walletRepository.GetByIdAsync(request.WalletId, userContext.UserId);
             if (wallet is null)
             {
                 return Result.Fail(WalletErrors.NotFound);
