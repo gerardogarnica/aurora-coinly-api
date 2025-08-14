@@ -7,11 +7,12 @@ internal sealed class UpdateSummaryOnSavingsAssignedEventHandler(
     ISender sender) : IDomainEventHandler<WalletSavingsUpdatedEvent>
 {
     public async Task Handle(
-        WalletSavingsUpdatedEvent notification, 
+        WalletSavingsUpdatedEvent notification,
         CancellationToken cancellationToken)
     {
         var command = new UpdateSummarySavingsCommand(
             notification.WalletId,
+            notification.UserId,
             notification.Amount,
             notification.AssignedOn,
             notification.IsIncrement);
