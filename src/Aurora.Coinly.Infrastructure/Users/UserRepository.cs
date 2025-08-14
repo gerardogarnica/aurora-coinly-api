@@ -7,11 +7,23 @@ internal sealed class UserRepository(
 {
     public IUnitOfWork UnitOfWork => dbContext;
 
+    public new async Task AddAsync(User user, CancellationToken cancellationToken)
+    {
+        foreach (Role role in user.Roles)
+        {
+            dbContext.Attach(role);
+        }
+
+        await dbContext.Set<User>().AddAsync(user, cancellationToken);
+    }
+
     public Task<User?> GetByEmailAsync(string email) => dbContext
         .Users
+        .Include(x => x.Roles)
         .FirstOrDefaultAsync(x => x.Email == email);
 
     public Task<User?> GetByIdAsync(Guid id) => dbContext
         .Users
+        .Include(x => x.Roles)
         .FirstOrDefaultAsync(x => x.Id == id);
 }

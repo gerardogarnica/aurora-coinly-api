@@ -15,6 +15,14 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.LastName).HasMaxLength(100);
         builder.Property(x => x.IdentityId).HasMaxLength(256);
 
+        builder.Property<string>("_passwordHash")
+            .HasField("_passwordHash")
+            .HasColumnName("password_hash")
+            .IsRequired()
+            .HasMaxLength(256);
+
+        builder.Ignore(user => user.FullName);
+
         builder.HasIndex(x => x.Email).IsUnique();
         builder.HasIndex(x => x.IdentityId).IsUnique();
     }
