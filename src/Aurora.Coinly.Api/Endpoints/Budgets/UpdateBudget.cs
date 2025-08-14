@@ -18,6 +18,7 @@ public sealed class UpdateBudget : IBaseEndpoint
                     () => Results.Accepted(string.Empty),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("UpdateBudget")
             .WithTags(EndpointTags.Budgets)
             .Produces(StatusCodes.Status202Accepted)

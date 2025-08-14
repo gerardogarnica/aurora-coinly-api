@@ -6,6 +6,7 @@ namespace Aurora.Coinly.Application.Budgets.Create;
 internal sealed class CreateBudgetCommandHandler(
     IBudgetRepository budgetRepository,
     ICategoryRepository categoryRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService,
     BudgetPeriodService budgetPeriodService) : ICommandHandler<CreateBudgetCommand, Guid>
 {
@@ -14,7 +15,7 @@ internal sealed class CreateBudgetCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.CategoryId);
+        var category = await categoryRepository.GetByIdAsync(request.CategoryId, userContext.UserId);
         if (category is null)
         {
             return Result.Fail<Guid>(CategoryErrors.NotFound);
@@ -22,6 +23,7 @@ internal sealed class CreateBudgetCommandHandler(
 
         // Check if budget already exists
         var existingBudget = await budgetRepository.GetByCategoryIdAsync(
+            userContext.UserId,
             request.CategoryId,
             request.Year);
 
@@ -32,6 +34,7 @@ internal sealed class CreateBudgetCommandHandler(
 
         // Create budget
         var budget = Budget.Create(
+            userContext.UserId,
             category,
             request.Year,
             request.Frequency,

@@ -7,6 +7,7 @@ public sealed class Budget : BaseEntity
 {
     private readonly List<BudgetPeriod> _periods = [];
 
+    public Guid UserId { get; private set; }
     public Guid CategoryId { get; private set; }
     public int Year { get; private set; }
     public BudgetFrequency Frequency { get; private set; }
@@ -21,6 +22,7 @@ public sealed class Budget : BaseEntity
     }
 
     public static Budget Create(
+        Guid userId,
         Category category,
         int year,
         BudgetFrequency frequency,
@@ -30,6 +32,7 @@ public sealed class Budget : BaseEntity
     {
         var budget = new Budget
         {
+            UserId = userId,
             CategoryId = category.Id,
             Year = year,
             Frequency = frequency,

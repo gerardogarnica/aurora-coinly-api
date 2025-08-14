@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Budgets.UpdateLimit;
 
 internal sealed class UpdateBudgetLimitCommandHandler(
     IBudgetRepository budgetRepository,
+    IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<UpdateBudgetLimitCommand>
 {
     public async Task<Result> Handle(
@@ -11,7 +12,7 @@ internal sealed class UpdateBudgetLimitCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get budget
-        var budget = await budgetRepository.GetByIdAsync(request.Id);
+        var budget = await budgetRepository.GetByIdAsync(request.Id, userContext.UserId);
         if (budget is null)
         {
             return Result.Fail(BudgetErrors.NotFound);

@@ -25,6 +25,7 @@ internal sealed class AddTransactionToBudgetCommandHandler(
 
         // Get budget
         var budget = await budgetRepository.GetByCategoryIdAsync(
+            transaction.UserId,
             transaction.CategoryId,
             transaction.PaymentDate!.Value.Year);
         if (budget is null)

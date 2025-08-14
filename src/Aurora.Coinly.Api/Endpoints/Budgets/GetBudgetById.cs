@@ -17,6 +17,7 @@ public sealed class GetBudgetById : IBaseEndpoint
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("GetBudgetById")
             .WithTags(EndpointTags.Budgets)
             .Produces<BudgetModel>(StatusCodes.Status200OK)

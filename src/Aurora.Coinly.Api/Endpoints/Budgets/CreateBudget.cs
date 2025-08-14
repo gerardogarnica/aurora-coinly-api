@@ -24,6 +24,7 @@ public sealed class CreateBudget : IBaseEndpoint
                     () => Results.Created(string.Empty, result.Value),
                     ApiResponses.Problem);
             })
+            .RequireAuthorization()
             .WithName("CreateBudget")
             .WithTags(EndpointTags.Budgets)
             .Produces<Guid>(StatusCodes.Status201Created)

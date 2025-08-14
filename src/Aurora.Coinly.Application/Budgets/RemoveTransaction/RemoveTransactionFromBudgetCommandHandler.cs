@@ -20,6 +20,7 @@ internal sealed class RemoveTransactionFromBudgetCommandHandler(
 
         // Get budget
         var budget = await budgetRepository.GetByCategoryIdAsync(
+            transaction.UserId,
             transaction.CategoryId,
             request.OriginalPaymentDate.Year);
         if (budget is null)

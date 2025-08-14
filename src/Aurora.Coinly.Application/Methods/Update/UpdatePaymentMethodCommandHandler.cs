@@ -21,7 +21,7 @@ internal sealed class UpdatePaymentMethodCommandHandler(
         }
 
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId);
+        var wallet = await walletRepository.GetByIdAsync(request.WalletId, userContext.UserId);
         if (wallet is null)
         {
             return Result.Fail<Guid>(WalletErrors.NotFound);
