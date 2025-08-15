@@ -30,48 +30,29 @@ public static class DependencyInjection
         // Authentication
         services.AddAuthenticationServices(configuration);
 
-        // Quartz configuration
-        services.AddQuartz();
-        services.AddQuartzHostedService(cfg => cfg.WaitForJobsToComplete = true);
-
         // Encryption services
         services.AddEncryptionServices(configuration);
 
+        // Quartz configuration
+        services.AddQuartzServices();
+
         // Outbox interceptor
-        services.TryAddSingleton<InsertOutboxMessagesInterceptor>();
+        services.AddEntityFrameworkCoreInterceptors();
 
-        // Database connection
-        var connectionString = configuration.GetConnectionString("AuroraCoinlyConnection");
-
-        services.AddDbContext<ApplicationDbContext>((sp, options) =>
-            options
-                .UseNpgsql(
-                    connectionString,
-                    x => x.MigrationsHistoryTable(HistoryRepository.DefaultTableName, ApplicationDbContext.DEFAULT_SCHEMA))
-                .UseSnakeCaseNamingConvention()
-                .AddInterceptors(sp.GetRequiredService<InsertOutboxMessagesInterceptor>()));
-
-        // IUnitOfWork implementation
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        // Database configuration
+        services.AddDatabaseConfiguration(configuration);
 
         // Repository implementations
-        services.AddScoped<IBudgetRepository, BudgetRepository>();
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
-        services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
-        services.AddScoped<IMonthlySummaryRepository, MonthlySummaryRepository>();
-        services.AddScoped<ITransactionRepository, TransactionRepository>();
-        services.AddScoped<IWalletRepository, WalletRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddRepositoryImplementations();
 
         // User context implementation
-        services.AddScoped<IUserContext, UserContext>();
+        services.AddUserContext();
 
         // Outbox pattern implementation
-        services.AddOptions<OutboxOptions>().BindConfiguration("Outbox");
-        services.ConfigureOptions<ConfigureProcessOutboxJob>();
+        services.AddOutboxPatternImplementation();
 
         // DateTime services
-        services.TryAddSingleton<IDateTimeService, DateTimeService>();
+        services.AddDateTimeServices();
 
         return services;
     }
@@ -79,8 +60,6 @@ public static class DependencyInjection
     private static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpContextAccessor();
-
-        services.ConfigureOptions<JwtBearerConfigureOptions>();
 
         services.Configure<JwtAuthOptions>(configuration.GetSection(JwtAuthOptions.SectionName));
         JwtAuthOptions jwtAuthOptions = configuration.GetSection(JwtAuthOptions.SectionName).Get<JwtAuthOptions>()!;
@@ -116,6 +95,71 @@ public static class DependencyInjection
 
         services.AddTransient<EncryptionService>();
 
+        return services;
+    }
+
+    private static IServiceCollection AddQuartzServices(this IServiceCollection services)
+    {
+        services.AddQuartz();
+        services.AddQuartzHostedService(cfg => cfg.WaitForJobsToComplete = true);
+
+        return services;
+    }
+    private static IServiceCollection AddEntityFrameworkCoreInterceptors(this IServiceCollection services)
+    {
+        services.TryAddSingleton<InsertOutboxMessagesInterceptor>();
+        return services;
+    }
+
+    private static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Database connection
+        var connectionString = configuration.GetConnectionString("AuroraCoinlyConnection");
+
+        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+            options
+                .UseNpgsql(
+                    connectionString,
+                    x => x.MigrationsHistoryTable(HistoryRepository.DefaultTableName, ApplicationDbContext.DEFAULT_SCHEMA))
+                .UseSnakeCaseNamingConvention()
+                .AddInterceptors(sp.GetRequiredService<InsertOutboxMessagesInterceptor>()));
+
+        // IUnitOfWork implementation
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+        return services;
+    }
+
+    private static IServiceCollection AddRepositoryImplementations(this IServiceCollection services)
+    {
+        services.AddScoped<IBudgetRepository, BudgetRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
+        services.AddScoped<IMonthlySummaryRepository, MonthlySummaryRepository>();
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddUserContext(this IServiceCollection services)
+    {
+        services.AddScoped<IUserContext, UserContext>();
+        return services;
+    }
+
+    private static IServiceCollection AddOutboxPatternImplementation(this IServiceCollection services)
+    {
+        services.AddOptions<OutboxOptions>().BindConfiguration("Outbox");
+        services.ConfigureOptions<ConfigureProcessOutboxJob>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDateTimeServices(this IServiceCollection services)
+    {
+        services.TryAddSingleton<IDateTimeService, DateTimeService>();
         return services;
     }
 }
