@@ -13,4 +13,12 @@ public static class UserErrors
     public static readonly BaseError InvalidCredentials = new(
         "User.InvalidCredentials",
         "The provided credentials are invalid");
+
+    public static readonly BaseError InvalidRefreshToken = new(
+        "User.InvalidRefreshToken",
+        "The provided refresh token is invalid");
+
+    public static readonly BaseError RefreshTokenExpired = new(
+        "User.RefreshTokenExpired",
+        "The refresh token has expired");
 }

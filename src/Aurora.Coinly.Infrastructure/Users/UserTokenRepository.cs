@@ -16,4 +16,11 @@ internal sealed class UserTokenRepository(
 
         await dbContext.Set<UserToken>().AddAsync(userToken, cancellationToken);
     }
+
+    public Task<UserToken?> GetByRefreshTokenAsync(string refreshToken) => dbContext
+        .UserTokens
+        .Include(x => x.User)
+        .ThenInclude(x => x.Roles)
+        .AsNoTracking()
+        .FirstOrDefaultAsync(x => x.RefreshToken == refreshToken && x.IsActive);
 }

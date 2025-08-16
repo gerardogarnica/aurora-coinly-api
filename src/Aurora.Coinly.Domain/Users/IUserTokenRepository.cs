@@ -2,4 +2,5 @@
 
 public interface IUserTokenRepository : IRepository<UserToken>
 {
+    Task<UserToken?> GetByRefreshTokenAsync(string refreshToken);
 }
