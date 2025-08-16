@@ -11,12 +11,19 @@ internal sealed class TokenProvider(IOptions<JwtAuthOptions> options) : ITokenPr
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
+    private DateTime _accessTokenExpiresOnUtc;
+    private DateTime _refreshTokenExpiresOnUtc;
+
     public IdentityToken CreateToken(TokenRequest tokenRequest)
     {
         var accessToken = CreateAccessToken(tokenRequest);
         var refreshToken = CreateRefreshToken();
 
-        return new IdentityToken(accessToken, refreshToken);
+        return new IdentityToken(
+            accessToken,
+            _accessTokenExpiresOnUtc,
+            refreshToken,
+            _refreshTokenExpiresOnUtc);
     }
 
     private string CreateAccessToken(TokenRequest tokenRequest)
@@ -42,12 +49,14 @@ internal sealed class TokenProvider(IOptions<JwtAuthOptions> options) : ITokenPr
         ];
 
         // Create the security token descriptor
+        _accessTokenExpiresOnUtc = DateTime.UtcNow.AddMinutes(_jwtAuthOptions.LifeTimeInMinutes);
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
             Issuer = _jwtAuthOptions.Issuer,
             Audience = _jwtAuthOptions.Audience,
-            Expires = DateTime.UtcNow.AddMinutes(_jwtAuthOptions.LifeTimeInMinutes),
+            Expires = _accessTokenExpiresOnUtc,
             SigningCredentials = signingCredentials,
         };
 
@@ -60,7 +69,9 @@ internal sealed class TokenProvider(IOptions<JwtAuthOptions> options) : ITokenPr
 
     private string CreateRefreshToken()
     {
-        var randomBytes = RandomNumberGenerator.GetBytes(32);
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
+
+        _refreshTokenExpiresOnUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
 
         return Convert.ToBase64String(randomBytes);
     }

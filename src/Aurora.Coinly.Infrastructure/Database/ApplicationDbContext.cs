@@ -21,6 +21,7 @@ public sealed class ApplicationDbContext(
     public DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<UserToken> UserTokens { get; set; } = null!;
     public DbSet<Wallet> Wallets { get; set; } = null!;
     public DbSet<WalletHistory> WalletHistories { get; set; } = null!;
 

@@ -74,10 +74,12 @@ public static class DependencyInjection
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(options =>
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtAuthOptions.Issuer,
                     ValidAudience = jwtAuthOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key))
@@ -139,6 +141,7 @@ public static class DependencyInjection
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserTokenRepository, UserTokenRepository>();
 
         return services;
     }

@@ -4,8 +4,10 @@ namespace Aurora.Coinly.Application.Authentication.Login;
 
 internal sealed class LoginCommandHandler(
     IUserRepository userRepository,
+    IUserTokenRepository userTokenRepository,
     IPasswordHasher passwordHasher,
-    ITokenProvider tokenProvider) : ICommandHandler<LoginCommand, IdentityToken>
+    ITokenProvider tokenProvider,
+    IDateTimeService dateTimeService) : ICommandHandler<LoginCommand, IdentityToken>
 {
     public async Task<Result<IdentityToken>> Handle(
         LoginCommand request,
@@ -35,7 +37,18 @@ internal sealed class LoginCommandHandler(
 
         var accessToken = tokenProvider.CreateToken(tokenRequest);
 
-        // Return token
+        // Create user token
+        var userToken = UserToken.Create(
+            user.Id,
+            accessToken.AccessToken,
+            accessToken.AccessTokenExpiresOn,
+            accessToken.RefreshToken,
+            accessToken.RefreshTokenExpiresOn,
+            dateTimeService.UtcNow);
+
+        await userTokenRepository.AddAsync(userToken, cancellationToken);
+
+        // Return identity token
         return accessToken;
     }
 }
