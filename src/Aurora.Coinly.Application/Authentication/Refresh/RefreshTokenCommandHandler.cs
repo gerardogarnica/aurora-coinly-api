@@ -4,6 +4,7 @@ namespace Aurora.Coinly.Application.Authentication.Refresh;
 
 internal sealed class RefreshTokenCommandHandler(
     IUserTokenRepository userTokenRepository,
+    IUserRepository userRepository,
     ITokenProvider tokenProvider,
     IDateTimeService dateTimeService) : ICommandHandler<RefreshTokenCommand, IdentityToken>
 {
@@ -13,7 +14,7 @@ internal sealed class RefreshTokenCommandHandler(
     {
         // Get user token by refresh token
         var userToken = await userTokenRepository.GetByRefreshTokenAsync(request.RefreshToken);
-        if (userToken is null || !userToken.IsActive)
+        if (userToken is null)
         {
             return Result.Fail<IdentityToken>(UserErrors.InvalidRefreshToken);
         }
@@ -25,25 +26,30 @@ internal sealed class RefreshTokenCommandHandler(
         }
 
         // Create new access token
+        var user = await userRepository.GetByIdAsync(userToken.UserId);
+        if (user is null)
+        {
+            return Result.Fail<IdentityToken>(UserErrors.NotFound);
+        }
+
         TokenRequest tokenRequest = new(
-            userToken.UserId.ToString(),
-            userToken.User.Email,
-            userToken.User.FirstName,
-            userToken.User.LastName,
-            userToken.User.Roles.Select(x => x.Name));
+            user.Id.ToString(),
+            user.Email,
+            user.FirstName,
+            user.LastName,
+            user.Roles.Select(x => x.Name));
 
         var accessToken = tokenProvider.CreateToken(tokenRequest);
 
-        // Create new user token
-        var newUserToken = UserToken.Create(
-            userToken.UserId,
+        // Update existing user token
+        userToken.Update(
             accessToken.AccessToken,
             accessToken.AccessTokenExpiresOn,
             accessToken.RefreshToken,
             accessToken.RefreshTokenExpiresOn,
             dateTimeService.UtcNow);
 
-        await userTokenRepository.AddAsync(newUserToken, cancellationToken);
+        userTokenRepository.Update(userToken);
 
         // Return new identity token
         return accessToken;

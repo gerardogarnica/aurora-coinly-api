@@ -8,7 +8,6 @@ public sealed class UserToken : BaseEntity
     public string RefreshToken { get; private set; }
     public DateTime RefreshTokenExpiresOnUtc { get; private set; }
     public DateTime IssuedOnUtc { get; private set; }
-    public bool IsActive { get; private set; }
     public User User { get; init; } = null!;
 
     private UserToken() : base(Guid.NewGuid()) { }
@@ -29,7 +28,20 @@ public sealed class UserToken : BaseEntity
             RefreshToken = refreshToken,
             RefreshTokenExpiresOnUtc = refreshTokenExpiresOnUtc,
             IssuedOnUtc = issuedOnUtc,
-            IsActive = true
         };
+    }
+
+    public void Update(
+        string accessToken,
+        DateTime accessTokenExpiresOnUtc,
+        string refreshToken,
+        DateTime refreshTokenExpiresOnUtc,
+        DateTime issuedOnUtc)
+    {
+        AccessToken = accessToken;
+        AccessTokenExpiresOnUtc = accessTokenExpiresOnUtc;
+        RefreshToken = refreshToken;
+        RefreshTokenExpiresOnUtc = refreshTokenExpiresOnUtc;
+        IssuedOnUtc = issuedOnUtc;
     }
 }
