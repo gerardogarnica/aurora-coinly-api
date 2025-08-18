@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.IdentityModel.JsonWebTokens;
+using System.Security.Claims;
 
 namespace Aurora.Coinly.Infrastructure.Authentication;
 
@@ -6,7 +7,7 @@ public static class ClaimsPrincipalExtensions
 {
     public static Guid GetUserId(this ClaimsPrincipal claimsPrincipal)
     {
-        string? userId = claimsPrincipal?.FindFirst(ClaimTypes.Sid)?.Value;
+        string? userId = claimsPrincipal?.FindFirst(JwtRegisteredClaimNames.Sid)?.Value;
 
         if (!Guid.TryParse(userId, out Guid parsedUserId))
         {
@@ -14,5 +15,11 @@ public static class ClaimsPrincipalExtensions
         }
 
         return parsedUserId;
+    }
+
+    public static string GetIdentityId(this ClaimsPrincipal? claimsPrincipal)
+    {
+        return claimsPrincipal?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+            throw new AuroraCoinlyException("User identity is unavailable");
     }
 }

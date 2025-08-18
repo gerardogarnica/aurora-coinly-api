@@ -20,11 +20,12 @@ public partial class InitialMigration : Migration
             columns: table => new
             {
                 id = table.Column<Guid>(type: "uuid", nullable: false),
+                user_id = table.Column<Guid>(type: "uuid", nullable: false),
                 name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                group = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                 type = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                 max_days_to_reverse = table.Column<int>(type: "integer", nullable: false),
                 color = table.Column<string>(type: "character varying(7)", maxLength: 7, nullable: false),
-                icon = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                 notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                 is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                 created_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -42,13 +43,13 @@ public partial class InitialMigration : Migration
             columns: table => new
             {
                 id = table.Column<Guid>(type: "uuid", nullable: false),
+                user_id = table.Column<Guid>(type: "uuid", nullable: false),
                 year = table.Column<int>(type: "integer", nullable: false),
                 month = table.Column<int>(type: "integer", nullable: false),
                 currency_code = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
-                total_income_amount = table.Column<decimal>(type: "numeric(9,2)", nullable: false),
-                total_income_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
-                total_expense_amount = table.Column<decimal>(type: "numeric(9,2)", nullable: false),
-                total_expense_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false)
+                total_income = table.Column<decimal>(type: "numeric(9,2)", nullable: false),
+                total_expense = table.Column<decimal>(type: "numeric(9,2)", nullable: false),
+                savings = table.Column<decimal>(type: "numeric(9,2)", nullable: false)
             },
             constraints: table =>
             {
@@ -74,11 +75,43 @@ public partial class InitialMigration : Migration
             });
 
         migrationBuilder.CreateTable(
+            name: "roles",
+            schema: "coinly",
+            columns: table => new
+            {
+                name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("pk_roles", x => x.name);
+            });
+
+        migrationBuilder.CreateTable(
+            name: "users",
+            schema: "coinly",
+            columns: table => new
+            {
+                id = table.Column<Guid>(type: "uuid", nullable: false),
+                email = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                identity_id = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                created_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                updated_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                password_hash = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("pk_users", x => x.id);
+            });
+
+        migrationBuilder.CreateTable(
             name: "wallets",
             schema: "coinly",
             columns: table => new
             {
                 id = table.Column<Guid>(type: "uuid", nullable: false),
+                user_id = table.Column<Guid>(type: "uuid", nullable: false),
                 name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 available_amount = table.Column<decimal>(type: "numeric(9,2)", nullable: false),
                 available_amount_currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
@@ -104,6 +137,7 @@ public partial class InitialMigration : Migration
             columns: table => new
             {
                 id = table.Column<Guid>(type: "uuid", nullable: false),
+                user_id = table.Column<Guid>(type: "uuid", nullable: false),
                 category_id = table.Column<Guid>(type: "uuid", nullable: false),
                 year = table.Column<int>(type: "integer", nullable: false),
                 frequency = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
@@ -123,11 +157,64 @@ public partial class InitialMigration : Migration
             });
 
         migrationBuilder.CreateTable(
+            name: "user_roles",
+            schema: "coinly",
+            columns: table => new
+            {
+                role_name = table.Column<string>(type: "character varying(50)", nullable: false),
+                user_id = table.Column<Guid>(type: "uuid", nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("pk_user_roles", x => new { x.role_name, x.user_id });
+                table.ForeignKey(
+                    name: "fk_user_roles_roles_roles_name",
+                    column: x => x.role_name,
+                    principalSchema: "coinly",
+                    principalTable: "roles",
+                    principalColumn: "name",
+                    onDelete: ReferentialAction.Cascade);
+                table.ForeignKey(
+                    name: "fk_user_roles_users_user_id",
+                    column: x => x.user_id,
+                    principalSchema: "coinly",
+                    principalTable: "users",
+                    principalColumn: "id",
+                    onDelete: ReferentialAction.Cascade);
+            });
+
+        migrationBuilder.CreateTable(
+            name: "user_tokens",
+            schema: "coinly",
+            columns: table => new
+            {
+                id = table.Column<Guid>(type: "uuid", nullable: false),
+                user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                access_token = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                access_token_expires_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                refresh_token = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                refresh_token_expires_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                issued_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("pk_user_tokens", x => x.id);
+                table.ForeignKey(
+                    name: "fk_user_tokens_users_user_id",
+                    column: x => x.user_id,
+                    principalSchema: "coinly",
+                    principalTable: "users",
+                    principalColumn: "id",
+                    onDelete: ReferentialAction.Cascade);
+            });
+
+        migrationBuilder.CreateTable(
             name: "payment_methods",
             schema: "coinly",
             columns: table => new
             {
                 id = table.Column<Guid>(type: "uuid", nullable: false),
+                user_id = table.Column<Guid>(type: "uuid", nullable: false),
                 name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 is_default = table.Column<bool>(type: "boolean", nullable: false),
                 allow_recurring = table.Column<bool>(type: "boolean", nullable: false),
@@ -217,6 +304,7 @@ public partial class InitialMigration : Migration
             columns: table => new
             {
                 id = table.Column<Guid>(type: "uuid", nullable: false),
+                user_id = table.Column<Guid>(type: "uuid", nullable: false),
                 description = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 category_id = table.Column<Guid>(type: "uuid", nullable: false),
                 transaction_date = table.Column<DateOnly>(type: "date", nullable: false),
@@ -282,6 +370,16 @@ public partial class InitialMigration : Migration
                     onDelete: ReferentialAction.Cascade);
             });
 
+        migrationBuilder.InsertData(
+            schema: "coinly",
+            table: "roles",
+            column: "name",
+            values: new object[]
+            {
+                "Administrator",
+                "Member"
+            });
+
         migrationBuilder.CreateIndex(
             name: "ix_budget_periods_budget_id",
             schema: "coinly",
@@ -325,6 +423,32 @@ public partial class InitialMigration : Migration
             column: "wallet_id");
 
         migrationBuilder.CreateIndex(
+            name: "ix_user_roles_user_id",
+            schema: "coinly",
+            table: "user_roles",
+            column: "user_id");
+
+        migrationBuilder.CreateIndex(
+            name: "ix_user_tokens_user_id",
+            schema: "coinly",
+            table: "user_tokens",
+            column: "user_id");
+
+        migrationBuilder.CreateIndex(
+            name: "ix_users_email",
+            schema: "coinly",
+            table: "users",
+            column: "email",
+            unique: true);
+
+        migrationBuilder.CreateIndex(
+            name: "ix_users_identity_id",
+            schema: "coinly",
+            table: "users",
+            column: "identity_id",
+            unique: true);
+
+        migrationBuilder.CreateIndex(
             name: "ix_wallet_history_wallet_id",
             schema: "coinly",
             table: "wallet_history",
@@ -351,6 +475,14 @@ public partial class InitialMigration : Migration
             schema: "coinly");
 
         migrationBuilder.DropTable(
+            name: "user_roles",
+            schema: "coinly");
+
+        migrationBuilder.DropTable(
+            name: "user_tokens",
+            schema: "coinly");
+
+        migrationBuilder.DropTable(
             name: "wallet_history",
             schema: "coinly");
 
@@ -360,6 +492,14 @@ public partial class InitialMigration : Migration
 
         migrationBuilder.DropTable(
             name: "payment_methods",
+            schema: "coinly");
+
+        migrationBuilder.DropTable(
+            name: "roles",
+            schema: "coinly");
+
+        migrationBuilder.DropTable(
+            name: "users",
             schema: "coinly");
 
         migrationBuilder.DropTable(
