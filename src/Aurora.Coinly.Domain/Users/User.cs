@@ -47,11 +47,11 @@ public sealed class User : BaseEntity
         return user;
     }
 
-    public void Update(string firstName, string lastName)
+    public void Update(string firstName, string lastName, DateTime updatedOnUtc)
     {
         FirstName = firstName;
         LastName = lastName;
-        UpdatedOnUtc = DateTime.UtcNow;
+        UpdatedOnUtc = updatedOnUtc;
     }
 
     public bool VerifyPassword(Password password, IPasswordHasher passwordHasher)
