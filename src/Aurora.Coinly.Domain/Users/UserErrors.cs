@@ -14,6 +14,10 @@ public static class UserErrors
         "User.InvalidCredentials",
         "The provided credentials are invalid");
 
+    public static readonly BaseError InvalidCurrentPassword = new(
+        "User.InvalidCurrentPassword",
+        "The current password is invalid");
+
     public static readonly BaseError InvalidRefreshToken = new(
         "User.InvalidRefreshToken",
         "The provided refresh token is invalid");

@@ -7,7 +7,7 @@ public sealed class UpdateProfile : IBaseEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut(
-            "me/profile",
+            "me",
             async ([FromBody] UpdateProfileRequest request, ISender sender) =>
             {
                 var command = new UpdateUserCommand(

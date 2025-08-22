@@ -54,6 +54,12 @@ public sealed class User : BaseEntity
         UpdatedOnUtc = updatedOnUtc;
     }
 
+    public void UpdatePassword(string newPasswordHash, DateTime updatedOnUtc)
+    {
+        _passwordHash = newPasswordHash;
+        UpdatedOnUtc = updatedOnUtc;
+    }
+
     public bool VerifyPassword(Password password, IPasswordHasher passwordHasher)
     {
         if (string.IsNullOrWhiteSpace(password.Value))
