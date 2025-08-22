@@ -71,7 +71,7 @@ public class UserTests : BaseTest
         var newLastName = "UpdatedLast";
 
         // Act
-        user.Update(newFirstName, newLastName);
+        user.Update(newFirstName, newLastName, DateTime.UtcNow);
 
         // Assert
         user.FirstName.Should().Be(newFirstName);
