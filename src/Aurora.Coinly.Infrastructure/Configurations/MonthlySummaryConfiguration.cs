@@ -1,7 +1,6 @@
-﻿using Aurora.Coinly.Domain.Shared;
-using Aurora.Coinly.Domain.Summary;
+﻿using Aurora.Coinly.Domain.Summary;
 
-namespace Aurora.Coinly.Infrastructure.Summary;
+namespace Aurora.Coinly.Infrastructure.Configurations;
 
 internal sealed class MonthlySummaryConfiguration : IEntityTypeConfiguration<MonthlySummary>
 {

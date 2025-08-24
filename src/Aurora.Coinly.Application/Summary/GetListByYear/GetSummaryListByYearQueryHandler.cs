@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Summary;
-
-namespace Aurora.Coinly.Application.Summary.GetListByYear;
+﻿namespace Aurora.Coinly.Application.Summary.GetListByYear;
 
 internal sealed class GetSummaryListByYearQueryHandler(
-    IMonthlySummaryRepository summaryRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext) : IQueryHandler<GetSummaryListByYearQuery, IReadOnlyCollection<MonthlySummaryModel>>
 {
     public async Task<Result<IReadOnlyCollection<MonthlySummaryModel>>> Handle(
@@ -11,10 +9,13 @@ internal sealed class GetSummaryListByYearQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get summaries
-        var summaries = await summaryRepository.GetListAsync(
-            userContext.UserId,
-            request.Year,
-            request.CurrencyCode);
+        List<MonthlySummary> summaries = await dbContext
+            .MonthlySummaries
+            .Where(x => x.UserId == userContext.UserId && x.Year == request.Year && x.Currency.Code == request.CurrencyCode)
+            .AsNoTracking()
+            .AsQueryable()
+            .OrderBy(x => x.Month)
+            .ToListAsync(cancellationToken);
 
         // Return summary models
         return summaries.Select(x => x.ToModel()).ToList();

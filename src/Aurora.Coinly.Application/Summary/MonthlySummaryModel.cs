@@ -1,6 +1,4 @@
-﻿using Aurora.Coinly.Domain.Summary;
-
-namespace Aurora.Coinly.Application.Summary;
+﻿namespace Aurora.Coinly.Application.Summary;
 
 public sealed record MonthlySummaryModel(
     int Year,

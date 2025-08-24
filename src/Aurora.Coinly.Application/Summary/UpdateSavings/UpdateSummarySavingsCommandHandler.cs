@@ -1,11 +1,7 @@
-﻿using Aurora.Coinly.Domain.Summary;
-using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Summary.UpdateSavings;
+﻿namespace Aurora.Coinly.Application.Summary.UpdateSavings;
 
 internal sealed class UpdateSummarySavingsCommandHandler(
-    ICoinlyDbContext dbContext,
-    IMonthlySummaryRepository summaryRepository) : ICommandHandler<UpdateSummarySavingsCommand>
+    ICoinlyDbContext dbContext) : ICommandHandler<UpdateSummarySavingsCommand>
 {
     public async Task<Result> Handle(
         UpdateSummarySavingsCommand request,
@@ -23,11 +19,14 @@ internal sealed class UpdateSummarySavingsCommandHandler(
         }
 
         // Get monthly summary
-        var monthlySummary = await summaryRepository.GetSummaryAsync(
-            wallet.UserId,
-            request.AssignedOn.Year,
-            request.AssignedOn.Month,
-            request.Amount.Currency.Code);
+        MonthlySummary? monthlySummary = await dbContext
+            .MonthlySummaries
+            .SingleOrDefaultAsync(x =>
+                x.UserId == wallet.UserId &&
+                x.Year == request.AssignedOn.Year &&
+                x.Month == request.AssignedOn.Month &&
+                x.Currency.Code == request.Amount.Currency.Code,
+                cancellationToken);
 
         var isNewSummary = monthlySummary is null;
 
@@ -47,12 +46,14 @@ internal sealed class UpdateSummarySavingsCommandHandler(
 
         if (isNewSummary)
         {
-            await summaryRepository.AddAsync(result.Value, cancellationToken);
+            dbContext.MonthlySummaries.Add(result.Value);
         }
         else
         {
-            summaryRepository.Update(result.Value);
+            dbContext.MonthlySummaries.Update(result.Value);
         }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

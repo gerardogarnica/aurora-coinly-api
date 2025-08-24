@@ -1,18 +1,17 @@
-﻿using Aurora.Coinly.Domain.Summary;
-using Aurora.Coinly.Domain.Transactions;
-
-namespace Aurora.Coinly.Application.Summary.AddTransaction;
+﻿namespace Aurora.Coinly.Application.Summary.AddTransaction;
 
 internal sealed class AddSummaryTransactionCommandHandler(
-    IMonthlySummaryRepository summaryRepository,
-    ITransactionRepository transactionRepository) : ICommandHandler<AddSummaryTransactionCommand>
+    ICoinlyDbContext dbContext) : ICommandHandler<AddSummaryTransactionCommand>
 {
     public async Task<Result> Handle(
         AddSummaryTransactionCommand request,
         CancellationToken cancellationToken)
     {
         // Get transaction
-        var transaction = await transactionRepository.GetByIdAsync(request.TransactionId);
+        Transaction? transaction = await dbContext
+            .Transactions
+            .SingleOrDefaultAsync(x => x.Id == request.TransactionId, cancellationToken);
+
         if (transaction is null)
         {
             return Result.Fail(TransactionErrors.NotFound);
@@ -24,11 +23,14 @@ internal sealed class AddSummaryTransactionCommandHandler(
         }
 
         // Get monthly summary
-        var monthlySummary = await summaryRepository.GetSummaryAsync(
-            transaction.UserId,
-            transaction.PaymentDate!.Value.Year,
-            transaction.PaymentDate!.Value.Month,
-            transaction.Amount.Currency.Code);
+        MonthlySummary? monthlySummary = await dbContext
+            .MonthlySummaries
+            .SingleOrDefaultAsync(x =>
+                x.UserId == transaction.UserId &&
+                x.Year == transaction.PaymentDate!.Value.Year &&
+                x.Month == transaction.PaymentDate!.Value.Month &&
+                x.Currency.Code == transaction.Amount.Currency.Code,
+                cancellationToken);
 
         var isNewSummary = monthlySummary is null;
 
@@ -48,12 +50,14 @@ internal sealed class AddSummaryTransactionCommandHandler(
 
         if (isNewSummary)
         {
-            await summaryRepository.AddAsync(result.Value, cancellationToken);
+            dbContext.MonthlySummaries.Add(result.Value);
         }
         else
         {
-            summaryRepository.Update(result.Value);
+            dbContext.MonthlySummaries.Update(result.Value);
         }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }
