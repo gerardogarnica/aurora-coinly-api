@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Methods;
-
-namespace Aurora.Coinly.Application.Methods.SetDefault;
+﻿namespace Aurora.Coinly.Application.Methods.SetDefault;
 
 internal sealed class SetDefaultPaymentMethodCommandHandler(
-    IPaymentMethodRepository paymentMethodRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<SetDefaultPaymentMethodCommand>
 {
@@ -12,20 +10,24 @@ internal sealed class SetDefaultPaymentMethodCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get payment method
-        var paymentMethod = await paymentMethodRepository.GetByIdAsync(userContext.UserId, request.Id);
+        PaymentMethod? paymentMethod = await dbContext
+            .PaymentMethods
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (paymentMethod is null)
         {
             return Result.Fail<Guid>(PaymentMethodErrors.NotFound);
         }
 
         // Get existing default method
-        var methods = await paymentMethodRepository.GetListAsync(userContext.UserId, true);
+        var defaultMethod = await dbContext
+            .PaymentMethods
+            .SingleOrDefaultAsync(x => x.UserId == userContext.UserId && x.IsDefault && !x.IsDeleted, cancellationToken);
 
-        var defaultMethod = methods.First(x => x.IsDefault);
         if (defaultMethod is not null && defaultMethod.Id != paymentMethod.Id)
         {
             defaultMethod.SetAsNotDefault(dateTimeService.UtcNow);
-            paymentMethodRepository.Update(defaultMethod);
+            dbContext.PaymentMethods.Update(defaultMethod);
         }
 
         // Set as default
@@ -36,7 +38,9 @@ internal sealed class SetDefaultPaymentMethodCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        paymentMethodRepository.Update(paymentMethod);
+        dbContext.PaymentMethods.Update(paymentMethod);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

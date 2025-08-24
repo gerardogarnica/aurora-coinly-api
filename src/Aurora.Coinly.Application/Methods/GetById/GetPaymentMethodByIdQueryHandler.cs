@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Methods;
-
-namespace Aurora.Coinly.Application.Methods.GetById;
+﻿namespace Aurora.Coinly.Application.Methods.GetById;
 
 internal sealed class GetPaymentMethodByIdQueryHandler(
-    IPaymentMethodRepository paymentMethodRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext) : IQueryHandler<GetPaymentMethodByIdQuery, PaymentMethodModel>
 {
     public async Task<Result<PaymentMethodModel>> Handle(
@@ -11,7 +9,11 @@ internal sealed class GetPaymentMethodByIdQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get payment method
-        var paymentMethod = await paymentMethodRepository.GetByIdAsync(userContext.UserId, request.Id);
+        PaymentMethod? paymentMethod = await dbContext
+            .PaymentMethods
+            .Include(x => x.Wallet)
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (paymentMethod is null)
         {
             return Result.Fail<PaymentMethodModel>(PaymentMethodErrors.NotFound);

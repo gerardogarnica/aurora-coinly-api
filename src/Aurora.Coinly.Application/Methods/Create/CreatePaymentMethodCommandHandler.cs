@@ -1,11 +1,7 @@
-﻿using Aurora.Coinly.Domain.Methods;
-using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Methods.Create;
+﻿namespace Aurora.Coinly.Application.Methods.Create;
 
 internal sealed class CreatePaymentMethodCommandHandler(
     ICoinlyDbContext dbContext,
-    IPaymentMethodRepository paymentMethodRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreatePaymentMethodCommand, Guid>
 {
@@ -30,7 +26,7 @@ internal sealed class CreatePaymentMethodCommandHandler(
         }
 
         // Get other payment methods
-        var markAsDefault = await IsSetAsDefault(request.IsDefault);
+        var markAsDefault = await IsSetAsDefault(request.IsDefault, cancellationToken);
 
         // Create payment method
         var paymentMethod = PaymentMethod.Create(
@@ -46,14 +42,20 @@ internal sealed class CreatePaymentMethodCommandHandler(
             request.Notes,
             dateTimeService.UtcNow);
 
-        await paymentMethodRepository.AddAsync(paymentMethod, cancellationToken);
+        dbContext.PaymentMethods.Add(paymentMethod);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return paymentMethod.Id;
     }
 
-    private async Task<bool> IsSetAsDefault(bool isDefault)
+    private async Task<bool> IsSetAsDefault(bool isDefault, CancellationToken cancellationToken)
     {
-        var methods = await paymentMethodRepository.GetListAsync(userContext.UserId, true);
+        List<PaymentMethod> methods = await dbContext
+            .PaymentMethods
+            .Where(x => x.UserId == userContext.UserId)
+            .ToListAsync(cancellationToken);
+
         if (!methods.Any())
         {
             return true;
@@ -64,7 +66,7 @@ internal sealed class CreatePaymentMethodCommandHandler(
             var defaultMethod = methods.First(x => x.IsDefault);
             defaultMethod.SetAsNotDefault(dateTimeService.UtcNow);
 
-            paymentMethodRepository.Update(defaultMethod);
+            dbContext.PaymentMethods.Update(defaultMethod);
         }
 
         return isDefault;

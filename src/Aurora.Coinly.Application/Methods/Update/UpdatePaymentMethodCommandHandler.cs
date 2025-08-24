@@ -1,11 +1,7 @@
-﻿using Aurora.Coinly.Domain.Methods;
-using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Methods.Update;
+﻿namespace Aurora.Coinly.Application.Methods.Update;
 
 internal sealed class UpdatePaymentMethodCommandHandler(
     ICoinlyDbContext dbContext,
-    IPaymentMethodRepository paymentMethodRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<UpdatePaymentMethodCommand>
 {
@@ -14,7 +10,10 @@ internal sealed class UpdatePaymentMethodCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get payment method
-        var paymentMethod = await paymentMethodRepository.GetByIdAsync(userContext.UserId, request.Id);
+        PaymentMethod? paymentMethod = await dbContext
+            .PaymentMethods
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (paymentMethod is null)
         {
             return Result.Fail<Guid>(PaymentMethodErrors.NotFound);
@@ -48,7 +47,9 @@ internal sealed class UpdatePaymentMethodCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        paymentMethodRepository.Update(paymentMethod);
+        dbContext.PaymentMethods.Update(paymentMethod);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

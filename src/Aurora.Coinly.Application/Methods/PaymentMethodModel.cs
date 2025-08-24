@@ -1,5 +1,4 @@
 ﻿using Aurora.Coinly.Application.Wallets;
-using Aurora.Coinly.Domain.Methods;
 
 namespace Aurora.Coinly.Application.Methods;
 

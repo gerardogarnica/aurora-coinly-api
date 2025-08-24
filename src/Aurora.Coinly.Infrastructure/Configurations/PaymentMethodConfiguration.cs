@@ -1,6 +1,6 @@
 ﻿using Aurora.Coinly.Domain.Methods;
 
-namespace Aurora.Coinly.Infrastructure.Methods;
+namespace Aurora.Coinly.Infrastructure.Configurations;
 
 internal sealed class PaymentMethodConfiguration : IEntityTypeConfiguration<PaymentMethod>
 {

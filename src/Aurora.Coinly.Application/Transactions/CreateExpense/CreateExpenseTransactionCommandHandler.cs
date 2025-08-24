@@ -2,7 +2,6 @@
 
 internal sealed class CreateExpenseTransactionCommandHandler(
     ICoinlyDbContext dbContext,
-    IPaymentMethodRepository paymentMethodRepository,
     ITransactionRepository transactionRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateExpenseTransactionCommand, Guid>
@@ -27,7 +26,10 @@ internal sealed class CreateExpenseTransactionCommandHandler(
         }
 
         // Get payment method
-        var method = await paymentMethodRepository.GetByIdAsync(request.PaymentMethodId, userContext.UserId);
+        PaymentMethod? method = await dbContext
+            .PaymentMethods
+            .SingleOrDefaultAsync(x => x.Id == request.PaymentMethodId && x.UserId == userContext.UserId, cancellationToken);
+
         if (method is null)
         {
             return Result.Fail<Guid>(PaymentMethodErrors.NotFound);
