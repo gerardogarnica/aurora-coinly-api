@@ -1,6 +1,4 @@
-﻿using Aurora.Coinly.Domain.Budgets;
-
-namespace Aurora.Coinly.Application.Budgets;
+﻿namespace Aurora.Coinly.Application.Budgets;
 
 public sealed record BudgetTransactionModel(
     Guid TransactionId,

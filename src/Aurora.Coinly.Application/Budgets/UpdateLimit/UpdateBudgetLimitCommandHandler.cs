@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Budgets;
-
-namespace Aurora.Coinly.Application.Budgets.UpdateLimit;
+﻿namespace Aurora.Coinly.Application.Budgets.UpdateLimit;
 
 internal sealed class UpdateBudgetLimitCommandHandler(
-    IBudgetRepository budgetRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<UpdateBudgetLimitCommand>
 {
@@ -12,7 +10,13 @@ internal sealed class UpdateBudgetLimitCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get budget
-        var budget = await budgetRepository.GetByIdAsync(request.Id, userContext.UserId);
+        Budget? budget = await dbContext
+            .Budgets
+            .Include(x => x.Category)
+            .Include(x => x.Periods)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (budget is null)
         {
             return Result.Fail(BudgetErrors.NotFound);
@@ -29,7 +33,9 @@ internal sealed class UpdateBudgetLimitCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        budgetRepository.Update(budget);
+        dbContext.Budgets.Update(budget);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

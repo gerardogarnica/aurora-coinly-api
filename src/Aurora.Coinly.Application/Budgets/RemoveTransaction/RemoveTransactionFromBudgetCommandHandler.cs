@@ -1,10 +1,7 @@
-﻿using Aurora.Coinly.Domain.Budgets;
-using Aurora.Coinly.Domain.Transactions;
-
-namespace Aurora.Coinly.Application.Budgets.RemoveTransaction;
+﻿namespace Aurora.Coinly.Application.Budgets.RemoveTransaction;
 
 internal sealed class RemoveTransactionFromBudgetCommandHandler(
-    IBudgetRepository budgetRepository,
+    ICoinlyDbContext dbContext,
     ITransactionRepository transactionRepository) : ICommandHandler<RemoveTransactionFromBudgetCommand>
 {
     public async Task<Result> Handle(
@@ -19,10 +16,14 @@ internal sealed class RemoveTransactionFromBudgetCommandHandler(
         }
 
         // Get budget
-        var budget = await budgetRepository.GetByCategoryIdAsync(
-            transaction.UserId,
-            transaction.CategoryId,
-            request.OriginalPaymentDate.Year);
+        Budget? budget = await dbContext
+            .Budgets
+            .Include(x => x.Category)
+            .Include(x => x.Periods)
+            .ThenInclude(x => x.Transactions)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(x => x.UserId == transaction.UserId && x.CategoryId == transaction.CategoryId && x.Year == request.OriginalPaymentDate.Year, cancellationToken);
+
         if (budget is null)
         {
             // Because budget is not necessary for transaction
@@ -37,7 +38,9 @@ internal sealed class RemoveTransactionFromBudgetCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        budgetRepository.Update(budget);
+        dbContext.Budgets.Update(budget);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

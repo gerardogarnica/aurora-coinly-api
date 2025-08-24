@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Budgets;
-
-namespace Aurora.Coinly.Application.Budgets.GetById;
+﻿namespace Aurora.Coinly.Application.Budgets.GetById;
 
 internal sealed class GetBudgetByIdQueryHandler(
-    IBudgetRepository budgetRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext) : IQueryHandler<GetBudgetByIdQuery, BudgetModel>
 {
     public async Task<Result<BudgetModel>> Handle(
@@ -11,7 +9,14 @@ internal sealed class GetBudgetByIdQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get budget
-        var budget = await budgetRepository.GetByIdAsync(userContext.UserId, request.Id);
+        Budget? budget = await dbContext
+            .Budgets
+            .Include(x => x.Category)
+            .Include(x => x.Periods)
+            .ThenInclude(x => x.Transactions)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (budget is null)
         {
             return Result.Fail<BudgetModel>(BudgetErrors.NotFound);

@@ -1,6 +1,4 @@
-﻿using Aurora.Coinly.Domain.Budgets;
-
-namespace Aurora.Coinly.Application.Budgets.Create;
+﻿namespace Aurora.Coinly.Application.Budgets.Create;
 
 public sealed record CreateBudgetCommand(
     Guid CategoryId,

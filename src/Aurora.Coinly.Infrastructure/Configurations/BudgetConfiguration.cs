@@ -1,6 +1,6 @@
 ﻿using Aurora.Coinly.Domain.Budgets;
 
-namespace Aurora.Coinly.Infrastructure.Budgets;
+namespace Aurora.Coinly.Infrastructure.Configurations;
 
 internal sealed class BudgetConfiguration : IEntityTypeConfiguration<Budget>
 {

@@ -1,5 +1,4 @@
 ﻿using Aurora.Coinly.Application.Categories;
-using Aurora.Coinly.Domain.Budgets;
 
 namespace Aurora.Coinly.Application.Budgets;
 

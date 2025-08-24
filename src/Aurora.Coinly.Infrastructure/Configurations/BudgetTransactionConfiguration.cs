@@ -1,7 +1,7 @@
 ﻿using Aurora.Coinly.Domain.Budgets;
 using Aurora.Coinly.Domain.Shared;
 
-namespace Aurora.Coinly.Infrastructure.Budgets;
+namespace Aurora.Coinly.Infrastructure.Configurations;
 
 internal sealed class BudgetTransactionConfiguration : IEntityTypeConfiguration<BudgetTransaction>
 {

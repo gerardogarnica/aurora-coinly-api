@@ -1,8 +1,9 @@
-﻿namespace Aurora.Coinly.Application.Budgets.Create;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Aurora.Coinly.Application.Budgets.Create;
 
 internal sealed class CreateBudgetCommandHandler(
     ICoinlyDbContext dbContext,
-    IBudgetRepository budgetRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService,
     BudgetPeriodService budgetPeriodService) : ICommandHandler<CreateBudgetCommand, Guid>
@@ -22,12 +23,11 @@ internal sealed class CreateBudgetCommandHandler(
         }
 
         // Check if budget already exists
-        var existingBudget = await budgetRepository.GetByCategoryIdAsync(
-            userContext.UserId,
-            request.CategoryId,
-            request.Year);
+        var existsBudget = await dbContext
+            .Budgets
+            .AnyAsync(x => x.UserId == userContext.UserId && x.CategoryId == request.CategoryId && x.Year == request.Year, cancellationToken);
 
-        if (existingBudget is not null)
+        if (existsBudget)
         {
             return Result.Fail<Guid>(BudgetErrors.BudgetAlreadyExists);
         }
@@ -42,7 +42,9 @@ internal sealed class CreateBudgetCommandHandler(
             dateTimeService.UtcNow,
             budgetPeriodService);
 
-        await budgetRepository.AddAsync(budget, cancellationToken);
+        dbContext.Budgets.Add(budget);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return budget.Id;
     }

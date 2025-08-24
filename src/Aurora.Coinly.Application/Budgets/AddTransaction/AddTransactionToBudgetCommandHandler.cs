@@ -1,10 +1,7 @@
-﻿using Aurora.Coinly.Domain.Budgets;
-using Aurora.Coinly.Domain.Transactions;
-
-namespace Aurora.Coinly.Application.Budgets.AddTransaction;
+﻿namespace Aurora.Coinly.Application.Budgets.AddTransaction;
 
 internal sealed class AddTransactionToBudgetCommandHandler(
-    IBudgetRepository budgetRepository,
+    ICoinlyDbContext dbContext,
     ITransactionRepository transactionRepository) : ICommandHandler<AddTransactionToBudgetCommand>
 {
     public async Task<Result> Handle(
@@ -24,10 +21,14 @@ internal sealed class AddTransactionToBudgetCommandHandler(
         }
 
         // Get budget
-        var budget = await budgetRepository.GetByCategoryIdAsync(
-            transaction.UserId,
-            transaction.CategoryId,
-            transaction.PaymentDate!.Value.Year);
+        Budget? budget = await dbContext
+            .Budgets
+            .Include(x => x.Category)
+            .Include(x => x.Periods)
+            .ThenInclude(x => x.Transactions)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(x => x.UserId == transaction.UserId && x.CategoryId == transaction.CategoryId && x.Year == transaction.PaymentDate!.Value.Year, cancellationToken);
+
         if (budget is null)
         {
             // Because budget is not necessary for transaction
@@ -42,7 +43,9 @@ internal sealed class AddTransactionToBudgetCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        await budgetRepository.AddTransactionAsync(result.Value);
+        dbContext.BudgetTransactions.Add(result.Value);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }
