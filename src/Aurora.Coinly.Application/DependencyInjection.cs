@@ -1,5 +1,4 @@
 ﻿using Aurora.Coinly.Application.Abstractions.Behaviors;
-using Aurora.Coinly.Domain.Budgets;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aurora.Coinly.Application;
@@ -14,7 +13,6 @@ public static class DependencyInjection
             cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
 
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-            cfg.AddOpenBehavior(typeof(UnitOfWorkBehavior<,>));
             cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
         });
 

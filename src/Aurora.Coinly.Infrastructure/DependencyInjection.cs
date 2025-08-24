@@ -1,4 +1,5 @@
-﻿using Aurora.Coinly.Infrastructure.Authentication;
+﻿using Aurora.Coinly.Application.Abstractions.Data;
+using Aurora.Coinly.Infrastructure.Authentication;
 using Aurora.Coinly.Infrastructure.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -110,7 +111,7 @@ public static class DependencyInjection
                 .AddInterceptors(sp.GetRequiredService<InsertOutboxMessagesInterceptor>()));
 
         // IUnitOfWork implementation
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<ICoinlyDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         return services;
     }

@@ -99,7 +99,7 @@ Planned features and improvements include:
 - [x] Add Budget entity with DateRange value object
 - [x] Integrate BudgetTransaction entity
 - [x] Implement MonthlySummary updates based on paid transactions
-- [ ] Add user authentication and authorization
+- [x] Add user authentication and authorization
 - [ ] Develop dashboard API
 
 ## Contributing
