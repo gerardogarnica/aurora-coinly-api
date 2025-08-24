@@ -8,6 +8,7 @@ public interface ICoinlyDbContext
     DbSet<Category> Categories { get; }
     DbSet<MonthlySummary> MonthlySummaries { get; }
     DbSet<PaymentMethod> PaymentMethods { get; }
+    DbSet<Role> Roles { get; }
     DbSet<Transaction> Transactions { get; }
     DbSet<User> Users { get; }
     DbSet<UserToken> UserTokens { get; }

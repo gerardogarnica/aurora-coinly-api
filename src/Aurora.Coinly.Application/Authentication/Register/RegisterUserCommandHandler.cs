@@ -1,10 +1,9 @@
 ﻿using Aurora.Coinly.Application.Users;
-using Aurora.Coinly.Domain.Users;
 
 namespace Aurora.Coinly.Application.Authentication.Register;
 
 internal sealed class RegisterUserCommandHandler(
-    IUserRepository userRepository,
+    ICoinlyDbContext dbContext,
     IPasswordHasher passwordHasher,
     IDateTimeService dateTimeService) : ICommandHandler<RegisterUserCommand, UserModel>
 {
@@ -13,7 +12,10 @@ internal sealed class RegisterUserCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get user by email
-        var user = await userRepository.GetByEmailAsync(request.Email);
+        User? user = await dbContext
+            .Users
+            .SingleOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+
         if (user is not null)
         {
             return Result.Fail<UserModel>(UserErrors.EmailAlreadyExists);
@@ -32,7 +34,14 @@ internal sealed class RegisterUserCommandHandler(
             Guid.NewGuid().ToString(),
             dateTimeService.UtcNow);
 
-        await userRepository.AddAsync(newUser, cancellationToken);
+        dbContext.Users.Add(newUser);
+
+        foreach (Role role in newUser.Roles)
+        {
+            dbContext.Roles.Attach(role);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return newUser.ToModel();
     }

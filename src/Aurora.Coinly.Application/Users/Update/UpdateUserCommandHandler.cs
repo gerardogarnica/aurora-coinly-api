@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Users;
-
-namespace Aurora.Coinly.Application.Users.Update;
+﻿namespace Aurora.Coinly.Application.Users.Update;
 
 internal sealed class UpdateUserCommandHandler(
-    IUserRepository userRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<UpdateUserCommand>
 {
@@ -11,7 +9,11 @@ internal sealed class UpdateUserCommandHandler(
         UpdateUserCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByIdAsync(userContext.UserId);
+        // Get user
+        User? user = await dbContext
+            .Users
+            .SingleOrDefaultAsync(x => x.Id == userContext.UserId, cancellationToken);
+
         if (user is null)
         {
             return Result.Fail(UserErrors.NotFound);
@@ -23,7 +25,9 @@ internal sealed class UpdateUserCommandHandler(
             request.LastName,
             dateTimeService.UtcNow);
 
-        userRepository.Update(user);
+        dbContext.Users.Update(user);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

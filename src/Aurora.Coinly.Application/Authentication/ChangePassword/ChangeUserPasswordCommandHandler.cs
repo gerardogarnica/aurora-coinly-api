@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Users;
-
-namespace Aurora.Coinly.Application.Authentication.ChangePassword;
+﻿namespace Aurora.Coinly.Application.Authentication.ChangePassword;
 
 internal sealed class ChangeUserPasswordCommandHandler(
-    IUserRepository userRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IPasswordHasher passwordHasher,
     IDateTimeService dateTimeService) : ICommandHandler<ChangeUserPasswordCommand>
@@ -12,7 +10,11 @@ internal sealed class ChangeUserPasswordCommandHandler(
         ChangeUserPasswordCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByIdAsync(userContext.UserId);
+        // Get user
+        User? user = await dbContext
+            .Users
+            .SingleOrDefaultAsync(x => x.Id == userContext.UserId, cancellationToken);
+
         if (user is null)
         {
             return Result.Fail(UserErrors.NotFound);
@@ -32,7 +34,9 @@ internal sealed class ChangeUserPasswordCommandHandler(
         // Update user password
         user.UpdatePassword(hashedNewPassword, dateTimeService.UtcNow);
 
-        userRepository.Update(user);
+        dbContext.Users.Update(user);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

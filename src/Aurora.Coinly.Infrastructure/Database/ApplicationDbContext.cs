@@ -20,6 +20,7 @@ public sealed class ApplicationDbContext(
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<MonthlySummary> MonthlySummaries { get; set; } = null!;
     public DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
+    public DbSet<Role> Roles { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<UserToken> UserTokens { get; set; } = null!;

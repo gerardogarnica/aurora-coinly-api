@@ -1,11 +1,9 @@
 ﻿using Aurora.Coinly.Domain.Summary;
 using Aurora.Coinly.Domain.Transactions;
-using Aurora.Coinly.Domain.Users;
 using Aurora.Coinly.Infrastructure.Authentication;
 using Aurora.Coinly.Infrastructure.Interceptors;
 using Aurora.Coinly.Infrastructure.Summary;
 using Aurora.Coinly.Infrastructure.Transactions;
-using Aurora.Coinly.Infrastructure.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -128,8 +126,6 @@ public static class DependencyInjection
     {
         services.AddScoped<IMonthlySummaryRepository, MonthlySummaryRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserTokenRepository, UserTokenRepository>();
 
         return services;
     }

@@ -1,10 +1,7 @@
-﻿using Aurora.Coinly.Domain.Users;
-
-namespace Aurora.Coinly.Application.Authentication.Login;
+﻿namespace Aurora.Coinly.Application.Authentication.Login;
 
 internal sealed class LoginCommandHandler(
-    IUserRepository userRepository,
-    IUserTokenRepository userTokenRepository,
+    ICoinlyDbContext dbContext,
     IPasswordHasher passwordHasher,
     ITokenProvider tokenProvider,
     IDateTimeService dateTimeService) : ICommandHandler<LoginCommand, IdentityToken>
@@ -14,7 +11,11 @@ internal sealed class LoginCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get user by email
-        var user = await userRepository.GetByEmailAsync(request.Email);
+        User? user = await dbContext
+            .Users
+            .Include(x => x.Roles)
+            .SingleOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+
         if (user is null)
         {
             return Result.Fail<IdentityToken>(UserErrors.InvalidCredentials);
@@ -46,7 +47,9 @@ internal sealed class LoginCommandHandler(
             accessToken.RefreshTokenExpiresOn,
             dateTimeService.UtcNow);
 
-        await userTokenRepository.AddAsync(userToken, cancellationToken);
+        dbContext.UserTokens.Add(userToken);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         // Return identity token
         return accessToken;

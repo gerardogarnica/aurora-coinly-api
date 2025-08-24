@@ -1,16 +1,17 @@
-﻿using Aurora.Coinly.Domain.Users;
-
-namespace Aurora.Coinly.Application.Users.GetById;
+﻿namespace Aurora.Coinly.Application.Users.GetById;
 
 internal sealed class GetUserByIdQueryHandler(
-    IUserRepository userRepository) : IQueryHandler<GetUserByIdQuery, UserModel>
+    ICoinlyDbContext dbContext) : IQueryHandler<GetUserByIdQuery, UserModel>
 {
     public async Task<Result<UserModel>> Handle(
         GetUserByIdQuery request,
         CancellationToken cancellationToken)
     {
         // Get user
-        var user = await userRepository.GetByIdAsync(request.Id);
+        User? user = await dbContext
+            .Users
+            .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+
         if (user is null)
         {
             return Result.Fail<UserModel>(UserErrors.NotFound);

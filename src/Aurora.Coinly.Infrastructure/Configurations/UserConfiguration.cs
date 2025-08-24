@@ -1,6 +1,6 @@
 ﻿using Aurora.Coinly.Domain.Users;
 
-namespace Aurora.Coinly.Infrastructure.Users;
+namespace Aurora.Coinly.Infrastructure.Configurations;
 
 internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {

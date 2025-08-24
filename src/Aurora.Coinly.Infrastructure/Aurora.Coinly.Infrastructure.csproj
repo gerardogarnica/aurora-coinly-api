@@ -14,7 +14,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Aurora.Coinly.Application\Aurora.Coinly.Application.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Budgets\" />
-  </ItemGroup>
 </Project>

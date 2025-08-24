@@ -1,6 +1,4 @@
-﻿using Aurora.Coinly.Domain.Users;
-
-namespace Aurora.Coinly.Application.Users;
+﻿namespace Aurora.Coinly.Application.Users;
 
 public sealed record UserModel(
     Guid UserId,

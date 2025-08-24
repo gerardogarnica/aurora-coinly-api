@@ -1,10 +1,7 @@
-﻿using Aurora.Coinly.Domain.Users;
-
-namespace Aurora.Coinly.Application.Authentication.Refresh;
+﻿namespace Aurora.Coinly.Application.Authentication.Refresh;
 
 internal sealed class RefreshTokenCommandHandler(
-    IUserTokenRepository userTokenRepository,
-    IUserRepository userRepository,
+    ICoinlyDbContext dbContext,
     ITokenProvider tokenProvider,
     IDateTimeService dateTimeService) : ICommandHandler<RefreshTokenCommand, IdentityToken>
 {
@@ -13,7 +10,10 @@ internal sealed class RefreshTokenCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get user token by refresh token
-        var userToken = await userTokenRepository.GetByRefreshTokenAsync(request.RefreshToken);
+        UserToken? userToken = await dbContext
+            .UserTokens
+            .SingleOrDefaultAsync(x => x.RefreshToken == request.RefreshToken, cancellationToken);
+
         if (userToken is null)
         {
             return Result.Fail<IdentityToken>(UserErrors.InvalidRefreshToken);
@@ -25,13 +25,18 @@ internal sealed class RefreshTokenCommandHandler(
             return Result.Fail<IdentityToken>(UserErrors.RefreshTokenExpired);
         }
 
-        // Create new access token
-        var user = await userRepository.GetByIdAsync(userToken.UserId);
+        // Get user with roles
+        User? user = await dbContext
+            .Users
+            .Include(x => x.Roles)
+            .SingleOrDefaultAsync(x => x.Id == userToken.UserId, cancellationToken);
+
         if (user is null)
         {
             return Result.Fail<IdentityToken>(UserErrors.NotFound);
         }
 
+        // Create new access token
         TokenRequest tokenRequest = new(
             user.Id.ToString(),
             user.Email,
@@ -49,7 +54,9 @@ internal sealed class RefreshTokenCommandHandler(
             accessToken.RefreshTokenExpiresOn,
             dateTimeService.UtcNow);
 
-        userTokenRepository.Update(userToken);
+        dbContext.UserTokens.Update(userToken);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         // Return new identity token
         return accessToken;
