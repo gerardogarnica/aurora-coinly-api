@@ -1,6 +1,4 @@
-﻿using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Wallets.Create;
+﻿namespace Aurora.Coinly.Application.Wallets.Create;
 
 public sealed record CreateWalletCommand(
     string Name,

@@ -4,15 +4,19 @@ using Aurora.Coinly.Domain.Wallets;
 namespace Aurora.Coinly.Application.Summary.UpdateSavings;
 
 internal sealed class UpdateSummarySavingsCommandHandler(
-    IMonthlySummaryRepository summaryRepository,
-    IWalletRepository walletRepository) : ICommandHandler<UpdateSummarySavingsCommand>
+    ICoinlyDbContext dbContext,
+    IMonthlySummaryRepository summaryRepository) : ICommandHandler<UpdateSummarySavingsCommand>
 {
     public async Task<Result> Handle(
         UpdateSummarySavingsCommand request,
         CancellationToken cancellationToken)
     {
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId, request.UserId);
+        Wallet? wallet = await dbContext
+            .Wallets
+            .Include(x => x.Methods)
+            .SingleOrDefaultAsync(x => x.Id == request.WalletId && x.UserId == request.UserId, cancellationToken);
+
         if (wallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);

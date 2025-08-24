@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Wallets.GetList;
+﻿namespace Aurora.Coinly.Application.Wallets.GetList;
 
 internal sealed class GetWalletListQueryHandler(
-    IWalletRepository walletRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext) : IQueryHandler<GetWalletListQuery, IReadOnlyCollection<WalletModel>>
 {
     public async Task<Result<IReadOnlyCollection<WalletModel>>> Handle(
@@ -11,7 +9,19 @@ internal sealed class GetWalletListQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get wallets
-        var wallets = await walletRepository.GetListAsync(userContext.UserId, request.ShowDeleted);
+        var query = dbContext
+            .Wallets
+            .Include(x => x.Methods)
+            .Where(x => x.UserId == userContext.UserId)
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (!request.ShowDeleted)
+        {
+            query = query.Where(x => !x.IsDeleted);
+        }
+
+        List<Wallet> wallets = await query.OrderBy(x => x.Name).ToListAsync(cancellationToken);
 
         // Return wallet models
         return wallets.Select(x => x.ToModel()).ToList();

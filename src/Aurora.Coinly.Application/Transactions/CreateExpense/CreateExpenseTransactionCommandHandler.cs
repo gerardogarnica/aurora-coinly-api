@@ -4,7 +4,6 @@ internal sealed class CreateExpenseTransactionCommandHandler(
     ICoinlyDbContext dbContext,
     IPaymentMethodRepository paymentMethodRepository,
     ITransactionRepository transactionRepository,
-    IWalletRepository walletRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateExpenseTransactionCommand, Guid>
 {
@@ -66,7 +65,11 @@ internal sealed class CreateExpenseTransactionCommandHandler(
                 return Result.Fail<Guid>(WalletErrors.NotFound);
             }
 
-            var wallet = await walletRepository.GetByIdAsync(request.WalletId.Value, userContext.UserId);
+            Wallet? wallet = await dbContext
+                .Wallets
+                .Include(x => x.Methods)
+                .SingleOrDefaultAsync(x => x.Id == request.WalletId.Value && x.UserId == userContext.UserId, cancellationToken);
+
             if (wallet is null)
             {
                 return Result.Fail<Guid>(WalletErrors.NotFound);

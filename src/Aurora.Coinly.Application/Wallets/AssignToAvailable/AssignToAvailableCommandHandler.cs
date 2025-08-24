@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Wallets.AssignToAvailable;
+﻿namespace Aurora.Coinly.Application.Wallets.AssignToAvailable;
 
 internal sealed class AssignToAvailableCommandHandler(
-    IWalletRepository walletRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<AssignToAvailableCommand>
 {
@@ -12,7 +10,10 @@ internal sealed class AssignToAvailableCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId, userContext.UserId);
+        Wallet? wallet = await dbContext
+            .Wallets
+            .SingleOrDefaultAsync(x => x.Id == request.WalletId && x.UserId == userContext.UserId, cancellationToken);
+
         if (wallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);
@@ -29,7 +30,9 @@ internal sealed class AssignToAvailableCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        walletRepository.Update(wallet);
+        dbContext.Wallets.Update(wallet);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

@@ -4,8 +4,8 @@ using Aurora.Coinly.Domain.Wallets;
 namespace Aurora.Coinly.Application.Methods.Create;
 
 internal sealed class CreatePaymentMethodCommandHandler(
+    ICoinlyDbContext dbContext,
     IPaymentMethodRepository paymentMethodRepository,
-    IWalletRepository walletRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreatePaymentMethodCommand, Guid>
 {
@@ -14,7 +14,11 @@ internal sealed class CreatePaymentMethodCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId, userContext.UserId);
+        Wallet? wallet = await dbContext
+            .Wallets
+            .Include(x => x.Methods)
+            .SingleOrDefaultAsync(x => x.Id == request.WalletId && x.UserId == userContext.UserId, cancellationToken);
+
         if (wallet is null)
         {
             return Result.Fail<Guid>(WalletErrors.NotFound);

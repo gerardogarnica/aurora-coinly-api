@@ -1,10 +1,7 @@
-﻿using Aurora.Coinly.Domain.Transactions;
-using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Wallets.RemoveTransaction;
+﻿namespace Aurora.Coinly.Application.Wallets.RemoveTransaction;
 
 internal sealed class RemoveTransactionFromWalletCommandHandler(
-    IWalletRepository walletRepository,
+    ICoinlyDbContext dbContext,
     ITransactionRepository transactionRepository) : ICommandHandler<RemoveTransactionFromWalletCommand>
 {
     public async Task<Result> Handle(
@@ -19,7 +16,10 @@ internal sealed class RemoveTransactionFromWalletCommandHandler(
         }
 
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId, transaction.UserId);
+        Wallet? wallet = await dbContext
+            .Wallets
+            .SingleOrDefaultAsync(x => x.Id == request.WalletId, cancellationToken);
+
         if (wallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);
@@ -33,7 +33,9 @@ internal sealed class RemoveTransactionFromWalletCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        walletRepository.Update(wallet);
+        dbContext.Wallets.Update(wallet);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

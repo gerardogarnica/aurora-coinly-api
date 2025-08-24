@@ -4,8 +4,8 @@ using Aurora.Coinly.Domain.Wallets;
 namespace Aurora.Coinly.Application.Transactions.Process;
 
 internal sealed class ProcessTransactionPaymentCommandHandler(
+    ICoinlyDbContext dbContext,
     ITransactionRepository transactionRepository,
-    IWalletRepository walletRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<ProcessTransactionPaymentCommand>
 {
@@ -23,7 +23,11 @@ internal sealed class ProcessTransactionPaymentCommandHandler(
             }
 
             // Get wallet
-            var wallet = await walletRepository.GetByIdAsync(request.WalletId, userContext.UserId);
+            Wallet? wallet = await dbContext
+                .Wallets
+                .Include(x => x.Methods)
+                .SingleOrDefaultAsync(x => x.Id == request.WalletId && x.UserId == userContext.UserId, cancellationToken);
+
             if (wallet is null)
             {
                 return Result.Fail(WalletErrors.NotFound);

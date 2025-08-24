@@ -1,7 +1,7 @@
 ﻿using Aurora.Coinly.Domain.Shared;
 using Aurora.Coinly.Domain.Wallets;
 
-namespace Aurora.Coinly.Infrastructure.Wallets;
+namespace Aurora.Coinly.Infrastructure.Configurations;
 
 internal sealed class WalletConfiguration : IEntityTypeConfiguration<Wallet>
 {
@@ -45,8 +45,5 @@ internal sealed class WalletConfiguration : IEntityTypeConfiguration<Wallet>
         });
 
         builder.Property(x => x.Notes).HasMaxLength(1000);
-
-        builder.Ignore(x => x.OpenedOn);
-        builder.Ignore(x => x.LastOperationOn);
     }
 }

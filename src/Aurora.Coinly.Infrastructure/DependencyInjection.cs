@@ -3,7 +3,6 @@ using Aurora.Coinly.Domain.Methods;
 using Aurora.Coinly.Domain.Summary;
 using Aurora.Coinly.Domain.Transactions;
 using Aurora.Coinly.Domain.Users;
-using Aurora.Coinly.Domain.Wallets;
 using Aurora.Coinly.Infrastructure.Authentication;
 using Aurora.Coinly.Infrastructure.Budgets;
 using Aurora.Coinly.Infrastructure.Interceptors;
@@ -11,7 +10,6 @@ using Aurora.Coinly.Infrastructure.Methods;
 using Aurora.Coinly.Infrastructure.Summary;
 using Aurora.Coinly.Infrastructure.Transactions;
 using Aurora.Coinly.Infrastructure.Users;
-using Aurora.Coinly.Infrastructure.Wallets;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -136,7 +134,6 @@ public static class DependencyInjection
         services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
         services.AddScoped<IMonthlySummaryRepository, MonthlySummaryRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
-        services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserTokenRepository, UserTokenRepository>();
 

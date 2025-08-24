@@ -16,10 +16,10 @@ public sealed class Wallet : BaseEntity
     public WalletType Type { get; private set; }
     public bool AllowNegative { get; private set; }
     public Color Color { get; private set; }
-    public string? Notes { get; private set; }
-    public bool IsDeleted { get; private set; }
     public DateOnly OpenedOn { get; private set; }
     public DateOnly LastOperationOn { get; private set; }
+    public string? Notes { get; private set; }
+    public bool IsDeleted { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? UpdatedOnUtc { get; private set; }
     public DateTime? DeletedOnUtc { get; private set; }
@@ -54,6 +54,8 @@ public sealed class Wallet : BaseEntity
             Type = type,
             AllowNegative = allowNegative,
             Color = color,
+            OpenedOn = DateOnly.FromDateTime(createdOn),
+            LastOperationOn = DateOnly.FromDateTime(createdOn),
             Notes = notes,
             IsDeleted = false,
             CreatedOnUtc = createdOn
@@ -289,12 +291,6 @@ public sealed class Wallet : BaseEntity
         return this;
     }
 
-    public void SetOpenAndLastOperationDates(DateOnly openedOn, DateOnly lastOperationOn)
-    {
-        OpenedOn = openedOn;
-        LastOperationOn = lastOperationOn;
-    }
-
     public void SetOperations(IList<WalletHistory> operations)
     {
         _operations.Clear();
@@ -320,6 +316,8 @@ public sealed class Wallet : BaseEntity
             new Money(AvailableAmount.Amount, AvailableAmount.Currency),
             new Money(SavingsAmount.Amount, SavingsAmount.Currency),
             createdOn);
+
+        LastOperationOn = DateOnly.FromDateTime(createdOn);
 
         _operations.Add(operation);
     }

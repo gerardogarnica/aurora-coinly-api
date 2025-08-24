@@ -1,6 +1,4 @@
-﻿using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Wallets;
+﻿namespace Aurora.Coinly.Application.Wallets;
 
 public sealed record WalletModel(
     Guid WalletId,

@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Wallets.Create;
+﻿namespace Aurora.Coinly.Application.Wallets.Create;
 
 internal sealed class CreateWalletCommandHandler(
-    IWalletRepository walletRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateWalletCommand, Guid>
 {
@@ -23,7 +21,9 @@ internal sealed class CreateWalletCommandHandler(
             request.OpenedOn,
             dateTimeService.UtcNow);
 
-        await walletRepository.AddAsync(wallet, cancellationToken);
+        dbContext.Wallets.Add(wallet);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return wallet.Id;
     }

@@ -3,7 +3,6 @@
 internal sealed class CreateIncomeTransactionCommandHandler(
     ICoinlyDbContext dbContext,
     ITransactionRepository transactionRepository,
-    IWalletRepository walletRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateIncomeTransactionCommand, Guid>
 {
@@ -46,7 +45,11 @@ internal sealed class CreateIncomeTransactionCommandHandler(
         var transaction = result.Value;
 
         // Pay transaction
-        var wallet = await walletRepository.GetByIdAsync(request.WalletId, userContext.UserId);
+        Wallet? wallet = await dbContext
+            .Wallets
+            .Include(x => x.Methods)
+            .SingleOrDefaultAsync(x => x.Id == request.WalletId && x.UserId == userContext.UserId, cancellationToken);
+
         if (wallet is null)
         {
             return Result.Fail<Guid>(WalletErrors.NotFound);

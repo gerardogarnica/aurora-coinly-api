@@ -1,10 +1,7 @@
-﻿using Aurora.Coinly.Domain.Wallets;
-using System.Transactions;
-
-namespace Aurora.Coinly.Application.Wallets.Transfer;
+﻿namespace Aurora.Coinly.Application.Wallets.Transfer;
 
 internal sealed class TransferBetweenWalletsCommandHandler(
-    IWalletRepository walletRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<TransferBetweenWalletsCommand>
 {
@@ -13,14 +10,20 @@ internal sealed class TransferBetweenWalletsCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get source wallet
-        var sourceWallet = await walletRepository.GetByIdAsync(request.SourceWalletId, userContext.UserId);
+        Wallet? sourceWallet = await dbContext
+            .Wallets
+            .SingleOrDefaultAsync(x => x.Id == request.SourceWalletId && x.UserId == userContext.UserId, cancellationToken);
+
         if (sourceWallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);
         }
 
         // Get destination wallet
-        var destinationWallet = await walletRepository.GetByIdAsync(request.DestinationWalletId, userContext.UserId);
+        Wallet? destinationWallet = await dbContext
+            .Wallets
+            .SingleOrDefaultAsync(x => x.Id == request.DestinationWalletId && x.UserId == userContext.UserId, cancellationToken);
+
         if (destinationWallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);
@@ -56,8 +59,10 @@ internal sealed class TransferBetweenWalletsCommandHandler(
             return Result.Fail(depositResult.Error);
         }
 
-        walletRepository.Update(sourceWallet);
-        walletRepository.Update(destinationWallet);
+        dbContext.Wallets.Update(sourceWallet);
+        dbContext.Wallets.Update(destinationWallet);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

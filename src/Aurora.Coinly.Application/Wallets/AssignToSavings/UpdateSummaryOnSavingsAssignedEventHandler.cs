@@ -1,5 +1,4 @@
 ﻿using Aurora.Coinly.Application.Summary.UpdateSavings;
-using Aurora.Coinly.Domain.Wallets;
 
 namespace Aurora.Coinly.Application.Wallets.AssignToSavings;
 

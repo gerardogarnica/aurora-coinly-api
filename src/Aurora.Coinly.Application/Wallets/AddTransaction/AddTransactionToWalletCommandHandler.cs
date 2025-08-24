@@ -1,10 +1,7 @@
-﻿using Aurora.Coinly.Domain.Transactions;
-using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Wallets.AddTransaction;
+﻿namespace Aurora.Coinly.Application.Wallets.AddTransaction;
 
 internal sealed class AddTransactionToWalletCommandHandler(
-    IWalletRepository walletRepository,
+    ICoinlyDbContext dbContext,
     ITransactionRepository transactionRepository,
     IDateTimeService dateTimeService) : ICommandHandler<AddTransactionToWalletCommand>
 {
@@ -25,7 +22,10 @@ internal sealed class AddTransactionToWalletCommandHandler(
         }
 
         // Get wallet
-        var wallet = await walletRepository.GetByIdAsync(transaction.Wallet!.Id, transaction.UserId);
+        Wallet? wallet = await dbContext
+            .Wallets
+            .SingleOrDefaultAsync(x => x.Id == transaction.Wallet!.Id, cancellationToken);
+
         if (wallet is null)
         {
             return Result.Fail(WalletErrors.NotFound);
@@ -41,7 +41,9 @@ internal sealed class AddTransactionToWalletCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        walletRepository.Update(wallet);
+        dbContext.Wallets.Update(wallet);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

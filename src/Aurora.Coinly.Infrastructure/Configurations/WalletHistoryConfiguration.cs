@@ -1,7 +1,7 @@
 ﻿using Aurora.Coinly.Domain.Shared;
 using Aurora.Coinly.Domain.Wallets;
 
-namespace Aurora.Coinly.Infrastructure.Wallets;
+namespace Aurora.Coinly.Infrastructure.Configurations;
 
 internal sealed class WalletHistoryConfiguration : IEntityTypeConfiguration<WalletHistory>
 {
