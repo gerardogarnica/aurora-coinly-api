@@ -1,15 +1,18 @@
 ﻿namespace Aurora.Coinly.Application.Wallets.RemoveTransaction;
 
 internal sealed class RemoveTransactionFromWalletCommandHandler(
-    ICoinlyDbContext dbContext,
-    ITransactionRepository transactionRepository) : ICommandHandler<RemoveTransactionFromWalletCommand>
+    ICoinlyDbContext dbContext) : ICommandHandler<RemoveTransactionFromWalletCommand>
 {
     public async Task<Result> Handle(
         RemoveTransactionFromWalletCommand request,
         CancellationToken cancellationToken)
     {
         // Get transaction
-        var transaction = await transactionRepository.GetByIdAsync(request.TransactionId);
+        Transaction? transaction = await dbContext
+            .Transactions
+            .Include(x => x.Wallet)
+            .SingleOrDefaultAsync(x => x.Id == request.TransactionId, cancellationToken);
+
         if (transaction is null)
         {
             return Result.Fail(TransactionErrors.NotFound);

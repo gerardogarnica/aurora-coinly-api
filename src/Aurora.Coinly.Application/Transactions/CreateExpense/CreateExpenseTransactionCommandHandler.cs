@@ -2,7 +2,6 @@
 
 internal sealed class CreateExpenseTransactionCommandHandler(
     ICoinlyDbContext dbContext,
-    ITransactionRepository transactionRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateExpenseTransactionCommand, Guid>
 {
@@ -84,7 +83,9 @@ internal sealed class CreateExpenseTransactionCommandHandler(
             }
         }
 
-        await transactionRepository.AddAsync(transaction, cancellationToken);
+        dbContext.Transactions.Add(transaction);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return transaction.Id;
     }

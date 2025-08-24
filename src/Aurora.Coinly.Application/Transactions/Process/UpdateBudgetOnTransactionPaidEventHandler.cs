@@ -1,5 +1,4 @@
 ﻿using Aurora.Coinly.Application.Budgets.AddTransaction;
-using Aurora.Coinly.Domain.Transactions;
 
 namespace Aurora.Coinly.Application.Transactions.Process;
 

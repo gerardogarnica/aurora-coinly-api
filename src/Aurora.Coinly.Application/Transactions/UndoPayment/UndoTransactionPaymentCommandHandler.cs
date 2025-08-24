@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Transactions;
-
-namespace Aurora.Coinly.Application.Transactions.UndoPayment;
+﻿namespace Aurora.Coinly.Application.Transactions.UndoPayment;
 
 internal sealed class UndoTransactionPaymentCommandHandler(
-    ITransactionRepository transactionRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<UndoTransactionPaymentCommand>
 {
@@ -12,7 +10,14 @@ internal sealed class UndoTransactionPaymentCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get transaction
-        var transaction = await transactionRepository.GetByIdAsync(request.Id, userContext.UserId);
+        Transaction? transaction = await dbContext
+            .Transactions
+            .Include(x => x.Category)
+            .Include(x => x.PaymentMethod)
+            .Include(x => x.Wallet)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (transaction is null)
         {
             return Result.Fail(TransactionErrors.NotFound);
@@ -26,7 +31,9 @@ internal sealed class UndoTransactionPaymentCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        transactionRepository.Update(transaction);
+        dbContext.Transactions.Update(transaction);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

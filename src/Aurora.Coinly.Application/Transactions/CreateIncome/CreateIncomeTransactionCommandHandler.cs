@@ -2,7 +2,6 @@
 
 internal sealed class CreateIncomeTransactionCommandHandler(
     ICoinlyDbContext dbContext,
-    ITransactionRepository transactionRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateIncomeTransactionCommand, Guid>
 {
@@ -61,7 +60,9 @@ internal sealed class CreateIncomeTransactionCommandHandler(
             return Result.Fail<Guid>(result.Error);
         }
 
-        await transactionRepository.AddAsync(transaction, cancellationToken);
+        dbContext.Transactions.Add(transaction);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return transaction.Id;
     }

@@ -1,7 +1,6 @@
 ﻿using Aurora.Coinly.Application.Categories;
 using Aurora.Coinly.Application.Methods;
 using Aurora.Coinly.Application.Wallets;
-using Aurora.Coinly.Domain.Transactions;
 
 namespace Aurora.Coinly.Application.Transactions;
 

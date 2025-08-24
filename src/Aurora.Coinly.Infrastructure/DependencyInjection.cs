@@ -1,7 +1,5 @@
-﻿using Aurora.Coinly.Domain.Transactions;
-using Aurora.Coinly.Infrastructure.Authentication;
+﻿using Aurora.Coinly.Infrastructure.Authentication;
 using Aurora.Coinly.Infrastructure.Interceptors;
-using Aurora.Coinly.Infrastructure.Transactions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -29,9 +27,6 @@ public static class DependencyInjection
 
         // Database configuration
         services.AddDatabaseConfiguration(configuration);
-
-        // Repository implementations
-        services.AddRepositoryImplementations();
 
         // User context implementation
         services.AddUserContext();
@@ -116,13 +111,6 @@ public static class DependencyInjection
 
         // IUnitOfWork implementation
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
-
-        return services;
-    }
-
-    private static IServiceCollection AddRepositoryImplementations(this IServiceCollection services)
-    {
-        services.AddScoped<ITransactionRepository, TransactionRepository>();
 
         return services;
     }

@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Categories;
-using Aurora.Coinly.Domain.Methods;
-using Aurora.Coinly.Domain.Shared;
+﻿using Aurora.Coinly.Domain.Shared;
 using Aurora.Coinly.Domain.Transactions;
 
-namespace Aurora.Coinly.Infrastructure.Transactions;
+namespace Aurora.Coinly.Infrastructure.Configurations;
 
 internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 {

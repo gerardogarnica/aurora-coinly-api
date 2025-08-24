@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Transactions;
-
-namespace Aurora.Coinly.Application.Transactions.GetById;
+﻿namespace Aurora.Coinly.Application.Transactions.GetById;
 
 internal sealed class GetTransactionByIdQueryHandler(
-    ITransactionRepository transactionRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext) : IQueryHandler<GetTransactionByIdQuery, TransactionModel>
 {
     public async Task<Result<TransactionModel>> Handle(
@@ -11,7 +9,14 @@ internal sealed class GetTransactionByIdQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get transaction
-        var transaction = await transactionRepository.GetByIdAsync(request.Id, userContext.UserId);
+        Transaction? transaction = await dbContext
+            .Transactions
+            .Include(x => x.Category)
+            .Include(x => x.PaymentMethod)
+            .Include(x => x.Wallet)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (transaction is null)
         {
             return Result.Fail<TransactionModel>(TransactionErrors.NotFound);

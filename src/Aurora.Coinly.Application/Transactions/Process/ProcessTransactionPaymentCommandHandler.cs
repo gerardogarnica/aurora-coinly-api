@@ -1,11 +1,7 @@
-﻿using Aurora.Coinly.Domain.Transactions;
-using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Transactions.Process;
+﻿namespace Aurora.Coinly.Application.Transactions.Process;
 
 internal sealed class ProcessTransactionPaymentCommandHandler(
     ICoinlyDbContext dbContext,
-    ITransactionRepository transactionRepository,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<ProcessTransactionPaymentCommand>
 {
@@ -16,7 +12,10 @@ internal sealed class ProcessTransactionPaymentCommandHandler(
         foreach (var transactionId in request.TransactionIds)
         {
             // Get transaction
-            var transaction = await transactionRepository.GetByIdAsync(transactionId, userContext.UserId);
+            Transaction? transaction = await dbContext
+                .Transactions
+                .SingleOrDefaultAsync(x => x.Id == transactionId && x.UserId == userContext.UserId, cancellationToken);
+
             if (transaction is null)
             {
                 return Result.Fail(TransactionErrors.NotFound);
@@ -44,7 +43,9 @@ internal sealed class ProcessTransactionPaymentCommandHandler(
                 return Result.Fail(result.Error);
             }
 
-            transactionRepository.Update(transaction);
+            dbContext.Transactions.Update(transaction);
+
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
 
         return Result.Ok();
