@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Categories;
-
-namespace Aurora.Coinly.Application.Categories.Delete;
+﻿namespace Aurora.Coinly.Application.Categories.Delete;
 
 internal sealed class DeleteCategoryCommandHandler(
-    ICategoryRepository categoryRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<DeleteCategoryCommand>
 {
@@ -12,7 +10,10 @@ internal sealed class DeleteCategoryCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.Id, userContext.UserId);
+        Category? category = await dbContext
+            .Categories
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (category is null)
         {
             return Result.Fail(CategoryErrors.NotFound);
@@ -26,7 +27,9 @@ internal sealed class DeleteCategoryCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        categoryRepository.Update(category);
+        dbContext.Categories.Update(category);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

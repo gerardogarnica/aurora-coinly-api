@@ -1,7 +1,4 @@
-﻿using Aurora.Coinly.Domain.Categories;
-using Aurora.Coinly.Domain.Transactions;
-
-namespace Aurora.Coinly.Application.Categories;
+﻿namespace Aurora.Coinly.Application.Categories;
 
 public sealed record CategoryModel(
     Guid CategoryId,

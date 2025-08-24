@@ -1,5 +1,4 @@
 ﻿using Aurora.Coinly.Domain.Budgets;
-using Aurora.Coinly.Domain.Categories;
 using Aurora.Coinly.Domain.Methods;
 using Aurora.Coinly.Domain.Summary;
 using Aurora.Coinly.Domain.Transactions;
@@ -7,7 +6,6 @@ using Aurora.Coinly.Domain.Users;
 using Aurora.Coinly.Domain.Wallets;
 using Aurora.Coinly.Infrastructure.Authentication;
 using Aurora.Coinly.Infrastructure.Budgets;
-using Aurora.Coinly.Infrastructure.Categories;
 using Aurora.Coinly.Infrastructure.Interceptors;
 using Aurora.Coinly.Infrastructure.Methods;
 using Aurora.Coinly.Infrastructure.Summary;
@@ -135,7 +133,6 @@ public static class DependencyInjection
     private static IServiceCollection AddRepositoryImplementations(this IServiceCollection services)
     {
         services.AddScoped<IBudgetRepository, BudgetRepository>();
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
         services.AddScoped<IMonthlySummaryRepository, MonthlySummaryRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();

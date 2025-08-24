@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Categories;
-
-namespace Aurora.Coinly.Application.Categories.Update;
+﻿namespace Aurora.Coinly.Application.Categories.Update;
 
 internal sealed class UpdateCategoryCommandHandler(
-    ICategoryRepository categoryRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<UpdateCategoryCommand>
 {
@@ -12,7 +10,10 @@ internal sealed class UpdateCategoryCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.Id, userContext.UserId);
+        Category? category = await dbContext
+            .Categories
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (category is null)
         {
             return Result.Fail(CategoryErrors.NotFound);
@@ -32,7 +33,9 @@ internal sealed class UpdateCategoryCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        categoryRepository.Update(category);
+        dbContext.Categories.Update(category);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

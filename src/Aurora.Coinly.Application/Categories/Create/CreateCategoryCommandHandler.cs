@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Categories;
-
-namespace Aurora.Coinly.Application.Categories.Create;
+﻿namespace Aurora.Coinly.Application.Categories.Create;
 
 internal sealed class CreateCategoryCommandHandler(
-    ICategoryRepository categoryRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext,
     IDateTimeService dateTimeService) : ICommandHandler<CreateCategoryCommand, Guid>
 {
@@ -22,7 +20,9 @@ internal sealed class CreateCategoryCommandHandler(
             request.Notes,
             dateTimeService.UtcNow);
 
-        await categoryRepository.AddAsync(category, cancellationToken);
+        dbContext.Categories.Add(category);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return category.Id;
     }

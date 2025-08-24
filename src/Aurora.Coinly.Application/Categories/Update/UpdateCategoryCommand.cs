@@ -1,6 +1,4 @@
-﻿using Aurora.Coinly.Domain.Categories;
-
-namespace Aurora.Coinly.Application.Categories.Update;
+﻿namespace Aurora.Coinly.Application.Categories.Update;
 
 public sealed record UpdateCategoryCommand(
     Guid Id,

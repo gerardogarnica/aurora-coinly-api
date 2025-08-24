@@ -1,9 +1,7 @@
-﻿using Aurora.Coinly.Domain.Categories;
-
-namespace Aurora.Coinly.Application.Categories.GetById;
+﻿namespace Aurora.Coinly.Application.Categories.GetById;
 
 internal sealed class GetCategoryByIdQueryHandler(
-    ICategoryRepository categoryRepository,
+    ICoinlyDbContext dbContext,
     IUserContext userContext) : IQueryHandler<GetCategoryByIdQuery, CategoryModel>
 {
     public async Task<Result<CategoryModel>> Handle(
@@ -11,7 +9,10 @@ internal sealed class GetCategoryByIdQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.Id, userContext.UserId);
+        Category? category = await dbContext
+            .Categories
+            .SingleOrDefaultAsync(x => x.Id == request.Id && x.UserId == userContext.UserId, cancellationToken);
+
         if (category is null)
         {
             return Result.Fail<CategoryModel>(CategoryErrors.NotFound);

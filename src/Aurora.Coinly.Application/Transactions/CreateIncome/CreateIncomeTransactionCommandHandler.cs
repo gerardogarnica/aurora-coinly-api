@@ -1,11 +1,7 @@
-﻿using Aurora.Coinly.Domain.Categories;
-using Aurora.Coinly.Domain.Transactions;
-using Aurora.Coinly.Domain.Wallets;
-
-namespace Aurora.Coinly.Application.Transactions.CreateIncome;
+﻿namespace Aurora.Coinly.Application.Transactions.CreateIncome;
 
 internal sealed class CreateIncomeTransactionCommandHandler(
-    ICategoryRepository categoryRepository,
+    ICoinlyDbContext dbContext,
     ITransactionRepository transactionRepository,
     IWalletRepository walletRepository,
     IUserContext userContext,
@@ -16,7 +12,10 @@ internal sealed class CreateIncomeTransactionCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get category
-        var category = await categoryRepository.GetByIdAsync(request.CategoryId, userContext.UserId);
+        Category? category = await dbContext
+            .Categories
+            .SingleOrDefaultAsync(x => x.Id == request.CategoryId && x.UserId == userContext.UserId, cancellationToken);
+
         if (category is null)
         {
             return Result.Fail<Guid>(CategoryErrors.NotFound);

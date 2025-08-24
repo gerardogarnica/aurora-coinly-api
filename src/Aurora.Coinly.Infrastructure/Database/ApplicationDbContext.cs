@@ -1,4 +1,5 @@
-﻿using Aurora.Coinly.Domain.Budgets;
+﻿using Aurora.Coinly.Application.Abstractions.Data;
+using Aurora.Coinly.Domain.Budgets;
 using Aurora.Coinly.Domain.Categories;
 using Aurora.Coinly.Domain.Methods;
 using Aurora.Coinly.Domain.Summary;
@@ -9,7 +10,7 @@ using Aurora.Coinly.Domain.Wallets;
 namespace Aurora.Coinly.Infrastructure.Database;
 
 public sealed class ApplicationDbContext(
-    DbContextOptions<ApplicationDbContext> options) : DbContext(options), IUnitOfWork
+    DbContextOptions<ApplicationDbContext> options) : DbContext(options), ICoinlyDbContext, IUnitOfWork
 {
     internal const string DEFAULT_SCHEMA = "coinly";
 

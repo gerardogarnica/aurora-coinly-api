@@ -1,6 +1,6 @@
 ﻿using Aurora.Coinly.Domain.Categories;
 
-namespace Aurora.Coinly.Infrastructure.Categories;
+namespace Aurora.Coinly.Infrastructure.Configurations;
 
 internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
