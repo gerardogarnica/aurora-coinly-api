@@ -54,8 +54,8 @@ public sealed class Wallet : BaseEntity
             Type = type,
             AllowNegative = allowNegative,
             Color = color,
-            OpenedOn = DateOnly.FromDateTime(createdOn),
-            LastOperationOn = DateOnly.FromDateTime(createdOn),
+            OpenedOn = openedOn,
+            LastOperationOn = openedOn,
             Notes = notes,
             IsDeleted = false,
             CreatedOnUtc = createdOn
@@ -317,7 +317,7 @@ public sealed class Wallet : BaseEntity
             new Money(SavingsAmount.Amount, SavingsAmount.Currency),
             createdOn);
 
-        LastOperationOn = DateOnly.FromDateTime(createdOn);
+        LastOperationOn = date;
 
         _operations.Add(operation);
     }
