@@ -6,6 +6,10 @@ public static class SummaryErrors
         "Summary.CurrencyNotMatched",
         "The currency of the transaction does not match the currency of the summary");
 
+    public static readonly BaseError NotFound = new(
+        "Summary.NotFound",
+        "The summary was not found");
+
     public static readonly BaseError TransactionAlreadyIsPaid = new(
         "Summary.TransactionAlreadyIsPaid",
         "The transaction is already paid");

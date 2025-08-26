@@ -11,7 +11,7 @@ internal sealed class GetSummaryListByYearQueryHandler(
         // Get summaries
         List<MonthlySummary> summaries = await dbContext
             .MonthlySummaries
-            .Where(x => x.UserId == userContext.UserId && x.Year == request.Year && x.Currency.Code == request.CurrencyCode)
+            .Where(x => x.UserId == userContext.UserId && x.Year == request.Year && x.CurrencyCode == request.CurrencyCode)
             .AsNoTracking()
             .AsQueryable()
             .OrderBy(x => x.Month)

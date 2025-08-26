@@ -11,6 +11,7 @@ internal sealed class AddTransactionToWalletCommandHandler(
         // Get transaction
         Transaction? transaction = await dbContext
             .Transactions
+            .Include(x => x.Category)
             .Include(x => x.Wallet)
             .SingleOrDefaultAsync(x => x.Id == request.TransactionId, cancellationToken);
 

@@ -10,6 +10,7 @@ internal sealed class AddSummaryTransactionCommandHandler(
         // Get transaction
         Transaction? transaction = await dbContext
             .Transactions
+            .Include(x => x.Category)
             .SingleOrDefaultAsync(x => x.Id == request.TransactionId, cancellationToken);
 
         if (transaction is null)
@@ -22,23 +23,36 @@ internal sealed class AddSummaryTransactionCommandHandler(
             return Result.Fail(TransactionErrors.NotPaid);
         }
 
-        // Get monthly summary
-        MonthlySummary? monthlySummary = await dbContext
+        // Check if summary exists for the requested year
+        var existsSummary = await dbContext
             .MonthlySummaries
-            .SingleOrDefaultAsync(x =>
-                x.UserId == transaction.UserId &&
-                x.Year == transaction.PaymentDate!.Value.Year &&
-                x.Month == transaction.PaymentDate!.Value.Month &&
-                x.Currency.Code == transaction.Amount.Currency.Code,
-                cancellationToken);
+            .AnyAsync(x => x.UserId == transaction.UserId && x.Year == transaction.PaymentDate!.Value.Year, cancellationToken);
 
-        var isNewSummary = monthlySummary is null;
+        List<MonthlySummary> summaries = [];
+        if (!existsSummary)
+        {
+            summaries = [.. MonthlySummary.Create(
+                transaction.UserId,
+                transaction.PaymentDate!.Value.Year,
+                transaction.Amount.Currency.Code)];
+        }
 
-        monthlySummary ??= MonthlySummary.Create(
-            transaction.UserId,
-            transaction.PaymentDate!.Value.Year,
-            transaction.PaymentDate!.Value.Month,
-            transaction.Amount.Currency);
+        // Get monthly summary
+        MonthlySummary? monthlySummary = existsSummary
+            ? await dbContext
+                .MonthlySummaries
+                .SingleOrDefaultAsync(x =>
+                    x.UserId == transaction.UserId &&
+                    x.Year == transaction.PaymentDate!.Value.Year &&
+                    x.Month == transaction.PaymentDate!.Value.Month &&
+                    x.CurrencyCode == transaction.Amount.Currency.Code,
+                    cancellationToken)
+            : summaries.Find(x => x.Month == transaction.PaymentDate!.Value.Month);
+
+        if (monthlySummary is null)
+        {
+            return Result.Fail(SummaryErrors.NotFound);
+        }
 
         // Apply transaction to summary
         var result = monthlySummary.ApplyTransaction(transaction);
@@ -48,9 +62,9 @@ internal sealed class AddSummaryTransactionCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        if (isNewSummary)
+        if (!existsSummary)
         {
-            dbContext.MonthlySummaries.Add(result.Value);
+            dbContext.MonthlySummaries.AddRange(summaries);
         }
         else
         {

@@ -18,23 +18,36 @@ internal sealed class UpdateSummarySavingsCommandHandler(
             return Result.Fail(WalletErrors.NotFound);
         }
 
-        // Get monthly summary
-        MonthlySummary? monthlySummary = await dbContext
+        // Check if summary exists for the requested year
+        var existsSummary = await dbContext
             .MonthlySummaries
-            .SingleOrDefaultAsync(x =>
-                x.UserId == wallet.UserId &&
-                x.Year == request.AssignedOn.Year &&
-                x.Month == request.AssignedOn.Month &&
-                x.Currency.Code == request.Amount.Currency.Code,
-                cancellationToken);
+            .AnyAsync(x => x.UserId == wallet.UserId && x.Year == request.AssignedOn.Year, cancellationToken);
 
-        var isNewSummary = monthlySummary is null;
+        List<MonthlySummary> summaries = [];
+        if (!existsSummary)
+        {
+            summaries = [.. MonthlySummary.Create(
+                wallet.UserId,
+                request.AssignedOn.Year,
+                wallet.TotalAmount.Currency.Code)];
+        }
 
-        monthlySummary ??= MonthlySummary.Create(
-            wallet.UserId,
-            request.AssignedOn.Year,
-            request.AssignedOn.Month,
-            request.Amount.Currency);
+        // Get monthly summary
+        MonthlySummary? monthlySummary = existsSummary
+            ? await dbContext
+                .MonthlySummaries
+                .SingleOrDefaultAsync(x =>
+                    x.UserId == wallet.UserId &&
+                    x.Year == request.AssignedOn.Year &&
+                    x.Month == request.AssignedOn.Month &&
+                    x.CurrencyCode == request.Amount.Currency.Code,
+                    cancellationToken)
+            : summaries.Find(x => x.Month == request.AssignedOn.Month);
+
+        if (monthlySummary is null)
+        {
+            return Result.Fail(SummaryErrors.NotFound);
+        }
 
         // Update savings
         var result = monthlySummary.UpdateSavings(request.Amount, request.AssignedOn, request.IsIncrement);
@@ -44,9 +57,9 @@ internal sealed class UpdateSummarySavingsCommandHandler(
             return Result.Fail(result.Error);
         }
 
-        if (isNewSummary)
+        if (!existsSummary)
         {
-            dbContext.MonthlySummaries.Add(result.Value);
+            dbContext.MonthlySummaries.AddRange(summaries);
         }
         else
         {

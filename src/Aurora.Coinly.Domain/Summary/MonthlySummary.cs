@@ -7,7 +7,7 @@ public sealed class MonthlySummary : BaseEntity
     public Guid UserId { get; private set; }
     public int Year { get; private set; }
     public int Month { get; private set; }
-    public Currency Currency { get; private set; }
+    public string CurrencyCode { get; private set; }
     public decimal TotalIncome { get; private set; }
     public decimal TotalExpense { get; private set; }
     public decimal Balance => TotalIncome - TotalExpense;
@@ -15,24 +15,27 @@ public sealed class MonthlySummary : BaseEntity
 
     private MonthlySummary() : base(Guid.NewGuid()) { }
 
-    public static MonthlySummary Create(
-        Guid userId,
-        int year,
-        int month,
-        Currency currency)
+    public static IList<MonthlySummary> Create(Guid userId, int year, string currencyCode)
     {
-        var summary = new MonthlySummary
-        {
-            UserId = userId,
-            Year = year,
-            Month = month,
-            Currency = currency,
-            TotalIncome = decimal.Zero,
-            TotalExpense = decimal.Zero,
-            Savings = decimal.Zero
-        };
+        List<MonthlySummary> summaries = [];
 
-        return summary;
+        for (int month = 1; month <= 12; month++)
+        {
+            MonthlySummary summary = new()
+            {
+                UserId = userId,
+                Year = year,
+                Month = month,
+                CurrencyCode = currencyCode,
+                TotalIncome = decimal.Zero,
+                TotalExpense = decimal.Zero,
+                Savings = decimal.Zero
+            };
+
+            summaries.Add(summary);
+        }
+
+        return summaries;
     }
 
     public Result<MonthlySummary> ApplyTransaction(Transaction transaction)
@@ -47,7 +50,7 @@ public sealed class MonthlySummary : BaseEntity
             return Result.Fail<MonthlySummary>(SummaryErrors.TransactionNotInPeriod);
         }
 
-        if (transaction.Amount.Currency != Currency)
+        if (transaction.Amount.Currency.Code != CurrencyCode)
         {
             return Result.Fail<MonthlySummary>(SummaryErrors.CurrencyNotMatched);
         }
@@ -76,7 +79,7 @@ public sealed class MonthlySummary : BaseEntity
             return Result.Fail<MonthlySummary>(SummaryErrors.TransactionNotInPeriod);
         }
 
-        if (transaction.Amount.Currency != Currency)
+        if (transaction.Amount.Currency.Code != CurrencyCode)
         {
             return Result.Fail<MonthlySummary>(SummaryErrors.CurrencyNotMatched);
         }

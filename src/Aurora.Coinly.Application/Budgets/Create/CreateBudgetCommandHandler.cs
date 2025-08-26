@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace Aurora.Coinly.Application.Budgets.Create;
+﻿namespace Aurora.Coinly.Application.Budgets.Create;
 
 internal sealed class CreateBudgetCommandHandler(
     ICoinlyDbContext dbContext,

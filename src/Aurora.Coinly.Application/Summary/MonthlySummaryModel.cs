@@ -16,7 +16,7 @@ internal static class MonthlySummaryModelExtensions
         return new MonthlySummaryModel(
             summary.Year,
             summary.Month,
-            summary.Currency.Code,
+            summary.CurrencyCode,
             summary.TotalIncome,
             summary.TotalExpense,
             summary.Balance,

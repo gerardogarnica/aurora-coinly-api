@@ -14,6 +14,7 @@ internal sealed class ProcessTransactionPaymentCommandHandler(
             // Get transaction
             Transaction? transaction = await dbContext
                 .Transactions
+                .Include(x => x.Category)
                 .SingleOrDefaultAsync(x => x.Id == transactionId && x.UserId == userContext.UserId, cancellationToken);
 
             if (transaction is null)

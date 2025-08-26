@@ -10,11 +10,7 @@ internal sealed class MonthlySummaryConfiguration : IEntityTypeConfiguration<Mon
 
         builder.HasKey(x => x.Id);
 
-        builder.OwnsOne(x => x.Currency, y =>
-        {
-            y.Property(x => x.Code).HasMaxLength(3);
-        });
-
+        builder.Property(x => x.CurrencyCode).HasMaxLength(3);
         builder.Property(x => x.TotalIncome).HasColumnType("numeric(9, 2)");
         builder.Property(x => x.TotalExpense).HasColumnType("numeric(9, 2)");
         builder.Property(x => x.Savings).HasColumnType("numeric(9, 2)");
