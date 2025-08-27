@@ -5,6 +5,7 @@ internal static class EndpointTags
     internal const string Authentication = "Authentication";
     internal const string Budgets = "Budgets";
     internal const string Categories = "Categories";
+    internal const string Dashboard = "Dashboard";
     internal const string PaymentMethods = "PaymentMethods";
     internal const string Profile = "Profile";
     internal const string Transactions = "Transactions";

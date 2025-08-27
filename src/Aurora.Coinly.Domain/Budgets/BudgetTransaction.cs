@@ -25,7 +25,7 @@ public sealed class BudgetTransaction
             BudgetPeriodId = period.Id,
             TransactionId = transaction.Id,
             Description = transaction.Description,
-            TransactionDate = transaction.TransactionDate,
+            TransactionDate = transaction.PaymentDate!.Value,
             Amount = transaction.Amount
         };
     }
