@@ -89,7 +89,7 @@ internal sealed class GetDashboardSummaryQueryHandler(
 
         return summary
             ?? MonthlySummary
-                .Create(userContext.UserId, date.Year, CurrencyCode)
+                .Create(userContext.UserId, date.Year, CurrencyCode, decimal.Zero)
                 .ToList()
                 .Find(x => x.Month == date.Month);
     }
@@ -167,6 +167,7 @@ internal sealed class GetDashboardSummaryQueryHandler(
         .Where(x => x.UserId == userContext.UserId)
         .AsNoTracking()
         .OrderByDescending(x => x.TransactionDate)
+        .ThenByDescending(x => x.CreatedOnUtc)
         .Take(MaxNumberOfTransactions)
         .ToListAsync(cancellationToken);
 
