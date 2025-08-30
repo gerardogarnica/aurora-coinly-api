@@ -23,47 +23,39 @@ internal sealed class UpdateSummarySavingsCommandHandler(
             .MonthlySummaries
             .AnyAsync(x => x.UserId == wallet.UserId && x.Year == request.AssignedOn.Year, cancellationToken);
 
-        List<MonthlySummary> summaries = [];
         if (!existsSummary)
         {
-            summaries = [.. MonthlySummary.Create(
+            // Get savings from the wallets
+            List<Wallet> wallets = await dbContext
+                .Wallets
+                .Where(x => x.UserId == wallet.UserId && !x.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+            decimal savingsAmount = wallets.Sum(x => x.SavingsAmount.Amount);
+
+            // Create summaries for all months in the year
+            List<MonthlySummary> summaries = [.. MonthlySummary.Create(
                 wallet.UserId,
                 request.AssignedOn.Year,
-                wallet.TotalAmount.Currency.Code)];
-        }
+                wallet.TotalAmount.Currency.Code,
+                savingsAmount)];
 
-        // Get monthly summary
-        MonthlySummary? monthlySummary = existsSummary
-            ? await dbContext
-                .MonthlySummaries
-                .SingleOrDefaultAsync(x =>
-                    x.UserId == wallet.UserId &&
-                    x.Year == request.AssignedOn.Year &&
-                    x.Month == request.AssignedOn.Month &&
-                    x.CurrencyCode == request.Amount.Currency.Code,
-                    cancellationToken)
-            : summaries.Find(x => x.Month == request.AssignedOn.Month);
-
-        if (monthlySummary is null)
-        {
-            return Result.Fail(SummaryErrors.NotFound);
-        }
-
-        // Update savings
-        var result = monthlySummary.UpdateSavings(request.Amount, request.AssignedOn, request.IsIncrement);
-
-        if (!result.IsSuccessful)
-        {
-            return Result.Fail(result.Error);
-        }
-
-        if (!existsSummary)
-        {
             dbContext.MonthlySummaries.AddRange(summaries);
         }
         else
         {
-            dbContext.MonthlySummaries.Update(result.Value);
+            List<MonthlySummary> summaries = await dbContext
+                .MonthlySummaries
+                .Where(x =>
+                    x.UserId == wallet.UserId &&
+                    x.Year == request.AssignedOn.Year &&
+                    x.Month >= request.AssignedOn.Month &&
+                    x.CurrencyCode == request.Amount.Currency.Code)
+                .ToListAsync(cancellationToken);
+
+            summaries.ForEach(x => x.UpdateSavings(request.Amount, request.IsIncrement));
+
+            dbContext.MonthlySummaries.UpdateRange(summaries);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

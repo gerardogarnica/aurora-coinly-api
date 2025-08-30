@@ -31,10 +31,20 @@ internal sealed class AddSummaryTransactionCommandHandler(
         List<MonthlySummary> summaries = [];
         if (!existsSummary)
         {
+            // Get savings from the wallets
+            List<Wallet> wallets = await dbContext
+                .Wallets
+                .Where(x => x.UserId == transaction.UserId && !x.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+            decimal savingsAmount = wallets.Sum(x => x.SavingsAmount.Amount);
+
+            // Create summaries for all months in the year
             summaries = [.. MonthlySummary.Create(
                 transaction.UserId,
                 transaction.PaymentDate!.Value.Year,
-                transaction.Amount.Currency.Code)];
+                transaction.Amount.Currency.Code,
+                savingsAmount)];
         }
 
         // Get monthly summary

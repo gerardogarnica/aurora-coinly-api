@@ -15,7 +15,11 @@ public sealed class MonthlySummary : BaseEntity
 
     private MonthlySummary() : base(Guid.NewGuid()) { }
 
-    public static IList<MonthlySummary> Create(Guid userId, int year, string currencyCode)
+    public static IList<MonthlySummary> Create(
+        Guid userId,
+        int year,
+        string currencyCode,
+        decimal savingsAmount)
     {
         List<MonthlySummary> summaries = [];
 
@@ -29,7 +33,7 @@ public sealed class MonthlySummary : BaseEntity
                 CurrencyCode = currencyCode,
                 TotalIncome = decimal.Zero,
                 TotalExpense = decimal.Zero,
-                Savings = decimal.Zero
+                Savings = savingsAmount
             };
 
             summaries.Add(summary);
@@ -96,23 +100,11 @@ public sealed class MonthlySummary : BaseEntity
         return this;
     }
 
-    public Result<MonthlySummary> UpdateSavings(Money amount, DateOnly assignedOn, bool isIncrement)
+    public void UpdateSavings(Money amount, bool isIncrement)
     {
-        if (!GetSummaryPeriod().Contains(assignedOn))
-        {
-            return Result.Fail<MonthlySummary>(SummaryErrors.TransactionNotInPeriod);
-        }
-
-        if (isIncrement)
-        {
-            Savings += amount.Amount;
-        }
-        else
-        {
-            Savings -= amount.Amount;
-        }
-
-        return this;
+        Savings = isIncrement
+            ? Savings + amount.Amount
+            : Savings - amount.Amount;
     }
 
     private DateRange GetSummaryPeriod()
