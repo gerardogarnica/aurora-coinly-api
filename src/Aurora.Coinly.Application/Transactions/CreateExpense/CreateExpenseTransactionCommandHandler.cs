@@ -102,9 +102,12 @@ internal sealed class CreateExpenseTransactionCommandHandler(
         var suggestedPaymentDay = method.SuggestedPaymentDay ?? 1;
         var statementCutoffDay = method.StatementCutoffDay ?? 1;
 
-        maxPaymentDate = transactionDate.Day < statementCutoffDay
-            ? new DateOnly(transactionDate.Year, transactionDate.Month, suggestedPaymentDay)
-            : new DateOnly(transactionDate.Year, transactionDate.Month + 1, suggestedPaymentDay);
+        maxPaymentDate = new DateOnly(transactionDate.Year, transactionDate.Month, suggestedPaymentDay);
+
+        if (transactionDate.Day >= statementCutoffDay)
+        {
+            maxPaymentDate = maxPaymentDate.AddMonths(1);
+        }
 
         if (statementCutoffDay > suggestedPaymentDay)
         {
