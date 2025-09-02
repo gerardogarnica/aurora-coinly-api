@@ -12,44 +12,25 @@ namespace Aurora.Coinly.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        // Authentication
-        services.AddAuthenticationServices(configuration);
-
-        // Encryption services
-        services.AddEncryptionServices(configuration);
-
-        // Quartz configuration
-        services.AddQuartzServices();
-
-        // Outbox interceptor
-        services.AddEntityFrameworkCoreInterceptors();
-
-        // Database configuration
-        services.AddDatabaseConfiguration(configuration);
-
-        // User context implementation
-        services.AddUserContext();
-
-        // Outbox pattern implementation
-        services.AddOutboxPatternImplementation();
-
-        // DateTime services
-        services.AddDateTimeServices();
-
-        return services;
-    }
+    public static IServiceCollection AddInfrastructureServices(
+        this IServiceCollection services,
+        IConfiguration configuration) => services
+            .AddAuthenticationServices(configuration)
+            .AddEncryptionServices(configuration)
+            .AddQuartzServices()
+            .AddDatabaseConfiguration(configuration)
+            .AddOutboxPatternImplementation()
+            .AddDateTimeServices();
 
     private static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpContextAccessor();
+        services.AddScoped<IUserContext, UserContext>();
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<ITokenProvider, TokenProvider>();
 
         services.Configure<JwtAuthOptions>(configuration.GetSection(JwtAuthOptions.SectionName));
         JwtAuthOptions jwtAuthOptions = configuration.GetSection(JwtAuthOptions.SectionName).Get<JwtAuthOptions>()!;
-
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
-        services.AddScoped<ITokenProvider, TokenProvider>();
 
         services
             .AddAuthentication(options =>
@@ -66,7 +47,7 @@ public static class DependencyInjection
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtAuthOptions.Issuer,
                     ValidAudience = jwtAuthOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key)),
                 };
             });
 
@@ -91,11 +72,6 @@ public static class DependencyInjection
 
         return services;
     }
-    private static IServiceCollection AddEntityFrameworkCoreInterceptors(this IServiceCollection services)
-    {
-        services.TryAddSingleton<InsertOutboxMessagesInterceptor>();
-        return services;
-    }
 
     private static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
@@ -113,12 +89,9 @@ public static class DependencyInjection
         // IUnitOfWork implementation
         services.AddScoped<ICoinlyDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
-        return services;
-    }
+        // Entity Framework Core interceptors
+        services.TryAddSingleton<InsertOutboxMessagesInterceptor>();
 
-    private static IServiceCollection AddUserContext(this IServiceCollection services)
-    {
-        services.AddScoped<IUserContext, UserContext>();
         return services;
     }
 
