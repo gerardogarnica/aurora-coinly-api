@@ -45,9 +45,9 @@ internal sealed class ProcessTransactionPaymentCommandHandler(
             }
 
             dbContext.Transactions.Update(transaction);
-
-            await dbContext.SaveChangesAsync(cancellationToken);
         }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

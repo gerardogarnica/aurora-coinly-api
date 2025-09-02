@@ -94,6 +94,16 @@ public sealed class Transaction : BaseEntity
         WalletId = wallet.Id;
         PaidOnUtc = paidOnUtc;
 
+        // Add transaction to wallet
+        if (Type == TransactionType.Income)
+        {
+            wallet.Deposit(this, paidOnUtc);
+        }
+        else
+        {
+            wallet.Withdraw(this, paidOnUtc);
+        }
+
         AddDomainEvent(new TransactionPaidEvent(Id));
 
         return this;
