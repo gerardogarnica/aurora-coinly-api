@@ -120,6 +120,8 @@ public partial class InitialMigration : Migration
                 type = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                 allow_negative = table.Column<bool>(type: "boolean", nullable: false),
                 color = table.Column<string>(type: "character varying(7)", maxLength: 7, nullable: false),
+                opened_on = table.Column<DateOnly>(type: "date", nullable: false),
+                last_operation_on = table.Column<DateOnly>(type: "date", nullable: false),
                 notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                 is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                 created_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Aurora.Coinly.Infrastructure.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250818001037_InitialMigration")]
+    [Migration("20250828214607_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -271,6 +271,12 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency_code");
 
                     b.Property<int>("Month")
                         .HasColumnType("integer")
@@ -534,6 +540,10 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
+                    b.Property<DateOnly>("LastOperationOn")
+                        .HasColumnType("date")
+                        .HasColumnName("last_operation_on");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -544,6 +554,10 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("notes");
+
+                    b.Property<DateOnly>("OpenedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("opened_on");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -821,33 +835,6 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                         .HasConstraintName("fk_payment_methods_wallets_wallet_id");
 
                     b.Navigation("Wallet");
-                });
-
-            modelBuilder.Entity("Aurora.Coinly.Domain.Summary.MonthlySummary", b =>
-                {
-                    b.OwnsOne("Aurora.Coinly.Domain.Shared.Currency", "Currency", b1 =>
-                        {
-                            b1.Property<Guid>("MonthlySummaryId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("id");
-
-                            b1.Property<string>("Code")
-                                .IsRequired()
-                                .HasMaxLength(3)
-                                .HasColumnType("character varying(3)")
-                                .HasColumnName("currency_code");
-
-                            b1.HasKey("MonthlySummaryId");
-
-                            b1.ToTable("monthly_summaries", "coinly");
-
-                            b1.WithOwner()
-                                .HasForeignKey("MonthlySummaryId")
-                                .HasConstraintName("fk_monthly_summaries_monthly_summaries_id");
-                        });
-
-                    b.Navigation("Currency")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Aurora.Coinly.Domain.Transactions.Transaction", b =>
