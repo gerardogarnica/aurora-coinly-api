@@ -252,15 +252,18 @@ public class WalletTests : BaseTest
     {
         // Arrange
         var wallet = WalletData.GetWallet();
-        var transaction = TransactionData.GetTransaction(CategoryData.GetCategory(), PaymentMethodData.GetPaymentMethod());
+        var transaction = TransactionData.GetTransaction(CategoryData.GetCategory(TransactionType.Income), PaymentMethodData.GetPaymentMethod());
         var expectedAvailableAmount = wallet.AvailableAmount + transaction.Amount;
-        transaction.Pay(wallet, DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
+        var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
         // Act
-        var result = wallet.Deposit(transaction, DateTime.UtcNow);
+        var result = transaction.Pay(wallet, paymentDate, DateTime.UtcNow);
+
+        transaction = result.Value;
 
         // Assert
         result.IsSuccessful.Should().BeTrue();
+        transaction.Status.Should().Be(TransactionStatus.Paid);
         wallet.AvailableAmount.Should().Be(expectedAvailableAmount);
         wallet.UpdatedOnUtc.Should().NotBeNull();
     }
@@ -387,15 +390,18 @@ public class WalletTests : BaseTest
     {
         // Arrange
         var wallet = WalletData.GetWallet();
-        var transaction = TransactionData.GetTransaction(CategoryData.GetCategory(), PaymentMethodData.GetPaymentMethod());
+        var transaction = TransactionData.GetTransaction(CategoryData.GetCategory(TransactionType.Expense), PaymentMethodData.GetPaymentMethod());
         var expectedAvailableAmount = wallet.AvailableAmount - transaction.Amount;
-        transaction.Pay(wallet, DateOnly.FromDateTime(DateTime.UtcNow), DateTime.UtcNow);
+        var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
         // Act
-        var result = wallet.Withdraw(transaction, DateTime.UtcNow);
+        var result = transaction.Pay(wallet, paymentDate, DateTime.UtcNow);
+
+        transaction = result.Value;
 
         // Assert
         result.IsSuccessful.Should().BeTrue();
+        transaction.Status.Should().Be(TransactionStatus.Paid);
         wallet.AvailableAmount.Should().Be(expectedAvailableAmount);
         wallet.UpdatedOnUtc.Should().NotBeNull();
     }
@@ -556,7 +562,6 @@ public class WalletTests : BaseTest
 
         var paymentDate = DateOnly.FromDateTime(DateTime.UtcNow);
         transaction.Pay(wallet, paymentDate, DateTime.UtcNow);
-        wallet.Withdraw(transaction, DateTime.UtcNow);
         
         transaction.UndoPayment(DateTime.UtcNow, DateOnly.FromDateTime(DateTime.UtcNow));
 

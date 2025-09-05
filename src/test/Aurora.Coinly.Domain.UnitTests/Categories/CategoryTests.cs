@@ -14,7 +14,7 @@ public class CategoryTests : BaseTest
             UserData.GetUser().Id,
             CategoryData.Name,
             CategoryData.Group,
-            CategoryData.Type,
+            TransactionType.Expense,
             CategoryData.MaxDaysToReverse,
             CategoryData.Color,
             CategoryData.Notes,
@@ -22,7 +22,7 @@ public class CategoryTests : BaseTest
 
         // Assert
         category.Name.Should().Be(CategoryData.Name);
-        category.Type.Should().Be(CategoryData.Type);
+        category.Type.Should().Be(TransactionType.Expense);
         category.Group.Should().Be(CategoryData.Group);
         category.Notes.Should().Be(CategoryData.Notes);
         category.IsDeleted.Should().Be(false);
