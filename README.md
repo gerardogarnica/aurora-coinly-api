@@ -95,12 +95,9 @@ Aurora Coinly follows the Clean Architecture principles, with the following laye
 
 Planned features and improvements include:
 
-- [x] Implement Wallet domain model
-- [x] Add Budget entity with DateRange value object
-- [x] Integrate BudgetTransaction entity
-- [x] Implement MonthlySummary updates based on paid transactions
-- [x] Add user authentication and authorization
-- [ ] Develop dashboard API
+- **Dashboard API insights**
+- **AI integration**
+- **Income and expense transaction templates**
 
 ## Contributing
 
