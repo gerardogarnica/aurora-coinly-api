@@ -1,4 +1,5 @@
 ﻿using Aurora.Coinly.Application.Transactions;
+using Aurora.Coinly.Application.Wallets;
 using System.Threading.Tasks;
 
 namespace Aurora.Coinly.Application.Dashboard.GetSummary;
@@ -11,7 +12,7 @@ internal sealed class GetDashboardSummaryQueryHandler(
     private const string CurrencyCode = "USD";
     private const int MonthsToShow = 12;
     private const int MaxNumberOfCategories = 10;
-    private const int MaxNumberOfTransactions = 10;
+    private const int MaxNumberOfTransactions = 5;
 
     public async Task<Result<DashboardSummaryModel>> Handle(
         GetDashboardSummaryQuery request,
@@ -41,6 +42,9 @@ internal sealed class GetDashboardSummaryQueryHandler(
         // Get expenses by category for the current month
         List<CategoryExpense> categoryExpenses = await GetExpensesByCategory(currentDate.Year, currentDate.Month, cancellationToken);
 
+        // Get expenses by group for the current month
+        List<CategoryGroupExpense> groupExpenses = await GetExpensesByGroup(currentDate.Year, currentDate.Month, cancellationToken);
+
         // Get recent transactions
         List<TransactionModel> recentTransactions = [.. (await GetRecentTransactions(cancellationToken))
             .Select(x => x.ToModel(DisplayDateType.TransactionDate))];
@@ -48,6 +52,10 @@ internal sealed class GetDashboardSummaryQueryHandler(
         // Get upcoming pending payments
         List<TransactionModel> upcomingPayments = [.. (await GetUpcomingPendingPayments(cancellationToken))
             .Select(x => x.ToModel(DisplayDateType.TransactionDate))];
+
+        // Get wallets
+        List<WalletModel> wallets = [.. (await GetActiveWallets(cancellationToken))
+            .Select(x => x.ToModel())];
 
         // Create and return the dashboard summary model
         DashboardSummaryModel dashboardSummaryModel = new(
@@ -58,8 +66,10 @@ internal sealed class GetDashboardSummaryQueryHandler(
             GetSummaryCard(currentPeriod.Savings, previousPeriod.Savings),
             monthlyTrends,
             categoryExpenses,
+            groupExpenses,
             recentTransactions,
-            upcomingPayments);
+            upcomingPayments,
+            wallets);
 
         return dashboardSummaryModel;
     }
@@ -158,6 +168,35 @@ internal sealed class GetDashboardSummaryQueryHandler(
         return topCategories;
     }
 
+    private async Task<List<CategoryGroupExpense>> GetExpensesByGroup(int year, int month, CancellationToken cancellationToken)
+    {
+        List<Transaction> transactions = await dbContext
+            .Transactions
+            .Include(x => x.Category)
+            .Where(x =>
+                x.Category.Type == TransactionType.Expense &&
+                x.UserId == userContext.UserId &&
+                x.TransactionDate.Year == year &&
+                x.TransactionDate.Month == month)
+            .ToListAsync(cancellationToken);
+
+        List<CategoryGroupExpense> groups = [.. transactions
+            .GroupBy(x => x.Category.Group)
+            .Select(g => new CategoryGroupExpense(g.Key.ToString(), g.Sum(x => x.Amount.Amount)))
+            .OrderByDescending(x => x.Amount)];
+
+        if (groups.Count <= MaxNumberOfCategories)
+        {
+            return groups;
+        }
+
+        List<CategoryGroupExpense> topGroups = [.. groups.Take(MaxNumberOfCategories - 1)];
+        decimal othersAmount = groups.Skip(MaxNumberOfCategories - 1).Sum(x => x.Amount);
+        topGroups.Add(new CategoryGroupExpense("Others", othersAmount));
+
+        return topGroups;
+    }
+
     private async Task<List<Transaction>> GetRecentTransactions(CancellationToken cancellationToken) => await dbContext
         .Transactions
         .Include(x => x.Category)
@@ -182,5 +221,13 @@ internal sealed class GetDashboardSummaryQueryHandler(
         .OrderBy(x => x.MaxPaymentDate)
         .ThenBy(x => x.TransactionDate)
         .Take(MaxNumberOfTransactions)
+        .ToListAsync(cancellationToken);
+
+    private async Task<List<Wallet>> GetActiveWallets(CancellationToken cancellationToken) => await dbContext
+        .Wallets
+        .Include(x => x.Methods)
+        .Where(x => x.UserId == userContext.UserId && !x.IsDeleted)
+        .AsNoTracking()
+        .OrderBy(x => x.Name)
         .ToListAsync(cancellationToken);
 }
