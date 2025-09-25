@@ -1,4 +1,4 @@
-﻿using MediatR;
+﻿using Aurora.Coinly.Infrastructure.DomainEvents;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -7,7 +7,7 @@ namespace Aurora.Coinly.Infrastructure.Outbox;
 [DisallowConcurrentExecution]
 internal sealed class ProcessOutboxJob(
     ApplicationDbContext dbContext,
-    IServiceScopeFactory serviceScopeFactory,
+    IDomainEventsDispatcher domainEventsDispatcher,
     IDateTimeService dateTimeService,
     IOptions<OutboxOptions> options,
     ILogger<ProcessOutboxJob> logger) : IJob
@@ -32,11 +32,7 @@ internal sealed class ProcessOutboxJob(
                     outboxMessage.Content,
                     SerializerSettings.Instance)!;
 
-                using IServiceScope scope = serviceScopeFactory.CreateScope();
-
-                IPublisher publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
-
-                await publisher.Publish(domainEvent);
+                await domainEventsDispatcher.DispatchAsync([domainEvent]);
             }
             catch (Exception processException)
             {
