@@ -5,22 +5,69 @@ namespace Aurora.Coinly.Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services) => services
+        .AddMessagingHandlers()
+        .AddBehaviors()
+        .AddDomainHandlers()
+        .AddDomainServices()
+        .AddValidatorsFromAssembly();
+
+    private static IServiceCollection AddMessagingHandlers(this IServiceCollection services)
     {
-        // MediatR
-        services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+        services
+            .Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
+            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
-            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-            cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
-        });
+        services
+            .Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
-        // FluentValidation
-        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
+        services
+            .Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
-        // Domain services
+        return services;
+    }
+
+    private static IServiceCollection AddBehaviors(this IServiceCollection services)
+    {
+        services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationBehavior.CommandHandler<,>));
+        services.Decorate(typeof(ICommandHandler<>), typeof(ValidationBehavior.CommandBaseHandler<>));
+
+        services.Decorate(typeof(IQueryHandler<,>), typeof(LoggingBehavior.QueryHandler<,>));
+        services.Decorate(typeof(ICommandHandler<,>), typeof(LoggingBehavior.CommandHandler<,>));
+        services.Decorate(typeof(ICommandHandler<>), typeof(LoggingBehavior.CommandBaseHandler<>));
+
+        return services;
+    }
+
+    private static IServiceCollection AddDomainHandlers(this IServiceCollection services)
+    {
+        services
+            .Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
+            .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+        return services;
+    }
+
+    private static IServiceCollection AddDomainServices(this IServiceCollection services)
+    {
         services.AddTransient<BudgetPeriodService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddValidatorsFromAssembly(this IServiceCollection services)
+    {
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
         return services;
     }

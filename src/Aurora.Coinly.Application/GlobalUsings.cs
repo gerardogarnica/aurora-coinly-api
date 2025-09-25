@@ -13,6 +13,5 @@ global using Aurora.Coinly.Domain.Transactions;
 global using Aurora.Coinly.Domain.Users;
 global using Aurora.Coinly.Domain.Wallets;
 global using FluentValidation;
-global using MediatR;
 global using Microsoft.EntityFrameworkCore;
 global using System.Text.Json.Serialization;
