@@ -1,3 +1,5 @@
 ﻿namespace Aurora.Coinly.Application.Abstractions.Messaging;
 
-public interface IQuery<TResponse> : IRequest<Result<TResponse>>;
+#pragma warning disable S2326 // Unused type parameters should be removed
+public interface IQuery<TResponse>;
+#pragma warning restore S2326 // Unused type parameters should be removed

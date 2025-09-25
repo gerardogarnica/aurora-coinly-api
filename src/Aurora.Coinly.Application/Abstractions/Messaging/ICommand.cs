@@ -1,7 +1,9 @@
 ﻿namespace Aurora.Coinly.Application.Abstractions.Messaging;
 
-public interface ICommand : IRequest<Result>, IBaseCommand;
+public interface ICommand;
 
-public interface ICommand<TResponse> : IRequest<Result<TResponse>>, IBaseCommand;
+#pragma warning disable S2326 // Unused type parameters should be removed
+public interface ICommand<TResponse>;
+#pragma warning restore S2326 // Unused type parameters should be removed
 
 public interface IBaseCommand;
