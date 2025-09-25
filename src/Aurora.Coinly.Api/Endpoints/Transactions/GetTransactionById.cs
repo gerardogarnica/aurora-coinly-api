@@ -9,11 +9,14 @@ public sealed class GetTransactionById : IBaseEndpoint
     {
         app.MapGet(
             "transactions/{id}",
-            async (Guid id, ISender sender) =>
+            async (
+                Guid id,
+                IQueryHandler<GetTransactionByIdQuery, TransactionModel> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetTransactionByIdQuery(id);
 
-                Result<TransactionModel> result = await sender.Send(query);
+                Result<TransactionModel> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

@@ -9,7 +9,10 @@ public sealed class Register : IBaseEndpoint
     {
         app.MapPost(
             "auth/register",
-            async ([FromBody] RegisterUserRequest request, ISender sender) =>
+            async (
+                [FromBody] RegisterUserRequest request,
+                ICommandHandler<RegisterUserCommand, UserModel> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new RegisterUserCommand(
                     request.Email,
@@ -17,7 +20,7 @@ public sealed class Register : IBaseEndpoint
                     request.LastName,
                     request.Password);
 
-                Result<UserModel> result = await sender.Send(command);
+                Result<UserModel> result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Created(string.Empty, result.Value),

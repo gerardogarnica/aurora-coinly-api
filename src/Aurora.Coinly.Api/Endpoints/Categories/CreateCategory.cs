@@ -10,7 +10,10 @@ public sealed class CreateCategory : IBaseEndpoint
     {
         app.MapPost(
             "categories",
-            async ([FromBody] CreateCategoryRequest request, ISender sender) =>
+            async (
+                [FromBody] CreateCategoryRequest request,
+                ICommandHandler<CreateCategoryCommand, Guid> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new CreateCategoryCommand(
                     request.Name,
@@ -20,7 +23,7 @@ public sealed class CreateCategory : IBaseEndpoint
                     request.Color,
                     request.Notes);
 
-                Result<Guid> result = await sender.Send(command);
+                Result<Guid> result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Created(string.Empty, result.Value),

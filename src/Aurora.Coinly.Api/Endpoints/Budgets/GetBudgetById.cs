@@ -9,11 +9,14 @@ public sealed class GetBudgetById : IBaseEndpoint
     {
         app.MapGet(
             "budgets/{id}",
-            async (Guid id, ISender sender) =>
+            async (
+                Guid id,
+                IQueryHandler<GetBudgetByIdQuery, BudgetModel> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetBudgetByIdQuery(id);
 
-                Result<BudgetModel> result = await sender.Send(query);
+                Result<BudgetModel> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

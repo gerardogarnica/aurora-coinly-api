@@ -8,11 +8,14 @@ public sealed class DeleteWallet : IBaseEndpoint
     {
         app.MapDelete(
             "wallets/{id}",
-            async (Guid id, ISender sender) =>
+            async (
+                Guid id,
+                ICommandHandler<DeleteWalletCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new DeleteWalletCommand(id);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

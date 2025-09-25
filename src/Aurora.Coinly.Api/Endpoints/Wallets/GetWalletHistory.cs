@@ -9,11 +9,16 @@ public sealed class GetWalletHistory : IBaseEndpoint
     {
         app.MapGet(
             "wallets/{id}/history",
-            async (Guid id, [FromQuery] DateOnly dateFrom, [FromQuery] DateOnly dateTo, ISender sender) =>
+            async (
+                Guid id,
+                [FromQuery] DateOnly dateFrom,
+                [FromQuery] DateOnly dateTo,
+                IQueryHandler<GetWalletHistoryQuery, WalletModel> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetWalletHistoryQuery(id, dateFrom, dateTo);
 
-                Result<WalletModel> result = await sender.Send(query);
+                Result<WalletModel> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

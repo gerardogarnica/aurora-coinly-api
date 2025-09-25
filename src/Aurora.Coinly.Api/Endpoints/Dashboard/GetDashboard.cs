@@ -9,11 +9,13 @@ public sealed class GetDashboard : IBaseEndpoint
     {
         app.MapGet(
             "dashboard",
-            async (ISender sender) =>
+            async (
+                IQueryHandler<GetDashboardSummaryQuery, DashboardSummaryModel> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetDashboardSummaryQuery();
 
-                Result<DashboardSummaryModel> result = await sender.Send(query);
+                Result<DashboardSummaryModel> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

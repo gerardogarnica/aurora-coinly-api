@@ -9,11 +9,14 @@ public sealed class Login : IBaseEndpoint
     {
         app.MapPost(
             "auth/login",
-            async ([FromBody] LoginRequest request, ISender sender) =>
+            async (
+                [FromBody] LoginRequest request,
+                ICommandHandler<LoginCommand, IdentityToken> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new LoginCommand(request.Email, request.Password);
 
-                Result<IdentityToken> result = await sender.Send(command);
+                Result<IdentityToken> result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Created(string.Empty, result.Value),

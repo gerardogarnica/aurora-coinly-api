@@ -9,7 +9,10 @@ public sealed class CreateWallet : IBaseEndpoint
     {
         app.MapPost(
             "wallets",
-            async ([FromBody] CreateWalletRequest request, ISender sender) =>
+            async (
+                [FromBody] CreateWalletRequest request,
+                ICommandHandler<CreateWalletCommand, Guid> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new CreateWalletCommand(
                     request.Name,
@@ -21,7 +24,7 @@ public sealed class CreateWallet : IBaseEndpoint
                     request.Notes,
                     request.OpenedOn);
 
-                Result<Guid> result = await sender.Send(command);
+                Result<Guid> result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Created(string.Empty, result.Value),

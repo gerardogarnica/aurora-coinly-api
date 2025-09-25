@@ -10,7 +10,10 @@ public sealed class GetTransactions : IBaseEndpoint
     {
         app.MapGet(
             "transactions",
-            async ([AsParameters] GetTransactionsQueryParameters queryParams, ISender sender) =>
+            async (
+                [AsParameters] GetTransactionsQueryParameters queryParams,
+                IQueryHandler<GetTransactionListQuery, IReadOnlyCollection<TransactionModel>> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetTransactionListQuery(
                     queryParams.DateFrom,
@@ -22,7 +25,7 @@ public sealed class GetTransactions : IBaseEndpoint
                         ? DisplayDateType.TransactionDate
                         : DisplayDateType.PaymentDate);
 
-                Result<IReadOnlyCollection<TransactionModel>> result = await sender.Send(query);
+                Result<IReadOnlyCollection<TransactionModel>> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

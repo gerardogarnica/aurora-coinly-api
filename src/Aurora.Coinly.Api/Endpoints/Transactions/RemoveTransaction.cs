@@ -8,11 +8,14 @@ public sealed class RemoveTransaction : IBaseEndpoint
     {
         app.MapDelete(
             "transactions/{id}",
-            async (Guid id, ISender sender) =>
+            async (
+                Guid id,
+                ICommandHandler<RemoveTransactionCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new RemoveTransactionCommand(id);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

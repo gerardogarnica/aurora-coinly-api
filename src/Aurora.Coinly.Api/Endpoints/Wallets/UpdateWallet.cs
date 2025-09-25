@@ -8,7 +8,11 @@ public sealed class UpdateWallet : IBaseEndpoint
     {
         app.MapPut(
             "wallets/{id}",
-            async (Guid id, [FromBody] UpdateWalletRequest request, ISender sender) =>
+            async (
+                Guid id,
+                [FromBody] UpdateWalletRequest request,
+                ICommandHandler<UpdateWalletCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new UpdateWalletCommand(
                     id,
@@ -17,7 +21,7 @@ public sealed class UpdateWallet : IBaseEndpoint
                     request.Color,
                     request.Notes);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

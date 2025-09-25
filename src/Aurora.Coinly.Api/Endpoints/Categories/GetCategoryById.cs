@@ -9,11 +9,14 @@ public sealed class GetCategoryById : IBaseEndpoint
     {
         app.MapGet(
             "categories/{id}",
-            async (Guid id, ISender sender) =>
+            async (
+                Guid id,
+                IQueryHandler<GetCategoryByIdQuery, CategoryModel> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetCategoryByIdQuery(id);
 
-                Result<CategoryModel> result = await sender.Send(query);
+                Result<CategoryModel> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

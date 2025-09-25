@@ -8,11 +8,14 @@ public sealed class SetDefaultPaymentMethod : IBaseEndpoint
     {
         app.MapPut(
             "methods/{id}/default",
-            async (Guid id, ISender sender) =>
+            async (
+                Guid id,
+                ICommandHandler<SetDefaultPaymentMethodCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new SetDefaultPaymentMethodCommand(id);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

@@ -9,11 +9,14 @@ public sealed class GetWalletById : IBaseEndpoint
     {
         app.MapGet(
             "wallets/{id}",
-            async (Guid id, ISender sender) =>
+            async (
+                Guid id,
+                IQueryHandler<GetWalletByIdQuery, WalletModel> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetWalletByIdQuery(id);
 
-                Result<WalletModel> result = await sender.Send(query);
+                Result<WalletModel> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

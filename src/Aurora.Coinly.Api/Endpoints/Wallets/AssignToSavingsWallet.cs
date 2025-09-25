@@ -8,11 +8,15 @@ public sealed class AssignToSavingsWallet : IBaseEndpoint
     {
         app.MapPut(
             "wallets/{id}/assign/savings",
-            async (Guid id, [FromBody] AssignToSavingsWalletRequest request, ISender sender) =>
+            async (
+                Guid id,
+                [FromBody] AssignToSavingsWalletRequest request,
+                ICommandHandler<AssignToSavingsCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new AssignToSavingsCommand(id, request.Amount, request.AssignedOn);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

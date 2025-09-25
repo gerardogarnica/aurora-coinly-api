@@ -8,11 +8,14 @@ public sealed class UndoTransactionPayment : IBaseEndpoint
     {
         app.MapPut(
             "transactions/{id}/undopayment",
-            async (Guid id, ISender sender) =>
+            async (
+                Guid id,
+                ICommandHandler<UndoTransactionPaymentCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new UndoTransactionPaymentCommand(id);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

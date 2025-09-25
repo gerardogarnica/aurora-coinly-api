@@ -8,13 +8,16 @@ public sealed class UpdateProfile : IBaseEndpoint
     {
         app.MapPut(
             "me",
-            async ([FromBody] UpdateProfileRequest request, ISender sender) =>
+            async (
+                [FromBody] UpdateProfileRequest request,
+                ICommandHandler<UpdateUserCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new UpdateUserCommand(
                     request.FirstName,
                     request.LastName);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

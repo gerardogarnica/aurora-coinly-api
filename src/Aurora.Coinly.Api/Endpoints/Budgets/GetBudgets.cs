@@ -9,11 +9,14 @@ public sealed class GetBudgets : IBaseEndpoint
     {
         app.MapGet(
             "budgets/year/{year}",
-            async (int year, ISender sender) =>
+            async (
+                int year,
+                IQueryHandler<GetBudgetListQuery, IReadOnlyCollection<BudgetModel>> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetBudgetListQuery(year);
 
-                Result<IReadOnlyCollection<BudgetModel>> result = await sender.Send(query);
+                Result<IReadOnlyCollection<BudgetModel>> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

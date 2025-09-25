@@ -9,11 +9,14 @@ public sealed class GetPaymentMethods : IBaseEndpoint
     {
         app.MapGet(
             "methods",
-            async ([FromQuery(Name = "deleted")] bool showDeleted, ISender sender) =>
+            async (
+                [FromQuery(Name = "deleted")] bool showDeleted,
+                IQueryHandler<GetPaymentMethodListQuery, IReadOnlyCollection<PaymentMethodModel>> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetPaymentMethodListQuery(showDeleted);
 
-                Result<IReadOnlyCollection<PaymentMethodModel>> result = await sender.Send(query);
+                Result<IReadOnlyCollection<PaymentMethodModel>> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

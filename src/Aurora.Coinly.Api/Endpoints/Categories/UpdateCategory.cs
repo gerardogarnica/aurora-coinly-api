@@ -9,7 +9,11 @@ public sealed class UpdateCategory : IBaseEndpoint
     {
         app.MapPut(
             "categories/{id}",
-            async (Guid id, [FromBody] UpdateCategoryRequest request, ISender sender) =>
+            async (
+                Guid id,
+                [FromBody] UpdateCategoryRequest request,
+                ICommandHandler<UpdateCategoryCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new UpdateCategoryCommand(
                     id,
@@ -19,7 +23,7 @@ public sealed class UpdateCategory : IBaseEndpoint
                     request.Group,
                     request.Notes);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

@@ -8,7 +8,10 @@ public sealed class TransferBetweenWallets : IBaseEndpoint
     {
         app.MapPost(
             "wallets/transfer",
-            async ([FromBody] TransferBetweenWalletsRequest request, ISender sender) =>
+            async (
+                [FromBody] TransferBetweenWalletsRequest request,
+                ICommandHandler<TransferBetweenWalletsCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new TransferBetweenWalletsCommand(
                     request.SourceWalletId,
@@ -16,7 +19,7 @@ public sealed class TransferBetweenWallets : IBaseEndpoint
                     request.Amount,
                     request.TransferedOn);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Created(),

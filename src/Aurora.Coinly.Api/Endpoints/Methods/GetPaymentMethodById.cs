@@ -9,11 +9,14 @@ public sealed class GetPaymentMethodById : IBaseEndpoint
     {
         app.MapGet(
             "methods/{id}",
-            async (Guid id, ISender sender) =>
+            async (
+                Guid id,
+                IQueryHandler<GetPaymentMethodByIdQuery, PaymentMethodModel> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetPaymentMethodByIdQuery(id);
 
-                Result<PaymentMethodModel> result = await sender.Send(query);
+                Result<PaymentMethodModel> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

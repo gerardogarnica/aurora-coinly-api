@@ -9,11 +9,14 @@ public sealed class Refresh : IBaseEndpoint
     {
         app.MapPost(
             "auth/refresh",
-            async ([FromBody] RefreshTokenRequest request, ISender sender) =>
+            async (
+                [FromBody] RefreshTokenRequest request,
+                ICommandHandler<RefreshTokenCommand, IdentityToken> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new RefreshTokenCommand(request.RefreshToken);
 
-                Result<IdentityToken> result = await sender.Send(command);
+                Result<IdentityToken> result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Created(string.Empty, result.Value),

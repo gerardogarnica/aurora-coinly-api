@@ -8,7 +8,11 @@ public sealed class UpdatePaymentMethod : IBaseEndpoint
     {
         app.MapPut(
             "methods/{id}",
-            async (Guid id, [FromBody] UpdatePaymentMethodRequest request, ISender sender) =>
+            async (
+                Guid id,
+                [FromBody] UpdatePaymentMethodRequest request,
+                ICommandHandler<UpdatePaymentMethodCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new UpdatePaymentMethodCommand(
                     id,
@@ -21,7 +25,7 @@ public sealed class UpdatePaymentMethod : IBaseEndpoint
                     request.StatementCutoffDay,
                     request.Notes);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

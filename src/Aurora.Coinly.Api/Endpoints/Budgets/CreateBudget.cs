@@ -9,7 +9,10 @@ public sealed class CreateBudget : IBaseEndpoint
     {
         app.MapPost(
             "budgets",
-            async ([FromBody] CreateBudgetRequest request, ISender sender) =>
+            async (
+                [FromBody] CreateBudgetRequest request,
+                ICommandHandler<CreateBudgetCommand, Guid> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new CreateBudgetCommand(
                     request.CategoryId,
@@ -18,7 +21,7 @@ public sealed class CreateBudget : IBaseEndpoint
                     request.CurrencyCode,
                     request.AmountLimit);
 
-                Result<Guid> result = await sender.Send(command);
+                Result<Guid> result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Created(string.Empty, result.Value),

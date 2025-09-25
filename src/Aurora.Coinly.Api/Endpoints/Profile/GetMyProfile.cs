@@ -9,11 +9,14 @@ public sealed class GetMyProfile : IBaseEndpoint
     {
         app.MapGet(
             "me",
-            async (IUserContext userContext, ISender sender) =>
+            async (
+                IUserContext userContext,
+                IQueryHandler<GetUserByIdQuery, UserModel> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetUserByIdQuery(userContext.UserId);
 
-                Result<UserModel> result = await sender.Send(query);
+                Result<UserModel> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

@@ -8,14 +8,17 @@ public sealed class PayTransaction : IBaseEndpoint
     {
         app.MapPut(
             "transactions/pay",
-            async ([FromBody] PayTransactionRequest request, ISender sender) =>
+            async (
+                [FromBody] PayTransactionRequest request,
+                ICommandHandler<ProcessTransactionPaymentCommand> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new ProcessTransactionPaymentCommand(
                     request.TransactionIds,
                     request.WalletId,
                     request.PaymentDate);
 
-                Result result = await sender.Send(command);
+                Result result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Accepted(string.Empty),

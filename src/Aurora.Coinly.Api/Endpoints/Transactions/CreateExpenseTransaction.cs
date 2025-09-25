@@ -8,7 +8,10 @@ public sealed class CreateExpenseTransaction : IBaseEndpoint
     {
         app.MapPost(
             "transactions/expense",
-            async ([FromBody] CreateExpenseTransactionRequest request, ISender sender) =>
+            async (
+                [FromBody] CreateExpenseTransactionRequest request,
+                ICommandHandler<CreateExpenseTransactionCommand, Guid> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new CreateExpenseTransactionCommand(
                     request.CategoryId,
@@ -21,7 +24,7 @@ public sealed class CreateExpenseTransaction : IBaseEndpoint
                     request.MakePayment,
                     request.WalletId);
 
-                Result<Guid> result = await sender.Send(command);
+                Result<Guid> result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Created(string.Empty, result.Value),

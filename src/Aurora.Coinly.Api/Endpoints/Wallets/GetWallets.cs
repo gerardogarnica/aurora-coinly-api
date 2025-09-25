@@ -9,11 +9,14 @@ public sealed class GetWallets : IBaseEndpoint
     {
         app.MapGet(
             "wallets",
-            async ([FromQuery(Name = "deleted")] bool showDeleted, ISender sender) =>
+            async (
+                [FromQuery(Name = "deleted")] bool showDeleted,
+                IQueryHandler<GetWalletListQuery, IReadOnlyCollection<WalletModel>> handler,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetWalletListQuery(showDeleted);
 
-                Result<IReadOnlyCollection<WalletModel>> result = await sender.Send(query);
+                Result<IReadOnlyCollection<WalletModel>> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })

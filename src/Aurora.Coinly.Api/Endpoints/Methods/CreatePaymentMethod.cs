@@ -8,7 +8,10 @@ public sealed class CreatePaymentMethod : IBaseEndpoint
     {
         app.MapPost(
             "methods",
-            async ([FromBody] CreatePaymentMethodRequest request, ISender sender) =>
+            async (
+                [FromBody] CreatePaymentMethodRequest request,
+                ICommandHandler<CreatePaymentMethodCommand, Guid> handler,
+                CancellationToken cancellationToken) =>
             {
                 var command = new CreatePaymentMethodCommand(
                     request.Name,
@@ -21,7 +24,7 @@ public sealed class CreatePaymentMethod : IBaseEndpoint
                     request.StatementCutoffDay,
                     request.Notes);
 
-                Result<Guid> result = await sender.Send(command);
+                Result<Guid> result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
                     () => Results.Created(string.Empty, result.Value),
