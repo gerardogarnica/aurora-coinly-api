@@ -3,7 +3,7 @@
 namespace Aurora.Coinly.Application.Wallets.AssignToSavings;
 
 internal sealed class UpdateSummaryOnSavingsAssignedEventHandler(
-    ISender sender) : IDomainEventHandler<WalletSavingsUpdatedEvent>
+    ICommandHandler<UpdateSummarySavingsCommand> handler) : IDomainEventHandler<WalletSavingsUpdatedEvent>
 {
     public async Task Handle(
         WalletSavingsUpdatedEvent notification,
@@ -16,7 +16,8 @@ internal sealed class UpdateSummaryOnSavingsAssignedEventHandler(
             notification.AssignedOn,
             notification.IsIncrement);
 
-        Result result = await sender.Send(command, cancellationToken);
+        Result result = await handler.Handle(command, cancellationToken);
+
         if (!result.IsSuccessful)
         {
             throw new AuroraCoinlyException(nameof(UpdateSummaryOnSavingsAssignedEventHandler), result.Error);

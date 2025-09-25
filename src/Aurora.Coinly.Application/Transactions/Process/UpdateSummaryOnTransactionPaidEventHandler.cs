@@ -3,7 +3,7 @@
 namespace Aurora.Coinly.Application.Transactions.Process;
 
 internal sealed class UpdateSummaryOnTransactionPaidEventHandler(
-    ISender sender) : IDomainEventHandler<TransactionPaidEvent>
+    ICommandHandler<AddSummaryTransactionCommand> handler) : IDomainEventHandler<TransactionPaidEvent>
 {
     public async Task Handle(
         TransactionPaidEvent notification,
@@ -11,7 +11,8 @@ internal sealed class UpdateSummaryOnTransactionPaidEventHandler(
     {
         var command = new AddSummaryTransactionCommand(notification.TransactionId);
 
-        Result result = await sender.Send(command, cancellationToken);
+        Result result = await handler.Handle(command, cancellationToken);
+
         if (!result.IsSuccessful)
         {
             throw new AuroraCoinlyException(nameof(AddSummaryTransactionCommand), result.Error);
