@@ -1,5 +1,6 @@
 ﻿using Aurora.Coinly.Application.Abstractions.Data;
 using Aurora.Coinly.Infrastructure.Authentication;
+using Aurora.Coinly.Infrastructure.DomainEvents;
 using Aurora.Coinly.Infrastructure.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -19,6 +20,7 @@ public static class DependencyInjection
             .AddEncryptionServices(configuration)
             .AddQuartzServices()
             .AddDatabaseConfiguration(configuration)
+            .AddDomainEventsDispatcher()
             .AddOutboxPatternImplementation()
             .AddDateTimeServices();
 
@@ -91,6 +93,13 @@ public static class DependencyInjection
 
         // Entity Framework Core interceptors
         services.TryAddSingleton<InsertOutboxMessagesInterceptor>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDomainEventsDispatcher(this IServiceCollection services)
+    {
+        services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
 
         return services;
     }
