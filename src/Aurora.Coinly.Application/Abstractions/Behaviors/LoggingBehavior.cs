@@ -8,7 +8,6 @@ internal static class LoggingBehavior
         ICommandHandler<TCommand, TResponse> innerHandler,
         ILogger<CommandHandler<TCommand, TResponse>> logger) : ICommandHandler<TCommand, TResponse>
         where TCommand : ICommand<TResponse>
-        where TResponse : Result
     {
         public async Task<Result<TResponse>> Handle(
             TCommand command,
@@ -61,7 +60,6 @@ internal static class LoggingBehavior
         IQueryHandler<TQuery, TResponse> innerHandler,
         ILogger<QueryHandler<TQuery, TResponse>> logger) : IQueryHandler<TQuery, TResponse>
         where TQuery : IQuery<TResponse>
-        where TResponse : Result
     {
         public async Task<Result<TResponse>> Handle(
             TQuery query,

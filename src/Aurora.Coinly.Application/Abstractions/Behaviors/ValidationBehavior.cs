@@ -9,7 +9,6 @@ internal static class ValidationBehavior
         ICommandHandler<TCommand, TResponse> innerHandler,
         IEnumerable<IValidator<TCommand>> validators) : ICommandHandler<TCommand, TResponse>
         where TCommand : ICommand<TResponse>
-        where TResponse : Result
     {
         public async Task<Result<TResponse>> Handle(
             TCommand command,

@@ -14,10 +14,20 @@ internal static class ApiResponses
             title: $"The result of the request is a {result.Error.Code} failure",
             statusCode: StatusCodes.Status400BadRequest,
             detail: result.Error.Message,
-            extensions: new Dictionary<string, object?>
-            {
-                ["errors"] = new[] { result.Error }
-            }
+            extensions: GetErrors(result)
         );
+    }
+
+    private static Dictionary<string, object?> GetErrors(Result result)
+    {
+        if (result.Error is not Application.Abstractions.Validations.ValidationError validationError)
+        {
+            return [];
+        }
+
+        return new Dictionary<string, object?>
+        {
+            { "errors", validationError.Errors }
+        };
     }
 }
