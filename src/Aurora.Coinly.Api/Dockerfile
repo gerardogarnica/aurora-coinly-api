@@ -11,10 +11,10 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Packages.props", "."]
 COPY ["Directory.Build.props", "."]
-COPY ["Aurora.Coinly.Api/Aurora.Coinly.Api.csproj", "Aurora.Coinly.Api/"]
-RUN dotnet restore "./Aurora.Coinly.Api/Aurora.Coinly.Api.csproj"
+COPY ["src/Aurora.Coinly.Api/Aurora.Coinly.Api.csproj", "src/Aurora.Coinly.Api/"]
+RUN dotnet restore "./src/Aurora.Coinly.Api/Aurora.Coinly.Api.csproj"
 COPY . .
-WORKDIR "/src/Aurora.Coinly.Api"
+WORKDIR "/src/src/Aurora.Coinly.Api"
 RUN dotnet build "./Aurora.Coinly.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage

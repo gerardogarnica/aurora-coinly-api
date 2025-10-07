@@ -3,7 +3,7 @@ services:
     image: ${DOCKER_REGISTRY-}aurora/coinly-api:1.0
     build:
       context: .
-      dockerfile: Aurora.Coinly.Api/Dockerfile
+      dockerfile: src/Aurora.Coinly.Api/Dockerfile
     container_name: Aurora.Coinly.Api
     ports:
       - 5000:8080

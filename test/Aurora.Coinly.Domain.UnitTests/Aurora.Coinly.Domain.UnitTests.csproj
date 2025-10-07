@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Aurora.Coinly.Domain\Aurora.Coinly.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Aurora.Coinly.Domain\Aurora.Coinly.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
