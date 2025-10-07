@@ -85,3 +85,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 await app.RunAsync();
+
+// REMARK: Required for functional and integration tests to work.
+namespace Aurora.Coinly.Api
+{
+    public partial class Program;
+}

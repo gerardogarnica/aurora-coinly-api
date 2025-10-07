@@ -8,4 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Aurora.Coinly.Domain\Aurora.Coinly.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+	<InternalsVisibleTo Include="Aurora.Coinly.ArchitectureTests" />
+  </ItemGroup>
 </Project>
