@@ -13,13 +13,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A22A3F71-82D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Api", "Aurora.Coinly.Api\Aurora.Coinly.Api.csproj", "{E4707769-1839-497A-A2A0-122B768EC50A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Api", "src\Aurora.Coinly.Api\Aurora.Coinly.Api.csproj", "{E4707769-1839-497A-A2A0-122B768EC50A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Application", "Aurora.Coinly.Application\Aurora.Coinly.Application.csproj", "{D0999CBD-4946-4BC7-A7DB-20ACEDDC08E3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Application", "src\Aurora.Coinly.Application\Aurora.Coinly.Application.csproj", "{D0999CBD-4946-4BC7-A7DB-20ACEDDC08E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Domain", "Aurora.Coinly.Domain\Aurora.Coinly.Domain.csproj", "{940BB4DA-E1DE-4017-B806-CD9F907DACE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Domain", "src\Aurora.Coinly.Domain\Aurora.Coinly.Domain.csproj", "{940BB4DA-E1DE-4017-B806-CD9F907DACE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Infrastructure", "Aurora.Coinly.Infrastructure\Aurora.Coinly.Infrastructure.csproj", "{4AB73B31-FE29-4290-8CEC-355E73C6A43A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Infrastructure", "src\Aurora.Coinly.Infrastructure\Aurora.Coinly.Infrastructure.csproj", "{4AB73B31-FE29-4290-8CEC-355E73C6A43A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurora.Coinly.Domain.UnitTests", "test\Aurora.Coinly.Domain.UnitTests\Aurora.Coinly.Domain.UnitTests.csproj", "{E8E673BC-7EAF-4071-B08F-2B357305758B}"
 EndProject
