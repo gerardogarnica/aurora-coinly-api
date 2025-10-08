@@ -82,7 +82,7 @@ public class DomainLayerTests : BaseTest
     }
 
     [Fact]
-    public void DomainEvents_Should_BeEventSuffix()
+    public void DomainEvents_Should_HaveEventSuffix()
     {
         TestResult testResult = Types.InAssembly(DomainAssembly)
             .That()
