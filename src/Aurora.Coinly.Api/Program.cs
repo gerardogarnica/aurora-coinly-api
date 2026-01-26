@@ -61,8 +61,7 @@ builder.Services
 var app = builder.Build();
 
 RouteGroupBuilder routeGroup = app
-    .MapGroup("aurora/coinly/")
-    .WithOpenApi();
+    .MapGroup("aurora/coinly/");
 
 app.MapEndpoints(routeGroup);
 
@@ -80,6 +79,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.UseAuthentication();
 app.UseAuthorization();
