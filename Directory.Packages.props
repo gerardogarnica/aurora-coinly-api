@@ -3,6 +3,8 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Azure -->
+    <PackageVersion Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.4.0" />
     <!-- coverlet -->
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <!-- EFCore -->

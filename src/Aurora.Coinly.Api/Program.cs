@@ -3,11 +3,6 @@ using Aurora.Coinly.Api.Extensions;
 using Aurora.Coinly.Api.Middlewares;
 using Aurora.Coinly.Application;
 using Aurora.Coinly.Infrastructure;
-using Npgsql;
-using OpenTelemetry;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,25 +28,7 @@ builder.Services.AddProblemDetails(cfg =>
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-builder.Services
-    .AddOpenTelemetry()
-    .ConfigureResource(cfg => cfg
-        .AddService(builder.Environment.ApplicationName))
-    .WithTracing(cfg => cfg
-        .AddHttpClientInstrumentation()
-        .AddAspNetCoreInstrumentation()
-        .AddNpgsql())
-    .WithMetrics(cfg => cfg
-        .AddHttpClientInstrumentation()
-        .AddAspNetCoreInstrumentation()
-        .AddRuntimeInstrumentation())
-    .UseOtlpExporter();
-
-builder.Logging.AddOpenTelemetry(cfg =>
-{
-    cfg.IncludeScopes = true;
-    cfg.IncludeFormattedMessage = true;
-});
+builder.AddObservability();
 
 builder.Services
     .AddApplicationServices()
@@ -65,14 +42,14 @@ RouteGroupBuilder routeGroup = app
 
 app.MapEndpoints(routeGroup);
 
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.DocumentTitle = "Coinly API";
+});
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.DocumentTitle = "Coinly API";
-    });
-
     app.ApplyMigrations();
 }
 
