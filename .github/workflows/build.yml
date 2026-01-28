@@ -10,7 +10,6 @@ env:
   DOTNET_VERSION: "10.x"
   AZURE_WEBAPP_NAME: aurora-coinly-api
   AZURE_WEBAPP_PACKAGE_PATH: "./src/Aurora.Coinly.Api/publish"
-  SOLUTION_PATH: "Aurora Coinly.slnx"
   API_PROJECT_PATH: "src/Aurora.Coinly.Api"
   PUBLISH_DIR: "./publish"
 
@@ -28,13 +27,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
+        run: dotnet restore "Aurora Coinly.slnx"
 
       - name: Build
-        run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+        run: dotnet build "Aurora Coinly.slnx" --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-restore --no-build --verbosity normal
+        run: dotnet test "Aurora Coinly.slnx" --configuration Release --no-restore --no-build --verbosity normal
 
       - name: Publish
         run: dotnet publish ${{ env.API_PROJECT_PATH }} --configuration Release --no-restore --no-build --property:PublishDir=${{ env.PUBLISH_DIR }}
