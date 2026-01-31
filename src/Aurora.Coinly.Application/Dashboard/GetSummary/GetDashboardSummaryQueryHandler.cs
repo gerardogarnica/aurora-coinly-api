@@ -1,8 +1,4 @@
-﻿using Aurora.Coinly.Application.Transactions;
-using Aurora.Coinly.Application.Wallets;
-using System.Threading.Tasks;
-
-namespace Aurora.Coinly.Application.Dashboard.GetSummary;
+﻿namespace Aurora.Coinly.Application.Dashboard.GetSummary;
 
 internal sealed class GetDashboardSummaryQueryHandler(
     ICoinlyDbContext dbContext,
@@ -46,16 +42,13 @@ internal sealed class GetDashboardSummaryQueryHandler(
         List<CategoryGroupExpense> groupExpenses = await GetExpensesByGroup(currentDate.Year, currentDate.Month, cancellationToken);
 
         // Get recent transactions
-        List<TransactionModel> recentTransactions = [.. (await GetRecentTransactions(cancellationToken))
-            .Select(x => x.ToModel(DisplayDateType.TransactionDate))];
+        List<DashboardTransactionModel> recentTransactions = await GetRecentTransactions(cancellationToken);
 
         // Get upcoming pending payments
-        List<TransactionModel> upcomingPayments = [.. (await GetUpcomingPendingPayments(cancellationToken))
-            .Select(x => x.ToModel(DisplayDateType.TransactionDate))];
+        List<DashboardTransactionModel> upcomingPayments = await GetUpcomingPendingPayments(cancellationToken);
 
         // Get wallets
-        List<WalletModel> wallets = [.. (await GetActiveWallets(cancellationToken))
-            .Select(x => x.ToModel())];
+        List<DashboardWalletModel> wallets = await GetActiveWallets(cancellationToken);
 
         // Create and return the dashboard summary model
         DashboardSummaryModel dashboardSummaryModel = new(
@@ -197,37 +190,70 @@ internal sealed class GetDashboardSummaryQueryHandler(
         return topGroups;
     }
 
-    private async Task<List<Transaction>> GetRecentTransactions(CancellationToken cancellationToken) => await dbContext
+    private async Task<List<DashboardTransactionModel>> GetRecentTransactions(CancellationToken cancellationToken) => await dbContext
         .Transactions
         .Include(x => x.Category)
-        .Include(x => x.PaymentMethod)
-        .Include(x => x.Wallet)
-        .AsSplitQuery()
-        .Where(x => x.UserId == userContext.UserId)
         .AsNoTracking()
+        .Where(x => x.UserId == userContext.UserId)
         .OrderByDescending(x => x.TransactionDate)
         .ThenByDescending(x => x.CreatedOnUtc)
         .Take(MaxNumberOfTransactions)
+        .Select(x => new DashboardTransactionModel(
+            x.Id,
+            x.Description,
+            x.TransactionDate,
+            x.MaxPaymentDate,
+            x.PaymentMethod == null ? string.Empty : x.PaymentMethod.Name,
+            x.Amount.Currency.Code,
+            x.Amount.Amount,
+            x.Type,
+            x.Status,
+            new DashboardTransactionCategoryModel(
+                x.Category.Id,
+                x.Category.Name,
+                x.Category.Type,
+                x.Category.Color.Value,
+                x.Category.Group)))
         .ToListAsync(cancellationToken);
 
-    private async Task<List<Transaction>> GetUpcomingPendingPayments(CancellationToken cancellationToken) => await dbContext
+    private async Task<List<DashboardTransactionModel>> GetUpcomingPendingPayments(CancellationToken cancellationToken) => await dbContext
         .Transactions
         .Include(x => x.Category)
-        .Include(x => x.PaymentMethod)
-        .Include(x => x.Wallet)
-        .AsSplitQuery()
-        .Where(x => x.UserId == userContext.UserId && x.Status == TransactionStatus.Pending)
         .AsNoTracking()
+        .Where(x => x.UserId == userContext.UserId && x.Status == TransactionStatus.Pending)
         .OrderBy(x => x.MaxPaymentDate)
-        .ThenBy(x => x.TransactionDate)
+        .ThenByDescending(x => x.TransactionDate)
         .Take(MaxNumberOfTransactions)
+        .Select(x => new DashboardTransactionModel(
+            x.Id,
+            x.Description,
+            x.TransactionDate,
+            x.MaxPaymentDate,
+            x.PaymentMethod == null ? string.Empty : x.PaymentMethod.Name,
+            x.Amount.Currency.Code,
+            x.Amount.Amount,
+            x.Type,
+            x.Status,
+            new DashboardTransactionCategoryModel(
+                x.Category.Id,
+                x.Category.Name,
+                x.Category.Type,
+                x.Category.Color.Value,
+                x.Category.Group)))
         .ToListAsync(cancellationToken);
 
-    private async Task<List<Wallet>> GetActiveWallets(CancellationToken cancellationToken) => await dbContext
+    private async Task<List<DashboardWalletModel>> GetActiveWallets(CancellationToken cancellationToken) => await dbContext
         .Wallets
-        .Include(x => x.Methods)
-        .Where(x => x.UserId == userContext.UserId && !x.IsDeleted)
         .AsNoTracking()
+        .Where(x => x.UserId == userContext.UserId && !x.IsDeleted)
         .OrderBy(x => x.Name)
+        .Select(x => new DashboardWalletModel(
+            x.Id,
+            x.Name,
+            x.TotalAmount.Currency.Code,
+            x.AvailableAmount.Amount,
+            x.SavingsAmount.Amount,
+            x.TotalAmount.Amount,
+            x.Color.Value))
         .ToListAsync(cancellationToken);
 }
