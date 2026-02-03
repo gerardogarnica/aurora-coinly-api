@@ -80,7 +80,7 @@ public static class DependencyInjection
         // Database connection
         var connectionString = configuration.GetConnectionString("AuroraCoinlyConnection");
 
-        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        services.AddDbContextFactory<ApplicationDbContext>((sp, options) =>
             options
                 .UseNpgsql(
                     connectionString,
@@ -88,8 +88,11 @@ public static class DependencyInjection
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(sp.GetRequiredService<InsertOutboxMessagesInterceptor>()));
 
+        // DbContextFactory implementations
+        services.AddScoped<ICoinlyDbContextFactory, CoinlyDbContextFactory>();
+
         // IUnitOfWork implementation
-        services.AddScoped<ICoinlyDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<ICoinlyDbContext>(sp => sp.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 
         // Entity Framework Core interceptors
         services.TryAddSingleton<InsertOutboxMessagesInterceptor>();

@@ -1,6 +1,6 @@
 ﻿namespace Aurora.Coinly.Application.Abstractions.Data;
 
-public interface ICoinlyDbContext
+public interface ICoinlyDbContext : IAsyncDisposable
 {
     DbSet<Budget> Budgets { get; }
     DbSet<BudgetPeriod> BudgetPeriods { get; }
