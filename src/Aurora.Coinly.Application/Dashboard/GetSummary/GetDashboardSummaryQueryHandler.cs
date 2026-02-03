@@ -1,7 +1,7 @@
 ﻿namespace Aurora.Coinly.Application.Dashboard.GetSummary;
 
 internal sealed class GetDashboardSummaryQueryHandler(
-    ICoinlyDbContext dbContext,
+    ICoinlyDbContextFactory dbContextFactory,
     IUserContext userContext,
     IDateTimeService dateTimeService) : IQueryHandler<GetDashboardSummaryQuery, DashboardSummaryModel>
 {
@@ -19,56 +19,67 @@ internal sealed class GetDashboardSummaryQueryHandler(
         DateOnly previousDate = currentDate.AddMonths(-1);
 
         // Get the current and previous month summaries
-        MonthlySummary currentPeriod = await GetMonthlySummary(currentDate, cancellationToken);
-        MonthlySummary previousPeriod = await GetMonthlySummary(previousDate, cancellationToken);
+        var currentPeriodTask = GetMonthlySummary(currentDate, cancellationToken);
+        var previousPeriodTask = GetMonthlySummary(previousDate, cancellationToken);
 
         // Get the total balance
-        var totalBalance = await GetCurrentBalance(cancellationToken);
+        var totalBalanceTask = GetCurrentBalance(cancellationToken);
 
         // Get the last MonthsToShow summaries
-        List<MonthlySummary> summaries = await GetSummaries(cancellationToken);
-
-        List<MonthlyTrend> monthlyTrends = [.. summaries.Select(x => new MonthlyTrend(
-            x.Year,
-            x.Month,
-            x.TotalIncome,
-            x.TotalExpense,
-            x.Savings))];
+        var monthlyTrendsTask = GetMonthlyTrends(cancellationToken);
 
         // Get expenses by category for the current month
-        List<CategoryExpense> categoryExpenses = await GetExpensesByCategory(currentDate.Year, currentDate.Month, cancellationToken);
+        var categoryExpensesTask = GetExpensesByCategory(currentDate.Year, currentDate.Month, cancellationToken);
 
         // Get expenses by group for the current month
-        List<CategoryGroupExpense> groupExpenses = await GetExpensesByGroup(currentDate.Year, currentDate.Month, cancellationToken);
+        var groupExpensesTask = GetExpensesByGroup(currentDate.Year, currentDate.Month, cancellationToken);
 
         // Get recent transactions
-        List<DashboardTransactionModel> recentTransactions = await GetRecentTransactions(cancellationToken);
+        var recentTransactionsTask = GetRecentTransactions(cancellationToken);
 
         // Get upcoming pending payments
-        List<DashboardTransactionModel> upcomingPayments = await GetUpcomingPendingPayments(cancellationToken);
+        var upcomingPaymentsTask = GetUpcomingPendingPayments(cancellationToken);
 
         // Get wallets
-        List<DashboardWalletModel> wallets = await GetActiveWallets(cancellationToken);
+        var walletsTask = GetActiveWallets(cancellationToken);
+
+        // Await all tasks
+        await Task.WhenAll(
+            currentPeriodTask,
+            previousPeriodTask,
+            totalBalanceTask,
+            monthlyTrendsTask,
+            categoryExpensesTask,
+            groupExpensesTask,
+            recentTransactionsTask,
+            upcomingPaymentsTask,
+            walletsTask);
+
+        // Await the results to avoid synchronous blocking
+        var currentPeriod = await currentPeriodTask;
+        var previousPeriod = await previousPeriodTask;
 
         // Create and return the dashboard summary model
         DashboardSummaryModel dashboardSummaryModel = new(
             CurrencyCode,
-            totalBalance,
+            await totalBalanceTask,
             GetSummaryCard(currentPeriod.TotalIncome, previousPeriod.TotalIncome),
             GetSummaryCard(currentPeriod.TotalExpense, previousPeriod.TotalExpense),
             GetSummaryCard(currentPeriod.Savings, previousPeriod.Savings),
-            monthlyTrends,
-            categoryExpenses,
-            groupExpenses,
-            recentTransactions,
-            upcomingPayments,
-            wallets);
+            await monthlyTrendsTask,
+            await categoryExpensesTask,
+            await groupExpensesTask,
+            await recentTransactionsTask,
+            await upcomingPaymentsTask,
+            await walletsTask);
 
         return dashboardSummaryModel;
     }
 
     private async Task<decimal> GetCurrentBalance(CancellationToken cancellationToken)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<Wallet> wallets = await dbContext
             .Wallets
             .Where(x => x.UserId == userContext.UserId && !x.IsDeleted)
@@ -80,6 +91,8 @@ internal sealed class GetDashboardSummaryQueryHandler(
 
     private async Task<MonthlySummary> GetMonthlySummary(DateOnly date, CancellationToken cancellationToken)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         MonthlySummary summary = await dbContext
             .MonthlySummaries
             .Where(x =>
@@ -116,24 +129,34 @@ internal sealed class GetDashboardSummaryQueryHandler(
         return periods;
     }
 
-    private async Task<List<MonthlySummary>> GetSummaries(CancellationToken cancellationToken)
+    private async Task<List<MonthlyTrend>> GetMonthlyTrends(CancellationToken cancellationToken)
     {
         List<int> periods = GetLastMonths(dateTimeService.UtcNow.Year, dateTimeService.UtcNow.Month);
 
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         return await dbContext
             .MonthlySummaries
+            .AsNoTracking()
             .Where(x =>
                 x.UserId == userContext.UserId &&
                 x.CurrencyCode == CurrencyCode &&
                 periods.Contains(x.Year * 100 + x.Month))
-            .AsNoTracking()
             .OrderBy(x => x.Year)
             .ThenBy(x => x.Month)
+            .Select(x => new MonthlyTrend(
+                x.Year,
+                x.Month,
+                x.TotalIncome,
+                x.TotalExpense,
+                x.Savings))
             .ToListAsync(cancellationToken);
     }
 
     private async Task<List<CategoryExpense>> GetExpensesByCategory(int year, int month, CancellationToken cancellationToken)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<Transaction> transactions = await dbContext
             .Transactions
             .Include(x => x.Category)
@@ -163,6 +186,8 @@ internal sealed class GetDashboardSummaryQueryHandler(
 
     private async Task<List<CategoryGroupExpense>> GetExpensesByGroup(int year, int month, CancellationToken cancellationToken)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<Transaction> transactions = await dbContext
             .Transactions
             .Include(x => x.Category)
@@ -190,70 +215,85 @@ internal sealed class GetDashboardSummaryQueryHandler(
         return topGroups;
     }
 
-    private async Task<List<DashboardTransactionModel>> GetRecentTransactions(CancellationToken cancellationToken) => await dbContext
-        .Transactions
-        .Include(x => x.Category)
-        .AsNoTracking()
-        .Where(x => x.UserId == userContext.UserId)
-        .OrderByDescending(x => x.TransactionDate)
-        .ThenByDescending(x => x.CreatedOnUtc)
-        .Take(MaxNumberOfTransactions)
-        .Select(x => new DashboardTransactionModel(
-            x.Id,
-            x.Description,
-            x.TransactionDate,
-            x.MaxPaymentDate,
-            x.PaymentMethod == null ? string.Empty : x.PaymentMethod.Name,
-            x.Amount.Currency.Code,
-            x.Amount.Amount,
-            x.Type,
-            x.Status,
-            new DashboardTransactionCategoryModel(
-                x.Category.Id,
-                x.Category.Name,
-                x.Category.Type,
-                x.Category.Color.Value,
-                x.Category.Group)))
-        .ToListAsync(cancellationToken);
+    private async Task<List<DashboardTransactionModel>> GetRecentTransactions(CancellationToken cancellationToken)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-    private async Task<List<DashboardTransactionModel>> GetUpcomingPendingPayments(CancellationToken cancellationToken) => await dbContext
-        .Transactions
-        .Include(x => x.Category)
-        .AsNoTracking()
-        .Where(x => x.UserId == userContext.UserId && x.Status == TransactionStatus.Pending)
-        .OrderBy(x => x.MaxPaymentDate)
-        .ThenByDescending(x => x.TransactionDate)
-        .Take(MaxNumberOfTransactions)
-        .Select(x => new DashboardTransactionModel(
-            x.Id,
-            x.Description,
-            x.TransactionDate,
-            x.MaxPaymentDate,
-            x.PaymentMethod == null ? string.Empty : x.PaymentMethod.Name,
-            x.Amount.Currency.Code,
-            x.Amount.Amount,
-            x.Type,
-            x.Status,
-            new DashboardTransactionCategoryModel(
-                x.Category.Id,
-                x.Category.Name,
-                x.Category.Type,
-                x.Category.Color.Value,
-                x.Category.Group)))
-        .ToListAsync(cancellationToken);
+        return await dbContext
+            .Transactions
+            .Include(x => x.Category)
+            .AsNoTracking()
+            .Where(x => x.UserId == userContext.UserId)
+            .OrderByDescending(x => x.TransactionDate)
+            .ThenByDescending(x => x.CreatedOnUtc)
+            .Take(MaxNumberOfTransactions)
+            .Select(x => new DashboardTransactionModel(
+                x.Id,
+                x.Description,
+                x.TransactionDate,
+                x.MaxPaymentDate,
+                x.PaymentMethod == null ? string.Empty : x.PaymentMethod.Name,
+                x.Amount.Currency.Code,
+                x.Amount.Amount,
+                x.Type,
+                x.Status,
+                new DashboardTransactionCategoryModel(
+                    x.Category.Id,
+                    x.Category.Name,
+                    x.Category.Type,
+                    x.Category.Color.Value,
+                    x.Category.Group)))
+            .ToListAsync(cancellationToken);
+    }
 
-    private async Task<List<DashboardWalletModel>> GetActiveWallets(CancellationToken cancellationToken) => await dbContext
-        .Wallets
-        .AsNoTracking()
-        .Where(x => x.UserId == userContext.UserId && !x.IsDeleted)
-        .OrderBy(x => x.Name)
-        .Select(x => new DashboardWalletModel(
-            x.Id,
-            x.Name,
-            x.TotalAmount.Currency.Code,
-            x.AvailableAmount.Amount,
-            x.SavingsAmount.Amount,
-            x.TotalAmount.Amount,
-            x.Color.Value))
-        .ToListAsync(cancellationToken);
+    private async Task<List<DashboardTransactionModel>> GetUpcomingPendingPayments(CancellationToken cancellationToken)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        return await dbContext
+            .Transactions
+            .Include(x => x.Category)
+            .AsNoTracking()
+            .Where(x => x.UserId == userContext.UserId && x.Status == TransactionStatus.Pending)
+            .OrderBy(x => x.MaxPaymentDate)
+            .ThenByDescending(x => x.TransactionDate)
+            .Take(MaxNumberOfTransactions)
+            .Select(x => new DashboardTransactionModel(
+                x.Id,
+                x.Description,
+                x.TransactionDate,
+                x.MaxPaymentDate,
+                x.PaymentMethod == null ? string.Empty : x.PaymentMethod.Name,
+                x.Amount.Currency.Code,
+                x.Amount.Amount,
+                x.Type,
+                x.Status,
+                new DashboardTransactionCategoryModel(
+                    x.Category.Id,
+                    x.Category.Name,
+                    x.Category.Type,
+                    x.Category.Color.Value,
+                    x.Category.Group)))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<DashboardWalletModel>> GetActiveWallets(CancellationToken cancellationToken)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        return await dbContext
+            .Wallets
+            .AsNoTracking()
+            .Where(x => x.UserId == userContext.UserId && !x.IsDeleted)
+            .OrderBy(x => x.Name)
+            .Select(x => new DashboardWalletModel(
+                x.Id,
+                x.Name,
+                x.TotalAmount.Currency.Code,
+                x.AvailableAmount.Amount,
+                x.SavingsAmount.Amount,
+                x.TotalAmount.Amount,
+                x.Color.Value))
+            .ToListAsync(cancellationToken);
+    }
 }
