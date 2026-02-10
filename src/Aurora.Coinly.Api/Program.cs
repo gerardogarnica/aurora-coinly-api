@@ -50,7 +50,7 @@ app.UseSwaggerUI(options =>
 
 if (app.Environment.IsDevelopment())
 {
-    app.ApplyMigrations();
+    await app.ApplyMigrationsAsync();
 }
 
 app.UseHttpsRedirection();

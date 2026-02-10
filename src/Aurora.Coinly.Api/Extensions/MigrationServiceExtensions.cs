@@ -5,12 +5,12 @@ namespace Aurora.Coinly.Api.Extensions;
 
 internal static class MigrationServiceExtensions
 {
-    internal static void ApplyMigrations(this WebApplication app)
+    internal static async Task ApplyMigrationsAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
 
-        using var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await using var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        dbContext.Database.Migrate();
+        await dbContext.Database.MigrateAsync();
     }
 }
