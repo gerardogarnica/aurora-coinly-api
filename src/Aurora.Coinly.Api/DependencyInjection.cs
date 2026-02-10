@@ -1,0 +1,78 @@
+﻿using Aurora.Coinly.Api.Middlewares;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
+using Npgsql;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
+namespace Aurora.Coinly.Api;
+
+internal static class DependencyInjection
+{
+    internal static WebApplicationBuilder AddApiServices(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddEndpointsApiExplorer();
+
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new() { Title = "Coinly API", Version = "v1" });
+        });
+
+        builder.Services.Configure<JsonOptions>(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+
+        return builder;
+    }
+
+    internal static WebApplicationBuilder AddErrorHandling(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddProblemDetails(cfg =>
+        {
+            cfg.CustomizeProblemDetails = context =>
+            {
+                context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
+            };
+        });
+
+        builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+        return builder;
+    }
+
+    internal static WebApplicationBuilder AddObservability(this WebApplicationBuilder builder)
+    {
+        builder.Services
+            .AddOpenTelemetry()
+            .ConfigureResource(cfg => cfg
+                .AddService(builder.Environment.ApplicationName))
+            .WithTracing(cfg => cfg
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation()
+                .AddNpgsql())
+            .WithMetrics(cfg => cfg
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation()
+                .AddRuntimeInstrumentation());
+
+        builder.Logging.AddOpenTelemetry(cfg =>
+        {
+            cfg.IncludeScopes = true;
+            cfg.IncludeFormattedMessage = true;
+        });
+
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+        }
+        else
+        {
+            builder.Services.AddOpenTelemetry().UseAzureMonitor();
+        }
+
+        return builder;
+    }
+}
