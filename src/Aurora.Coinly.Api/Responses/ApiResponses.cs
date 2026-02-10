@@ -10,13 +10,31 @@ internal static class ApiResponses
         }
 
         return Results.Problem(
-            type: "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            type: GetTypeFromError(result.Error.ErrorType),
             title: $"The result of the request is a {result.Error.Code} failure",
-            statusCode: StatusCodes.Status400BadRequest,
+            statusCode: GetStatusCodeFromError(result.Error.ErrorType),
             detail: result.Error.Message,
             extensions: GetErrors(result)
         );
     }
+
+    private static string GetTypeFromError(BaseErrorType errorType) => errorType switch
+    {
+        BaseErrorType.Failure => "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+        BaseErrorType.Validation => "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+        BaseErrorType.NotFound => "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+        BaseErrorType.Conflict => "https://tools.ietf.org/html/rfc7231#section-6.5.8",
+        _ => "https://tools.ietf.org/html/rfc7231#section-6.6.1"
+    };
+
+    private static int GetStatusCodeFromError(BaseErrorType errorType) => errorType switch
+    {
+        BaseErrorType.Failure => StatusCodes.Status500InternalServerError,
+        BaseErrorType.Validation => StatusCodes.Status400BadRequest,
+        BaseErrorType.NotFound => StatusCodes.Status404NotFound,
+        BaseErrorType.Conflict => StatusCodes.Status409Conflict,
+        _ => StatusCodes.Status500InternalServerError
+    };
 
     private static Dictionary<string, object?> GetErrors(Result result)
     {

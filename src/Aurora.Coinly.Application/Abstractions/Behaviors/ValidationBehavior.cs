@@ -66,5 +66,5 @@ internal static class ValidationBehavior
     }
 
     private static ValidationError CreateValidationError(ValidationFailure[] validationFailures) =>
-        new([.. validationFailures.Select(f => new BaseError(f.ErrorCode, f.ErrorMessage))]);
+        new([.. validationFailures.Select(f => BaseError.Validation(f.ErrorCode, f.ErrorMessage))]);
 }
