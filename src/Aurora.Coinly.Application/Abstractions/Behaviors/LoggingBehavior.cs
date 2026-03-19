@@ -13,13 +13,19 @@ internal static class LoggingBehavior
             TCommand command,
             CancellationToken cancellationToken)
         {
-            logger.LogInformation("Processing request: {Name} {@Request}", typeof(TCommand).Name, command);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Processing request: {Name} {@Request}", typeof(TCommand).Name, command);
+            }
 
             Result<TResponse> result = await innerHandler.Handle(command, cancellationToken);
 
             if (result.IsSuccessful)
             {
-                logger.LogInformation("Request processed successfully: {Name} {@Response}", typeof(TResponse).Name, result);
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    logger.LogInformation("Request processed successfully: {Name} {@Response}", typeof(TResponse).Name, result);
+                }
             }
             else
             {
@@ -39,13 +45,19 @@ internal static class LoggingBehavior
             TCommand command,
             CancellationToken cancellationToken)
         {
-            logger.LogInformation("Processing request: {Name} {@Request}", typeof(TCommand).Name, command);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Processing request: {Name} {@Request}", typeof(TCommand).Name, command);
+            }
 
             Result result = await innerHandler.Handle(command, cancellationToken);
 
             if (result.IsSuccessful)
             {
-                logger.LogInformation("Request processed successfully: {Name} {@Response}", typeof(TCommand).Name, result);
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    logger.LogInformation("Request processed successfully: {Name} {@Response}", typeof(TCommand).Name, result);
+                }
             }
             else
             {
@@ -65,13 +77,19 @@ internal static class LoggingBehavior
             TQuery query,
             CancellationToken cancellationToken)
         {
-            logger.LogInformation("Processing request: {Name} {@Request}", typeof(TQuery).Name, query);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Processing request: {Name} {@Request}", typeof(TQuery).Name, query);
+            }
 
             Result<TResponse> result = await innerHandler.Handle(query, cancellationToken);
 
             if (result.IsSuccessful)
             {
-                logger.LogInformation("Request processed successfully: {Name} {@Response}", typeof(TResponse).Name, result);
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    logger.LogInformation("Request processed successfully: {Name} {@Response}", typeof(TResponse).Name, result);
+                }
             }
             else
             {
