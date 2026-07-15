@@ -1,5 +1,4 @@
 ﻿using Aurora.Coinly.Api.Middlewares;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -65,6 +64,13 @@ internal static class DependencyInjection
         });
 
         builder.Services.AddOpenTelemetry().UseOtlpExporter();
+
+        return builder;
+    }
+
+    internal static WebApplicationBuilder AddHealthCheckServices(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddHealthChecks();
 
         return builder;
     }
