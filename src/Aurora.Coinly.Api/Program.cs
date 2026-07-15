@@ -9,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder
     .AddApiServices()
     .AddErrorHandling()
-    .AddObservability();
+    .AddObservability()
+    .AddHealthCheckServices();
 
 builder.Services
     .AddApplicationServices()
@@ -22,6 +23,7 @@ RouteGroupBuilder routeGroup = app
     .MapGroup("aurora/coinly/");
 
 app.MapEndpoints(routeGroup);
+app.MapHealthCheckEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -29,7 +31,7 @@ app.UseSwaggerUI(options =>
     options.DocumentTitle = "Coinly API";
 });
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     await app.ApplyMigrationsAsync();
 }
