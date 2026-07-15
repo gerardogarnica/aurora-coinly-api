@@ -29,7 +29,7 @@ app.UseSwaggerUI(options =>
     options.DocumentTitle = "Coinly API";
 });
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     await app.ApplyMigrationsAsync();
 }
