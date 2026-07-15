@@ -64,14 +64,7 @@ internal static class DependencyInjection
             cfg.IncludeFormattedMessage = true;
         });
 
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.AddOpenTelemetry().UseOtlpExporter();
-        }
-        else
-        {
-            builder.Services.AddOpenTelemetry().UseAzureMonitor();
-        }
+        builder.Services.AddOpenTelemetry().UseOtlpExporter();
 
         return builder;
     }
