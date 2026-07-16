@@ -10,7 +10,8 @@ builder
     .AddApiServices()
     .AddErrorHandling()
     .AddObservability()
-    .AddHealthCheckServices();
+    .AddHealthCheckServices()
+    .AddCorsServices();
 
 builder.Services
     .AddApplicationServices()
@@ -37,6 +38,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(CorsExtensions.FrontendPolicy);
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
