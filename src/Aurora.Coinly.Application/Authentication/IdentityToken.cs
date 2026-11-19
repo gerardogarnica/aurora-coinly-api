@@ -4,4 +4,8 @@ public sealed record IdentityToken(
     string AccessToken,
     DateTime AccessTokenExpiresOn,
     string RefreshToken,
-    DateTime RefreshTokenExpiresOn);
+    DateTime RefreshTokenExpiresOn)
+{
+    public override string ToString() =>
+        $"IdentityToken {{ AccessToken = [REDACTED], AccessTokenExpiresOn = {AccessTokenExpiresOn}, RefreshToken = [REDACTED], RefreshTokenExpiresOn = {RefreshTokenExpiresOn} }}";
+}
