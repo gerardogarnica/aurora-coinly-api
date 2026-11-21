@@ -97,3 +97,45 @@ Key sections: `ConnectionStrings:AuroraCoinlyConnection`, `Jwt` (`JwtAuthOptions
 - `Aurora.Coinly.Domain.UnitTests` — xUnit + FluentAssertions, organized per aggregate.
 - `Aurora.Coinly.ArchitectureTests` — xUnit + NetArchTest + Shouldly.
 - There are no integration tests yet, though `Program` is exposed as `public partial class` for future `WebApplicationFactory` use.
+- Both test projects are xUnit v2, so `dotnet test` is the runner. Migrating to xUnit v3 (which breaks `dotnet test` on .NET 10 and needs the built `.exe` instead) is planned as separate work; it changes CI, the `dotnet-test-runner` agent and this file together.
+
+## Area-specific rules
+
+Detailed conventions live in `.claude/rules/` and load automatically when you read files matching their `paths:`. When creating something in an area without reading its existing files first, read the relevant rule.
+
+| Rule | Covers |
+|---|---|
+| `ef-core-queries.md` | `UserId` ownership filter, parallel queries with the factory, query shape, raw SQL, tracking and `Update()`, pagination |
+| `domain-model.md` | Enum placement, value objects, `Money`, soft delete, wallet balances and history, event payloads |
+| `domain-events-outbox.md` | Outbox flow, eventual consistency, single-attempt delivery and recovery, idempotent handlers, serialization, job debt |
+| `startup-and-migrations.md` | Migrations on startup (Dev/Staging only), configuration sections and secrets, pipeline order, Quartz |
+| `health-and-observability.md` | `/health`, error responses, Swagger, OpenTelemetry/Seq |
+| `unit-tests.md` | Domain test layout, fixed dates, assertions, naming; no Application tests yet |
+| `architecture-tests.md` | NetArchTest pitfalls (`.Or()`, records, zero-type selectors), what the selectors cover |
+| `build-and-packaging.md` | No spaces in project names, central package management, warnings as errors, CI |
+| `documentation.md` | `docs/` layout, spec/plan/ADR naming, header and status lifecycle, Spanish for new documents |
+
+When a change introduces a new area-specific decision, add it to the matching rule (or a new one), not here. This file only changes when the architecture, stack or workflow changes.
+
+## Workflow
+
+1. Ask clarifying questions if requirements are unclear.
+2. Propose a plan and list files to change.
+3. Implement the smallest viable change.
+4. Add or update tests when appropriate.
+5. Verify with the `dotnet-test-runner` agent.
+
+Scale the process to the change:
+- **Bounded** (an existing flow: a handler, an entity, an endpoint): short design in chat, approval, then implement with `domain-entity` / `create-feature` / `unit-testing`.
+- **Architectural** (new feature, several aggregates, a new pattern or dependency, a complex migration): `spec` → `write-plan` → `execute-plan`, with documents in `docs/` (see `.claude/rules/documentation.md`).
+- Before a PR: `arch-guard` and `code-reviewer` in parallel.
+
+Agents: `dotnet-test-runner` (build + both test projects, reports only failures), `arch-guard` (layering, data ownership, migrations; read-only), `code-reviewer` (quality and test gaps).
+
+## Working conventions
+
+- Talk to the user in Spanish; code, commits and PRs are in English.
+- Never commit, push or open a PR until asked. An approved plan authorizes one commit per task during `execute-plan`, nothing more.
+- Stage files one by one (`git add <file>`), never `git add -A` / `git add .`. Local changes to `appsettings.Development.json` and `.claude/settings.local.json` never go into a commit.
+- Branches are `feature/<topic>` from `origin/staging`; PRs target `staging`, and `staging` is merged into `main`.
+- On Windows, run shell commands with the Bash tool, not PowerShell.

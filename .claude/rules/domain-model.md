@@ -1,0 +1,38 @@
+---
+paths:
+  - "src/Aurora.Coinly.Domain/**/*.cs"
+  - "src/Aurora.Coinly.Infrastructure/Configurations/**/*.cs"
+---
+
+# Domain model conventions
+
+## Enums live in their owning aggregate folder
+
+Place enum types in `src/Aurora.Coinly.Domain/{Aggregate}/` next to the entity that owns them (`WalletType`, `WalletHistoryType`, `TransactionStatus`, `BudgetFrequency`, `CategoryGroup`), never in `Shared/`. `Shared/` is only for cross-aggregate value objects (`Money`, `Currency`, `Color`, `DateRange`).
+
+Enums are persisted as strings (`HasConversion<string>().HasMaxLength(40)`), so renaming a member is a data migration, and reordering is free. Adding a member needs no migration.
+
+## Value objects
+
+- A value object is a `sealed record` with a private constructor (or a positional record, like `Money`) and a static factory.
+- The existing factories (`Color.FromHex`, `DateRange.Create`, `Password.Create`) throw `ArgumentException` on malformed input; commands rely on their validator to reject that input first. A new value object whose input a validator can't fully guarantee returns `Result<T>` from `Create` instead.
+- There is no marker interface for value objects, and the architecture tests don't select them.
+- EF Core maps every persisted value object with `OwnsOne`, except `Currency`, which is stored as its 3-letter code with `HasConversion(c => c.Code, code => Currency.FromCode(code))` inside each `Money` owned type.
+
+## Money
+
+- Every amount is a `Money`, never a bare `decimal` on an entity. Columns are `numeric(9, 2)` and validators use `.PrecisionScale(9, 2, true)`.
+- `Money` operators throw `InvalidOperationException` when currencies differ. Aggregates check first and return a `Result` (`WalletErrors.CurrenciesNotMatch`), so the exception means a bug.
+- The dashboard aggregates in a fixed `USD` (`GetDashboardSummaryQueryHandler.CurrencyCode`). Multi-currency is on the roadmap; until then, a feature that sums across wallets must either filter by currency or say in its spec why it doesn't need to.
+
+## Soft delete
+
+Wallets, categories and payment methods are soft-deleted (`IsDeleted`, `DeletedOnUtc`, a `Delete(DateTime)` method that fails with `{Entity}Errors.IsDeleted` when repeated). Lists hide deleted rows unless the query asks for them (`ShowDeleted`). Other mutators refuse to act on a deleted entity with the same error. Transactions are not deleted but move to `TransactionStatus.Removed`.
+
+## Wallet balances
+
+A wallet holds two balances, `AvailableAmount` and `SavingsAmount`; `TotalAmount` is computed (and `Ignore`d by EF). Every balance change goes through a `Wallet` method that also appends a `WalletHistory` operation, so the history explains the balance. Never change a balance without its history entry.
+
+## Domain events
+
+`sealed class` inheriting `DomainEvent`, suffix `Event`, all of an aggregate's events in `{Entity}DomainEvents.cs`. Carry ids and simple values (`Guid`, `DateOnly`, `bool`, `Money`), never entities: `BudgetUpdatedEvent(Budget budget)` is the existing exception and shouldn't be copied. See `domain-events-outbox.md`.
