@@ -30,4 +30,4 @@ Los documentos nuevos se escriben en español; código, rutas e identificadores 
 |---|---|---|---|---|
 
 ### Revisiones
-- —
+- [Remediación a corto plazo](reviews/short-term-remediation.md): 14 problemas encontrados al adaptar los agents y las rules, priorizados
