@@ -28,6 +28,21 @@ The solution file `Aurora Coinly.slnx` does have a space. That is harmless (noth
 
 ## CI and deployment
 
-`.github/workflows/build.yml` runs on pushes to `main` and `staging`: restore → build (Release) → `dotnet test` on the solution → Docker image to GHCR (`:production` for `main`, `:staging` for `staging`, plus `:<sha>`) → Dokploy webhook. Feature branches don't run CI; run the `dotnet-test-runner` agent before pushing.
+`.github/workflows/build.yml` behaves by trigger:
+
+| Trigger | Jobs |
+|---|---|
+| Push to `main` / `staging` | `build-and-test` (restore → build Release → `dotnet test` on the solution) → `docker-build-push` (GHCR `:production` for `main`, `:staging` for `staging`, plus `:<sha>`) → `deploy` (Dokploy webhook) |
+| Pull request to `main` / `staging` | `build-and-test` only, as the required status check |
+| Push of a `vX.Y.Z` tag | `tag-release-image` only |
+
+Pushes to feature branches don't run CI; run the `dotnet-test-runner` agent before pushing.
+
+## Versioning and releases
+
+- The version is `<Version>` in `Directory.Build.props` (SemVer, no prefix). Bump it in the PR that goes to `main` for the release.
+- A release is a `vX.Y.Z` tag on the `main` commit that was deployed. `tag-release-image` doesn't rebuild: it checks that the tag is `vMAJOR.MINOR.PATCH` and matches `<Version>`, then re-tags the existing `:<sha>` image as `:X.Y.Z` and `:X.Y` with `docker buildx imagetools create`, so the release image is byte-for-byte the one in production.
+- Tag the merge commit on `main`, not the `staging` commit it came from: their SHAs differ, and the `staging` image was built from different code if `main` and `staging` diverged. The job only fails when no `:<sha>` image exists, and `staging` pushes also publish `:<sha>`, so it can't catch this mistake.
+- `docker-build-push` must keep publishing `:<sha>`; the release job depends on it.
 
 The test step uses `dotnet test`, which works because the test projects are xUnit v2. Migrating them to xUnit v3 (Microsoft.Testing.Platform) means changing this step and the `dotnet-test-runner` agent in the same change.
