@@ -32,7 +32,7 @@ dotnet ef database update --project src/Aurora.Coinly.Infrastructure --startup-p
 
 Migrations are applied automatically at startup in Development and Staging (`ApplyMigrationsAsync`).
 
-CI (`.github/workflows/build.yml`) runs restore → build (Release) → test on pushes to `main`/`staging`, then builds the Docker image to GHCR and triggers a Dokploy deploy webhook.
+CI (`.github/workflows/build.yml`) runs restore → build (Release) → test on pushes to `main`/`staging`, then builds the Docker image to GHCR and triggers a Dokploy deploy webhook. Pull requests to `main`/`staging` only build and test. A `vX.Y.Z` tag (matching `<Version>` in `Directory.Build.props`) re-tags the already-built image without rebuilding; see `.claude/rules/build-and-packaging.md`.
 
 ## Build strictness
 
