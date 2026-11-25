@@ -5,6 +5,7 @@ global using Aurora.Coinly.Domain.Abstractions;
 global using Aurora.Coinly.Infrastructure.Cryptography;
 global using Aurora.Coinly.Infrastructure.Database;
 global using Aurora.Coinly.Infrastructure.Outbox;
+global using Aurora.Coinly.Infrastructure.Serialization;
 global using Aurora.Coinly.Infrastructure.Time;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
