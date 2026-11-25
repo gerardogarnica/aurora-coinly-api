@@ -41,7 +41,7 @@ internal sealed class WalletConfiguration : IEntityTypeConfiguration<Wallet>
 
         builder.OwnsOne(x => x.Color, y =>
         {
-            y.Property(x => x.Value).HasColumnName("color").HasMaxLength(7);
+            y.Property(x => x.Value).HasColumnName("color").HasMaxLength(Color.MaxLength);
         });
 
         builder.Property(x => x.Notes).HasMaxLength(1000);

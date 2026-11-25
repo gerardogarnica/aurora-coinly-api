@@ -2,11 +2,11 @@
 
 public static class ColorErrors
 {
-    public static readonly BaseError Empty = BaseError.Validation(
-        "Color.Empty",
-        "The color value cannot be empty");
+    public static readonly BaseError Required = BaseError.Validation(
+        "Color.Required",
+        "The color is required");
 
-    public static readonly BaseError InvalidFormat = BaseError.Validation(
-        "Color.InvalidFormat",
-        "The color must be a hex value like #RRGGBB");
+    public static readonly BaseError TooLong = BaseError.Validation(
+        "Color.TooLong",
+        $"The color cannot exceed {Color.MaxLength} characters");
 }

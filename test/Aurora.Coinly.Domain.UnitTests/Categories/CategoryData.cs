@@ -6,7 +6,7 @@ internal static class CategoryData
 {
     public const string Name = "Test Category";
     public const int MaxDaysToReverse = 10;
-    public static readonly Color Color = Color.FromHex("#000000").Value;
+    public static readonly Color Color = Color.Create("#000000").Value;
     public const CategoryGroup Group = CategoryGroup.Other;
     public const string? Notes = "Notes of the category";
 

@@ -9,7 +9,7 @@ internal sealed class CreateWalletCommandHandler(
         CreateWalletCommand request,
         CancellationToken cancellationToken)
     {
-        Result<Color> color = Color.FromHex(request.Color);
+        Result<Color> color = Color.Create(request.Color);
         if (!color.IsSuccessful)
         {
             return Result.Fail<Guid>(color.Error);

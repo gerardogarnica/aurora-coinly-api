@@ -2,48 +2,76 @@ namespace Aurora.Coinly.Domain.UnitTests.Shared;
 
 public class ColorTests
 {
-    [Fact]
-    public void FromHex_Should_ReturnUpperCasedColor()
+    [Theory]
+    [InlineData("#FF5733")]
+    [InlineData("#ff5733")]
+    [InlineData("blue")]
+    [InlineData("primary-500")]
+    public void Create_Should_KeepValueAsGiven(string value)
     {
         // Arrange
 
         // Act
-        Result<Color> result = Color.FromHex("#ff5733");
+        Result<Color> result = Color.Create(value);
+
+        // Assert
+        result.IsSuccessful.Should().BeTrue();
+        result.Value.Value.Should().Be(value);
+    }
+
+    [Fact]
+    public void Create_Should_TrimValue()
+    {
+        // Arrange
+
+        // Act
+        Result<Color> result = Color.Create("  #FF5733  ");
 
         // Assert
         result.IsSuccessful.Should().BeTrue();
         result.Value.Value.Should().Be("#FF5733");
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void FromHex_Should_Fail_WhenValueIsEmpty(string hexValue)
+    [Fact]
+    public void Create_Should_Succeed_WhenValueHasMaxLength()
     {
         // Arrange
+        string value = new('a', Color.MaxLength);
 
         // Act
-        Result<Color> result = Color.FromHex(hexValue);
+        Result<Color> result = Color.Create(value);
 
         // Assert
-        result.IsSuccessful.Should().BeFalse();
-        result.Error.Should().Be(ColorErrors.Empty);
+        result.IsSuccessful.Should().BeTrue();
+        result.Value.Value.Should().Be(value);
     }
 
     [Theory]
-    [InlineData("FF5733")]
-    [InlineData("#FF573")]
-    [InlineData("#GG5733")]
-    [InlineData("#FF57331")]
-    public void FromHex_Should_Fail_WhenFormatIsInvalid(string hexValue)
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_Should_Fail_WhenValueIsEmpty(string value)
     {
         // Arrange
 
         // Act
-        Result<Color> result = Color.FromHex(hexValue);
+        Result<Color> result = Color.Create(value);
 
         // Assert
         result.IsSuccessful.Should().BeFalse();
-        result.Error.Should().Be(ColorErrors.InvalidFormat);
+        result.Error.Should().Be(ColorErrors.Required);
+    }
+
+    [Fact]
+    public void Create_Should_Fail_WhenValueIsTooLong()
+    {
+        // Arrange
+        string value = new('a', Color.MaxLength + 1);
+
+        // Act
+        Result<Color> result = Color.Create(value);
+
+        // Assert
+        result.IsSuccessful.Should().BeFalse();
+        result.Error.Should().Be(ColorErrors.TooLong);
     }
 }

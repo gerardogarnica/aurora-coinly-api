@@ -19,7 +19,7 @@ internal sealed class UpdateWalletCommandHandler(
             return Result.Fail(WalletErrors.NotFound);
         }
 
-        Result<Color> color = Color.FromHex(request.Color);
+        Result<Color> color = Color.Create(request.Color);
         if (!color.IsSuccessful)
         {
             return Result.Fail(color.Error);

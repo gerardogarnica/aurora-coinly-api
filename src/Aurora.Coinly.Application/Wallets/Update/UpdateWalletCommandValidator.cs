@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Application.Wallets.Update;
+﻿using Aurora.Coinly.Application.Abstractions.Validations;
+
+namespace Aurora.Coinly.Application.Wallets.Update;
 
 internal sealed class UpdateWalletCommandValidator : AbstractValidator<UpdateWalletCommand>
 {
@@ -9,9 +11,7 @@ internal sealed class UpdateWalletCommandValidator : AbstractValidator<UpdateWal
             .MinimumLength(3)
             .MaximumLength(100);
 
-        RuleFor(x => x.Color)
-            .NotEmpty()
-            .Length(7);
+        RuleFor(x => x.Color).MustBeValidColor();
 
         RuleFor(x => x.Notes).MaximumLength(1000);
     }

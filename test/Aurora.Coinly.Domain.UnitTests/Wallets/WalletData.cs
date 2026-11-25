@@ -9,7 +9,7 @@ internal static class WalletData
     public static readonly Money AvailableAmount = new(100.0m, Currency.Usd);
     public const WalletType Type = WalletType.Cash;
     public const bool AllowNegative = false;
-    public static readonly Color Color = Color.FromHex("#000000").Value;
+    public static readonly Color Color = Color.Create("#000000").Value;
     public const string? Notes = "Notes of the category";
 
     public static Wallet GetWallet() => Wallet.Create(

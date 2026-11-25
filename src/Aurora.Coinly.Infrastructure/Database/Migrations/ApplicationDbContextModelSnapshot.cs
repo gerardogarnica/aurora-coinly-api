@@ -18,7 +18,7 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("coinly")
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -805,8 +805,8 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(7)
-                                .HasColumnType("character varying(7)")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("color");
 
                             b1.HasKey("CategoryId");
@@ -935,8 +935,8 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(7)
-                                .HasColumnType("character varying(7)")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("color");
 
                             b1.HasKey("WalletId");

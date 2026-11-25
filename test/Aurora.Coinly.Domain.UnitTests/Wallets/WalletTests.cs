@@ -64,7 +64,7 @@ public class WalletTests : BaseTest
         var wallet = WalletData.GetWallet();
         var updatedName = "Updated Name";
         var updatedAllowNegative = true;
-        var updatedColor = Color.FromHex("#FF5733").Value;
+        var updatedColor = Color.Create("#FF5733").Value;
         var updatedNotes = "Updated Notes";
 
         // Act
@@ -89,7 +89,7 @@ public class WalletTests : BaseTest
         var wallet = WalletData.GetWallet();
         var updatedName = "Updated Name";
         var updatedAllowNegative = true;
-        var updatedColor = Color.FromHex("#FF5733").Value;
+        var updatedColor = Color.Create("#FF5733").Value;
         var updatedNotes = "Updated Notes";
         wallet.Delete(DateTime.UtcNow);
 

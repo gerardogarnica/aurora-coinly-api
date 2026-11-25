@@ -1,36 +1,29 @@
-﻿using System.Text.RegularExpressions;
+﻿namespace Aurora.Coinly.Domain.Shared;
 
-namespace Aurora.Coinly.Domain.Shared;
-
-public sealed partial record Color : IValueObject
+public sealed record Color : IValueObject
 {
-    private static readonly Regex HexColorRegex = GenerateHexColorRegex();
+    public const int MaxLength = 20;
 
     public string Value { get; init; }
 
-    // EF Core materializes Color through this constructor; validation lives in FromHex.
     private Color(string value) => Value = value;
 
-    public static Result<Color> FromHex(string hexValue)
+    public static Result<Color> Create(string color)
     {
-        if (string.IsNullOrWhiteSpace(hexValue))
+        if (string.IsNullOrWhiteSpace(color))
         {
-            return Result.Fail<Color>(ColorErrors.Empty);
+            return Result.Fail<Color>(ColorErrors.Required);
         }
 
-        if (!HexColorRegex.IsMatch(hexValue))
+        color = color.Trim();
+
+        if (color.Length > MaxLength)
         {
-            return Result.Fail<Color>(ColorErrors.InvalidFormat);
+            return Result.Fail<Color>(ColorErrors.TooLong);
         }
 
-        return new Color(hexValue.ToUpperInvariant());
+        return new Color(color);
     }
 
-    public static bool operator ==(Color left, string right) => left.Value == right;
-    public static bool operator !=(Color left, string right) => !(left == right);
-
     public override string ToString() => Value;
-
-    [GeneratedRegex(@"^#([0-9A-Fa-f]{6})$", RegexOptions.Compiled)]
-    private static partial Regex GenerateHexColorRegex();
 }
