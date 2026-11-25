@@ -9,7 +9,13 @@ internal sealed class GetTransactionListQueryHandler(
         CancellationToken cancellationToken)
     {
         // Get transactions
-        DateRange dateRange = DateRange.Create(request.DateFrom, request.DateTo);
+        Result<DateRange> dateRangeResult = DateRange.Create(request.DateFrom, request.DateTo);
+        if (!dateRangeResult.IsSuccessful)
+        {
+            return Result.Fail<IReadOnlyCollection<TransactionModel>>(dateRangeResult.Error);
+        }
+
+        DateRange dateRange = dateRangeResult.Value;
 
         var query = dbContext
             .Transactions

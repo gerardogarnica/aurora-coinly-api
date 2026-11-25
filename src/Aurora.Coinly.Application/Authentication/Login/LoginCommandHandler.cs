@@ -22,8 +22,9 @@ internal sealed class LoginCommandHandler(
         }
 
         // Validate password
-        var password = Password.Create(request.Password);
-        if (!user.VerifyPassword(password, passwordHasher))
+        // A malformed password is reported as invalid credentials, like a wrong one.
+        Result<Password> password = Password.Create(request.Password);
+        if (!password.IsSuccessful || !user.VerifyPassword(password.Value, passwordHasher))
         {
             return Result.Fail<IdentityToken>(UserErrors.InvalidCredentials);
         }

@@ -6,22 +6,22 @@ public sealed record Password : IValueObject
 
     public string Value { get; init; }
 
-    private Password(string value)
+    private Password(string value) => Value = value;
+
+    public static Result<Password> Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            throw new ArgumentException("Password cannot be null or empty", nameof(value));
+            return Result.Fail<Password>(PasswordErrors.Empty);
         }
 
         if (value.Length < MinLength)
         {
-            throw new ArgumentException($"Password must be at least {MinLength} characters long", nameof(value));
+            return Result.Fail<Password>(PasswordErrors.TooShort);
         }
 
-        Value = value;
+        return new Password(value);
     }
-
-    public static Password Create(string value) => new(value);
 
     public override string ToString() => Value;
 }

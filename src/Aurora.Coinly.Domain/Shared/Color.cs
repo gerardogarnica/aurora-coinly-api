@@ -8,22 +8,23 @@ public sealed partial record Color : IValueObject
 
     public string Value { get; init; }
 
-    private Color(string value)
+    // EF Core materializes Color through this constructor; validation lives in FromHex.
+    private Color(string value) => Value = value;
+
+    public static Result<Color> FromHex(string hexValue)
     {
-        if (string.IsNullOrWhiteSpace(value))
+        if (string.IsNullOrWhiteSpace(hexValue))
         {
-            throw new ArgumentException("Color value cannot be null or empty", nameof(value));
+            return Result.Fail<Color>(ColorErrors.Empty);
         }
 
-        if (!HexColorRegex.IsMatch(value))
+        if (!HexColorRegex.IsMatch(hexValue))
         {
-            throw new ArgumentException("Color must be a hex value like #RRGGBB.");
+            return Result.Fail<Color>(ColorErrors.InvalidFormat);
         }
 
-        Value = value.ToUpperInvariant();
+        return new Color(hexValue.ToUpperInvariant());
     }
-
-    public static Color FromHex(string hexValue) => new(hexValue);
 
     public static bool operator ==(Color left, string right) => left.Value == right;
     public static bool operator !=(Color left, string right) => !(left == right);

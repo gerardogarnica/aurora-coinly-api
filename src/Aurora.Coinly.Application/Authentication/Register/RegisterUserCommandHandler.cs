@@ -22,8 +22,13 @@ internal sealed class RegisterUserCommandHandler(
         }
 
         // Encrypt password
-        Password password = Password.Create(request.Password.Trim());
-        string hashedPassword = passwordHasher.HashPassword(password.Value);
+        Result<Password> password = Password.Create(request.Password.Trim());
+        if (!password.IsSuccessful)
+        {
+            return Result.Fail<UserModel>(password.Error);
+        }
+
+        string hashedPassword = passwordHasher.HashPassword(password.Value.Value);
 
         // Create user
         var newUser = User.Create(

@@ -21,15 +21,20 @@ internal sealed class ChangeUserPasswordCommandHandler(
         }
 
         // Validate password
-        var currentPassword = Password.Create(request.CurrentPassword);
-        if (!user.VerifyPassword(currentPassword, passwordHasher))
+        Result<Password> currentPassword = Password.Create(request.CurrentPassword);
+        if (!currentPassword.IsSuccessful || !user.VerifyPassword(currentPassword.Value, passwordHasher))
         {
             return Result.Fail(UserErrors.InvalidCurrentPassword);
         }
 
         // Encrypt new password
-        Password newPassword = Password.Create(request.NewPassword.Trim());
-        string hashedNewPassword = passwordHasher.HashPassword(newPassword.Value);
+        Result<Password> newPassword = Password.Create(request.NewPassword.Trim());
+        if (!newPassword.IsSuccessful)
+        {
+            return Result.Fail(newPassword.Error);
+        }
+
+        string hashedNewPassword = passwordHasher.HashPassword(newPassword.Value.Value);
 
         // Update user password
         user.UpdatePassword(hashedNewPassword, dateTimeService.UtcNow);

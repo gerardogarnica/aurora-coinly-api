@@ -8,11 +8,11 @@ public sealed record DateRange : IValueObject
 
     private DateRange() { }
 
-    public static DateRange Create(DateOnly start, DateOnly end)
+    public static Result<DateRange> Create(DateOnly start, DateOnly end)
     {
         if (start > end)
         {
-            throw new ArgumentException("Start date must be before end date");
+            return Result.Fail<DateRange>(DateRangeErrors.StartAfterEnd);
         }
 
         return new DateRange
