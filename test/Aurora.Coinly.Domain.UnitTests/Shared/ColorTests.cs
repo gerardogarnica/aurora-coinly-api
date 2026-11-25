@@ -74,4 +74,17 @@ public class ColorTests
         result.IsSuccessful.Should().BeFalse();
         result.Error.Should().Be(ColorErrors.TooLong);
     }
+
+    [Fact]
+    public void ImplicitConversion_Should_ReturnValue()
+    {
+        // Arrange
+        Color color = Color.Create("#FF5733").Value;
+
+        // Act
+        string value = color;
+
+        // Assert
+        value.Should().Be("#FF5733");
+    }
 }

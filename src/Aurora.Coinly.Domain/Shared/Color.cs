@@ -25,5 +25,7 @@ public sealed record Color : IValueObject
         return new Color(color);
     }
 
+    public static implicit operator string(Color color) => color.Value;
+
     public override string ToString() => Value;
 }

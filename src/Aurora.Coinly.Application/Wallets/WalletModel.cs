@@ -29,7 +29,7 @@ internal static class WalletModelExtensions
         wallet.TotalAmount.Amount,
         wallet.Type,
         wallet.AllowNegative,
-        wallet.Color.Value,
+        wallet.Color,
         !wallet.Methods.Any(x => !x.IsDeleted) && !wallet.IsDeleted,
         wallet.IsDeleted,
         wallet.Notes,
