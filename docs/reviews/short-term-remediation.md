@@ -143,7 +143,7 @@ Orden sugerido:
 - **Dónde:**
   - `src/Aurora.Coinly.Application/DependencyInjection.cs:40-41`: `ValidationBehavior` decora solo los comandos.
   - `src/Aurora.Coinly.Application/Wallets/GetHistory/GetWalletHistoryQueryValidator.cs`: es el único validador de query y su regla `DateTo >= DateFrom` no se aplica nunca.
-- **Riesgo:** un rango de fechas invertido llega al handler, que devuelve una lista vacía sin decir por qué. El fichero hace creer que la regla está cubierta.
+- **Riesgo:** el fichero hace creer que la regla está cubierta. Hoy no hay ningún fallo visible: un rango de fechas invertido llega al handler, y `DateRange.Create` devuelve `DateRangeErrors.StartAfterEnd` (400), igual que en `GetTransactionListQueryHandler`, que no tiene validador. Pero cualquier regla nueva que se añada a un validador de query se ignorará sin avisar.
 - **Propuesta:** elegir una de estas dos opciones y documentarla en `create-feature`:
   - añadir `ValidationBehavior.QueryHandler<,>` y registrarlo antes de `LoggingBehavior`;
   - borrar el validador y mover la comprobación al handler.

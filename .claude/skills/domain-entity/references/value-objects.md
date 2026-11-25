@@ -16,15 +16,27 @@ So a new value object is `public sealed record {Name} : IValueObject` with a pri
 |---|---|---|
 | `Money` | positional record `(decimal Amount, Currency Currency)` with arithmetic and comparison operators; mixing currencies throws | `new Money(amount, currency)`, `Money.Zero(currency)` |
 | `Currency` | closed set of known currencies (`Currency.All`, `Currency.Usd`, `Currency.Default`); its private constructor carries Json.NET's `[JsonConstructor]` so the outbox can rebuild the `Money` inside `WalletSavingsUpdatedEvent` | `Currency.FromCode("USD")` |
-| `Color` | `Value` holding `#RRGGBB`, upper-cased | `Color.FromHex("#FF5733")` |
-| `DateRange` | `Start`/`End` dates | `DateRange.Create(start, end)` |
-| `Password` | the plain password, minimum 8 characters (hashing goes through `IPasswordHasher`) | `Password.Create(value)` |
+| `Color` | `Value` holding `#RRGGBB`, upper-cased | `Color.FromHex("#FF5733")` → `Result<Color>` (`ColorErrors`) |
+| `DateRange` | `Start`/`End` dates, start on or before end | `DateRange.Create(start, end)` → `Result<DateRange>` (`DateRangeErrors`) |
+| `Password` | the plain password, minimum 8 characters (hashing goes through `IPasswordHasher`) | `Password.Create(value)` → `Result<Password>` (`PasswordErrors`) |
 
-`Color`, `DateRange` and `Password` **throw** (`ArgumentException`) on malformed input, and `Money` throws when its operators mix currencies. That is acceptable only because the command validator rejects bad input first (`Color` has `.Length(7)`, `CurrencyCode` is checked against `Currency.All`), so a throw means a bug, not a user error. Keep that pairing when adding a value object: either the validator guarantees the input, or `Create` returns `Result<T>`.
+A factory that validates returns `Result<T>` and never throws. `Money` and `Currency` have nothing to validate: `Currency.FromCode` falls back to `Currency.Default` for an unknown code, and the command validator checks the code against `Currency.All`. `Money` throws only when its operators mix currencies; aggregates check that first, so the exception means a bug.
 
-## Template — returning `Result`
+A handler checks the result and returns its error:
 
-Prefer this for a new value object whose input isn't fully covered by a validator:
+```csharp
+Result<Color> color = Color.FromHex(request.Color);
+if (!color.IsSuccessful)
+{
+    return Result.Fail<Guid>(color.Error);
+}
+```
+
+Domain code that builds a value from input it controls (`BudgetPeriodService`, `MonthlySummary.GetSummaryPeriod`) reads `.Value` directly. Tests do the same with literal input: `Color.FromHex("#000000").Value`.
+
+## Template
+
+Every new value object with something to validate follows this shape:
 
 ```csharp
 // src/Aurora.Coinly.Domain/Shared/{ValueObject}.cs
@@ -66,7 +78,7 @@ Its error catalog goes in a separate `{ValueObject}Errors.cs` in the same folder
 
 ## Rules
 
-- Private constructor; the static factory is the only way in.
+- Private constructor; the static factory is the only way in. The constructor only assigns; validation lives in the factory, because EF Core materializes owned types through the constructor.
 - Normalize before validating (`Trim()`, `ToUpperInvariant()`) so the stored form is canonical — `Color` upper-cases its hex.
 - `public const int MaxLength` when there is a length limit; the EF configuration reuses it.
 - Consumers unwrap with `.Value` only after checking `.IsSuccessful`.

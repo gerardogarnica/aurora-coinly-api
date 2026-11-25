@@ -74,12 +74,19 @@ internal sealed class Create{Entity}CommandHandler(
         Create{Entity}Command request,
         CancellationToken cancellationToken)
     {
+        // Value object factories return Result<T>: check before using them
+        Result<Color> color = Color.FromHex(request.Color);
+        if (!color.IsSuccessful)
+        {
+            return Result.Fail<Guid>(color.Error);
+        }
+
         // Create {entity}
         var {entity} = {Entity}.Create(
             userContext.UserId,
             request.Name,
             new Money(request.Amount, Currency.FromCode(request.CurrencyCode)),
-            Color.FromHex(request.Color),
+            color.Value,
             request.Notes,
             dateTimeService.UtcNow);
 
@@ -141,10 +148,16 @@ internal sealed class Update{Entity}CommandHandler(
             return Result.Fail({Entity}Errors.NotFound);
         }
 
+        Result<Color> color = Color.FromHex(request.Color);
+        if (!color.IsSuccessful)
+        {
+            return Result.Fail(color.Error);
+        }
+
         // Update {entity}
         var result = {entity}.Update(
             request.Name,
-            Color.FromHex(request.Color),
+            color.Value,
             request.Notes,
             dateTimeService.UtcNow);
 
