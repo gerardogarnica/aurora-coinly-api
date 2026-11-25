@@ -2,7 +2,7 @@
 
 namespace Aurora.Coinly.Domain.Shared;
 
-public sealed partial record Color
+public sealed partial record Color : IValueObject
 {
     private static readonly Regex HexColorRegex = GenerateHexColorRegex();
 

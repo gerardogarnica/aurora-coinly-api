@@ -1,6 +1,6 @@
 ﻿namespace Aurora.Coinly.Domain.Shared;
 
-public sealed record Money(decimal Amount, Currency Currency)
+public sealed record Money(decimal Amount, Currency Currency) : IValueObject
 {
     public static Money Zero() => Zero(Currency.Default);
     public static Money Zero(Currency currency) => new(0, currency);

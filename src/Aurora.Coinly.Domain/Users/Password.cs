@@ -1,6 +1,6 @@
 ﻿namespace Aurora.Coinly.Domain.Users;
 
-public sealed record Password
+public sealed record Password : IValueObject
 {
     private const int MinLength = 8;
 

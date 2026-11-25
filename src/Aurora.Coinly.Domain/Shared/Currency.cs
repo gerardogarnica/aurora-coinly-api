@@ -1,8 +1,8 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace Aurora.Coinly.Domain.Shared;
 
-public sealed record Currency
+public sealed record Currency : IValueObject
 {
     internal static readonly Currency Default = new("");
     public static readonly Currency Usd = new("USD");
@@ -17,8 +17,6 @@ public sealed record Currency
     ];
 
     [JsonConstructor]
-    public Currency() { }
-
     private Currency(string code) => Code = code;
 
     public static Currency FromCode(string code)
