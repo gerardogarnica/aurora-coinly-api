@@ -16,7 +16,7 @@ What they enforce is listed in `CLAUDE.md` ("Conventions enforced by architectur
 - **Never use `.BeImmutable()` on records.** `init` accessors compile to non-readonly backing fields, so every record is reported as mutable. Detect a record by the synthesized `<Clone>$` method instead.
 - **`Type.Name` carries the generic arity** (``Result`1``), so trim at the backtick before any suffix check.
 - **A reflection test that selects zero types passes silently.** When adding one, verify the selector actually matches something before trusting the green (e.g. assert the selected count is greater than zero).
-- `Domain_Should_NotHaveDependencyOn_*` only checks the other Coinly assemblies. It cannot express "Domain has no third-party dependencies"; if that rule is ever wanted, use `Assembly.GetReferencedAssemblies()` (Domain legitimately references Newtonsoft.Json for `SerializerSettings`).
+- `Domain_Should_NotHaveDependencyOn_*` only checks the other Coinly assemblies. It cannot express "Domain has no third-party dependencies"; if that rule is ever wanted, use `Assembly.GetReferencedAssemblies()`. Domain has no `PackageReference` today, so only `System.*` assemblies would show up.
 
 ## Scope
 

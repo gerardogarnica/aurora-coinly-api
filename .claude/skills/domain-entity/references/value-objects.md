@@ -15,8 +15,8 @@ So a new value object is `public sealed record {Name} : IValueObject` with a pri
 | Value object | Shape | Built with |
 |---|---|---|
 | `Money` | positional record `(decimal Amount, Currency Currency)` with arithmetic and comparison operators; mixing currencies throws | `new Money(amount, currency)`, `Money.Zero(currency)` |
-| `Currency` | closed set of known currencies (`Currency.All`, `Currency.Usd`, `Currency.Default`); its private constructor carries Json.NET's `[JsonConstructor]` so the outbox can rebuild the `Money` inside `WalletSavingsUpdatedEvent` | `Currency.FromCode("USD")` |
-| `Color` | `Value` holding `#RRGGBB`, upper-cased | `Color.FromHex("#FF5733")` → `Result<Color>` (`ColorErrors`) |
+| `Currency` | closed set of known currencies (`Currency.All`, `Currency.Usd`, `Currency.Default`); travels in the `Money` of `WalletSavingsUpdatedEvent`, rebuilt by the outbox's `ValueObjectContractResolver` through its private constructor | `Currency.FromCode("USD")` |
+| `Color` | free text in `Value` (`"#FF5733"`, `"blue"`, a design token), trimmed, case kept, at most `Color.MaxLength` (20) characters; no format check | `Color.Create("#FF5733")` → `Result<Color>` (`ColorErrors`) |
 | `DateRange` | `Start`/`End` dates, start on or before end | `DateRange.Create(start, end)` → `Result<DateRange>` (`DateRangeErrors`) |
 | `Password` | the plain password, minimum 8 characters (hashing goes through `IPasswordHasher`) | `Password.Create(value)` → `Result<Password>` (`PasswordErrors`) |
 
@@ -25,18 +25,18 @@ A factory that validates returns `Result<T>` and never throws. `Money` and `Curr
 A handler checks the result and returns its error:
 
 ```csharp
-Result<Color> color = Color.FromHex(request.Color);
+Result<Color> color = Color.Create(request.Color);
 if (!color.IsSuccessful)
 {
     return Result.Fail<Guid>(color.Error);
 }
 ```
 
-Domain code that builds a value from input it controls (`BudgetPeriodService`, `MonthlySummary.GetSummaryPeriod`) reads `.Value` directly. Tests do the same with literal input: `Color.FromHex("#000000").Value`.
+Domain code that builds a value from input it controls (`BudgetPeriodService`, `MonthlySummary.GetSummaryPeriod`) reads `.Value` directly. Tests do the same with literal input: `Color.Create("#000000").Value`.
 
 ## Template
 
-Every new value object with something to validate follows this shape:
+Every new value object with something to validate follows this shape (`Color` is the reference implementation):
 
 ```csharp
 // src/Aurora.Coinly.Domain/Shared/{ValueObject}.cs
@@ -57,7 +57,7 @@ public sealed record {ValueObject} : IValueObject
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            return Result.Fail<{ValueObject}>({ValueObject}Errors.Empty);
+            return Result.Fail<{ValueObject}>({ValueObject}Errors.Required);
         }
 
         value = value.Trim();
@@ -78,9 +78,10 @@ Its error catalog goes in a separate `{ValueObject}Errors.cs` in the same folder
 
 ## Rules
 
-- Private constructor; the static factory is the only way in. The constructor only assigns; validation lives in the factory, because EF Core materializes owned types through the constructor.
-- Normalize before validating (`Trim()`, `ToUpperInvariant()`) so the stored form is canonical — `Color` upper-cases its hex.
-- `public const int MaxLength` when there is a length limit; the EF configuration reuses it.
+- Private constructor; the static factory is the only way in. The constructor only assigns; validation lives in the factory, because EF Core and the outbox's Json.NET resolver both build the value object through that constructor. Name its parameters after the properties (`value` → `Value`), which both bind by name.
+- No serializer or persistence attributes: Domain references no NuGet package.
+- Normalize before validating (`Trim()`) so the stored form is canonical and the length check applies to what is stored.
+- `public const int MaxLength` when there is a length limit; the EF configuration (`HasMaxLength(Color.MaxLength)`) and the validators reuse it, so the number lives in one place. A string field shared by several commands gets one rule extension in `Application/Abstractions/Validations/RuleBuilderOptionsExtensions.cs` (`MustBeValidColor()`).
 - Consumers unwrap with `.Value` only after checking `.IsSuccessful`.
 
 ## Persistence

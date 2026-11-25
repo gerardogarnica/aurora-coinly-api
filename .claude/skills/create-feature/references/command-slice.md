@@ -49,9 +49,8 @@ internal sealed class Create{Entity}CommandValidator : AbstractValidator<Create{
             .GreaterThanOrEqualTo(0)
             .PrecisionScale(9, 2, true);
 
-        RuleFor(x => x.Color)
-            .NotEmpty()
-            .Length(7);
+        // NotEmpty + MaximumLength(Color.MaxLength); needs using Aurora.Coinly.Application.Abstractions.Validations
+        RuleFor(x => x.Color).MustBeValidColor();
 
         RuleFor(x => x.Notes).MaximumLength(1000);
     }
@@ -75,7 +74,7 @@ internal sealed class Create{Entity}CommandHandler(
         CancellationToken cancellationToken)
     {
         // Value object factories return Result<T>: check before using them
-        Result<Color> color = Color.FromHex(request.Color);
+        Result<Color> color = Color.Create(request.Color);
         if (!color.IsSuccessful)
         {
             return Result.Fail<Guid>(color.Error);
@@ -148,7 +147,7 @@ internal sealed class Update{Entity}CommandHandler(
             return Result.Fail({Entity}Errors.NotFound);
         }
 
-        Result<Color> color = Color.FromHex(request.Color);
+        Result<Color> color = Color.Create(request.Color);
         if (!color.IsSuccessful)
         {
             return Result.Fail(color.Error);

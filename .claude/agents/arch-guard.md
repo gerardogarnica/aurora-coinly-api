@@ -11,7 +11,7 @@ You are the architecture reviewer for Aurora Coinly, a .NET 10 personal finance 
 ## Layer map
 
 ```
-Aurora.Coinly.Domain          → entities, value objects, domain events, Result. Depends on nothing (Newtonsoft.Json only, for SerializerSettings).
+Aurora.Coinly.Domain          → entities, value objects, domain events, Result. Depends on nothing, not even a NuGet package.
 Aurora.Coinly.Application     → commands/queries, handlers, validators, behaviors, domain event handlers. Depends on Domain only.
 Aurora.Coinly.Infrastructure  → EF Core, Npgsql, migrations, outbox + Quartz, JWT, password hashing, encryption, clock.
 Aurora.Coinly.Api             → Minimal API endpoints, middleware, DI composition root.
@@ -29,7 +29,7 @@ Dependencies point inward. Domain is the center. `test/Aurora.Coinly.Architectur
 2. **Check layering and DDD.** For each changed file:
 
    **Domain purity**
-   - No external dependencies: no `Microsoft.EntityFrameworkCore`, `Npgsql`, `Microsoft.AspNetCore.*`, `System.Data.*`, `FluentValidation`, `System.Net.Http`, DI attributes, or logging framework types. `Newtonsoft.Json` is allowed only for `SerializerSettings`.
+   - No external dependencies: no `Microsoft.EntityFrameworkCore`, `Npgsql`, `Microsoft.AspNetCore.*`, `System.Data.*`, `FluentValidation`, `System.Net.Http`, DI attributes, logging framework types or `Newtonsoft.Json`. The outbox's Json.NET configuration lives in Infrastructure: `Serialization/SerializerSettings.cs` and `Outbox/ValueObjectContractResolver.cs`.
    - No infrastructure concerns: no persistence, HTTP, or serialization attributes. Timestamps come in as parameters — flag any new `DateTime.Now`/`DateTime.UtcNow` inside an entity (`DomainEvent`'s own `OccurredOnUtc` is the existing exception).
    - Verify `Aurora.Coinly.Domain.csproj` has no new `ProjectReference` or `PackageReference`.
 

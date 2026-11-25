@@ -114,7 +114,7 @@ builder.OwnsOne(x => x.AvailableAmount, y =>
 
 builder.OwnsOne(x => x.Color, y =>
 {
-    y.Property(x => x.Value).HasColumnName("color").HasMaxLength(7);
+    y.Property(x => x.Value).HasColumnName("color").HasMaxLength(Color.MaxLength);
 });
 ```
 
@@ -166,7 +166,7 @@ internal sealed class {Entity}Configuration : IEntityTypeConfiguration<{Entity}>
 
         builder.OwnsOne(x => x.Color, y =>
         {
-            y.Property(x => x.Value).HasColumnName("color").HasMaxLength(7);
+            y.Property(x => x.Value).HasColumnName("color").HasMaxLength(Color.MaxLength);
         });
 
         builder.Property(x => x.Notes).HasMaxLength(1000);

@@ -79,15 +79,15 @@ Orden sugerido:
 ### 3. El outbox deserializa cualquier `$type`
 
 - **Dónde:**
-  - `src/Aurora.Coinly.Domain/Abstractions/SerializerSettings.cs:9` (`TypeNameHandling.All`)
+  - `src/Aurora.Coinly.Infrastructure/Serialization/SerializerSettings.cs:7` (`TypeNameHandling.All`)
   - `src/Aurora.Coinly.Infrastructure/Outbox/ProcessOutboxJob.cs:31-33`, que deserializa sin `SerializationBinder`.
 - **Riesgo:** hoy solo escribe en la tabla el interceptor. Aun así, quien consiga escribir una fila puede hacer que el job instancie cualquier tipo cargado en el proceso, que es la vía clásica de *gadget chains* en Json.NET.
 - **Propuesta:** un `ISerializationBinder` que acepte solo:
   - los tipos del ensamblado Domain que implementan `IDomainEvent`;
   - los tipos concretos del ensamblado Domain que implementan `IValueObject`, porque `WalletSavingsUpdatedEvent` lleva un `Money` con su `Currency` y cada uno viaja con su propio `$type`. Un binder que aceptara solo eventos rechazaría ese evento.
 
-  Rechazar el resto con un error claro. `CurrencyTests` ya comprueba la ida y vuelta de `WalletSavingsUpdatedEvent` con `SerializerSettings.Instance`. Al añadir el binder, ampliarlo a cada evento existente.
-- **Enfoque:** acotado (skills `domain-entity` y `unit-testing`).
+  Rechazar el resto con un error claro. Ningún test cubre hoy la ida y vuelta: la configuración de Json.NET está en Infrastructure, que no tiene proyecto de tests, y los que había en Domain se eliminaron al quitar Newtonsoft de Domain. Al añadir el binder hay que decidir dónde probarlo y cubrir cada evento existente.
+- **Enfoque:** acotado (Infrastructure, `Serialization/` y `Outbox/`), salvo que se cree un proyecto de tests de Infrastructure: eso es una dependencia nueva y pasa por `spec`.
 
 ### 4. Swagger se publica en Producción
 

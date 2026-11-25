@@ -35,7 +35,7 @@ public sealed class {Entity} : BaseEntity
     {
         Name = string.Empty;
         TargetAmount = Money.Zero();
-        Color = Color.FromHex("#000000").Value;
+        Color = Color.Create("#000000").Value;
     }
 
     // ═══════════════════════════════════════════════════════════════

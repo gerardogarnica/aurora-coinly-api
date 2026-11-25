@@ -1,12 +1,12 @@
 ---
 paths:
   - "src/Aurora.Coinly.Infrastructure/Outbox/**/*.cs"
+  - "src/Aurora.Coinly.Infrastructure/Serialization/**/*.cs"
   - "src/Aurora.Coinly.Infrastructure/Interceptors/InsertOutboxMessagesInterceptor.cs"
   - "src/Aurora.Coinly.Infrastructure/DomainEvents/**/*.cs"
   - "src/Aurora.Coinly.Application/Abstractions/Messaging/IDomainEventHandler.cs"
   - "src/Aurora.Coinly.Application/**/*EventHandler.cs"
   - "src/Aurora.Coinly.Domain/**/*DomainEvents.cs"
-  - "src/Aurora.Coinly.Domain/Abstractions/SerializerSettings.cs"
 ---
 
 # Domain events and the outbox
@@ -34,7 +34,8 @@ Side effects on other aggregates are handled this way: `TransactionPaidEvent` â†
 
 ## Serialization
 
-- Content is Json.NET with `TypeNameHandling.All` (`Domain/Abstractions/SerializerSettings.cs`), and the job deserializes with the same settings and **no serialization binder**: any `$type` in a row is instantiated. The table is only written by the interceptor, but restricting deserialization to the Domain assembly's `IDomainEvent` types (a `SerializationBinder`) is a pending hardening.
+- Content is Json.NET with `TypeNameHandling.All` (`Infrastructure/Serialization/SerializerSettings.cs`), and the job deserializes with the same settings and **no serialization binder**: any `$type` in a row is instantiated. The table is only written by the interceptor, but restricting deserialization to the Domain assembly's `IDomainEvent` types (a `SerializationBinder`) is a pending hardening.
+- Domain has no Json.NET reference, so value objects carry no serializer attributes. `ValueObjectContractResolver` (`Infrastructure/Outbox/`, set in `SerializerSettings`) builds any Domain `IValueObject` without a public constructor through its private one (`Currency` inside the `Money` of `WalletSavingsUpdatedEvent`), skipping the record's copy constructor. Without it, Json.NET fails to deserialize those events. No test covers the round trip: it was checked by hand when the resolver was added, so re-check it (serialize and deserialize each event with `SerializerSettings.Instance`) when changing a value object's constructor or the settings.
 - Keep events flat: ids, dates, enums, numbers, and small value objects like `Money`. An entity in the payload (`BudgetUpdatedEvent(Budget budget)`) serializes its whole graph and is a stale snapshot when the handler reads it.
 - `Content` is `varchar(4000)`: a payload that grows past it fails the `SaveChanges` of the business change itself.
 - **Renaming or moving an event class breaks pending messages** of the old name (the `$type` no longer resolves and the attempt fails). Drain the outbox first, or keep the old type until it is empty.

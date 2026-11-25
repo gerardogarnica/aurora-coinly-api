@@ -81,7 +81,7 @@ Each domain shape forces a specific mapping. Decide these while designing the en
 |---|---|
 | `private readonly List<T> _items` exposed as `IReadOnlyCollection<T> Items` | Nothing extra when the field is named `_items` for `Items`: EF finds the backing field by convention. Configure the relationship (`HasMany(...).WithOne().HasForeignKey(...)`) explicitly. |
 | `Money` property | `OwnsOne(x => x.Amount, y => { y.Property(m => m.Amount).HasColumnName("amount").HasColumnType("numeric(9, 2)"); y.Property(m => m.Currency).HasConversion(c => c.Code, code => Currency.FromCode(code)).HasMaxLength(3); })` |
-| `Color` property | `OwnsOne(x => x.Color, y => y.Property(c => c.Value).HasColumnName("color").HasMaxLength(7))` |
+| `Color` property | `OwnsOne(x => x.Color, y => y.Property(c => c.Value).HasColumnName("color").HasMaxLength(Color.MaxLength))` |
 | Enum property | `HasConversion<string>().HasMaxLength(40)` |
 | Computed property (`TotalAmount`) | `builder.Ignore(x => x.TotalAmount)` |
 | `UserId` on a new aggregate root | `builder.HasIndex(x => x.UserId)`, since every query filters on it (existing tables have none yet) |

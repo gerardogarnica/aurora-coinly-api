@@ -27,9 +27,9 @@ Clean Architecture (también Onion o Hexagonal): separación por capas con depen
 │   │   │   ├── BaseEntity.cs
 │   │   │   ├── BaseError.cs
 │   │   │   ├── BaseErrorType.cs
-│   │   │   ├── IDomainEvent.cs       # IDomainEvent + DomainEvent
-│   │   │   ├── Result.cs
-│   │   │   └── SerializerSettings.cs # Json.NET para el outbox
+│   │   │   ├── DomainEvent.cs        # IDomainEvent + DomainEvent
+│   │   │   ├── IValueObject.cs
+│   │   │   └── Result.cs
 │   │   ├── {Aggregate}/
 │   │   │   ├── {Entity}.cs
 │   │   │   ├── {Entity}Errors.cs
@@ -150,7 +150,7 @@ dotnet add reference ../{name}.Infrastructure/{name}.Infrastructure.csproj
 
 ## Reglas críticas
 
-1. **Domain no tiene dependencias** — ni de otras capas ni de paquetes externos (salvo Json.NET para `SerializerSettings`)
+1. **Domain no tiene dependencias** — ni de otras capas ni de paquetes externos. La configuración de Json.NET del outbox vive en Infrastructure
 2. **Application depende solo de Domain** — sin preocupaciones de infraestructura
 3. **Infrastructure implementa las interfaces** declaradas en Application
 4. **Api solo referencia Infrastructure**
