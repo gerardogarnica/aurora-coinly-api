@@ -58,7 +58,7 @@ Handlers return `Result` / `Result<T>` (Domain `Abstractions/Result.cs`) instead
 ### Domain model
 
 - Entities inherit `BaseEntity` (Guid `Id`, domain event list), are `sealed`, have a private parameterless ctor (for EF), and are constructed only through a `public static Create(...)` factory. Behavior lives on the entity and returns `Result`.
-- Value objects in `Domain/Shared`: `Money`, `Currency`, `Color`, `DateRange`.
+- Value objects are `sealed record`s that implement the marker `IValueObject`: `Money`, `Currency`, `Color`, `DateRange` in `Domain/Shared`, and `Password` in `Domain/Users`.
 - Domain events derive from `DomainEvent`, are `sealed`, and end with `Event` (e.g. `WalletSavingsUpdatedEvent`, defined in `XxxDomainEvents.cs`).
 - `BudgetPeriodService` is a domain service registered in Application DI.
 
@@ -91,6 +91,7 @@ Key sections: `ConnectionStrings:AuroraCoinlyConnection`, `Jwt` (`JwtAuthOptions
 - Domain event handlers: `sealed`, suffix `EventHandler`.
 - Endpoints: `public sealed`.
 - Entities: `sealed`, private parameterless ctor, public static `Create`. Domain events: `sealed`, suffix `Event`.
+- Value objects (`IValueObject`): `sealed record`, no public ctor (except the positional `Money`). Every public record in Domain outside `Abstractions` must implement `IValueObject`.
 
 ## Tests
 

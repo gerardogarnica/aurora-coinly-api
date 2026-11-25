@@ -20,4 +20,6 @@ What they enforce is listed in `CLAUDE.md` ("Conventions enforced by architectur
 
 ## Scope
 
-The selectors only see `BaseEntity` subclasses, `ICommand*`/`IQuery*` implementations, `AbstractValidator<>` subclasses, `IDomainEventHandler<>` implementations and `IBaseEndpoint` implementations. Child entities (`WalletHistory`), value objects and models are not checked.
+The selectors see `BaseEntity` subclasses, `IValueObject` implementations, `ICommand*`/`IQuery*` implementations, `AbstractValidator<>` subclasses, `IDomainEventHandler<>` implementations and `IBaseEndpoint` implementations. Child entities (`WalletHistory`, `BudgetPeriod`, `BudgetTransaction`) and models are not checked.
+
+Value objects are selected by the marker they declare, not by inference, and `Records_Should_ImplementValueObject` is the completeness net that catches a record missing it. These tests use plain reflection with Shouldly instead of NetArchTest rules. When a new kind of record legitimately belongs in Domain without being a value object, exclude it in that test with a comment, as `Money` is excluded from the public-constructor test.

@@ -6,7 +6,7 @@
 **Rama:** — · **PR:** —
 **Relacionado:** `.claude/rules/` (cada punto enlaza la rule donde está documentado)
 
-Problemas encontrados al adaptar los agents, skills y rules de Aurora Flowboard a Coinly. Ninguno está corregido. Cada punto dice dónde está en el código, qué riesgo tiene, qué se propone y cómo abordarlo:
+Problemas encontrados al revisar los agents, skills y rules de Coinly. Ninguno está corregido. Cada punto dice dónde está en el código, qué riesgo tiene, qué se propone y cómo abordarlo:
 
 - **Acotado:** diseño corto en el chat y se implementa con la skill indicada.
 - **Spec:** cambio arquitectónico, que pasa por `spec` → `write-plan` → `execute-plan`.
@@ -84,9 +84,9 @@ Orden sugerido:
 - **Riesgo:** hoy solo escribe en la tabla el interceptor. Aun así, quien consiga escribir una fila puede hacer que el job instancie cualquier tipo cargado en el proceso, que es la vía clásica de *gadget chains* en Json.NET.
 - **Propuesta:** un `ISerializationBinder` que acepte solo:
   - los tipos del ensamblado Domain que implementan `IDomainEvent`;
-  - los tipos que llevan dentro (`Money`, `Currency`, enums).
+  - los tipos concretos del ensamblado Domain que implementan `IValueObject`, porque `WalletSavingsUpdatedEvent` lleva un `Money` con su `Currency` y cada uno viaja con su propio `$type`. Un binder que aceptara solo eventos rechazaría ese evento.
 
-  Rechazar el resto con un error claro. Un test de dominio debe comprobar que cada evento existente se serializa y se deserializa con el binder.
+  Rechazar el resto con un error claro. `CurrencyTests` ya comprueba la ida y vuelta de `WalletSavingsUpdatedEvent` con `SerializerSettings.Instance`. Al añadir el binder, ampliarlo a cada evento existente.
 - **Enfoque:** acotado (skills `domain-entity` y `unit-testing`).
 
 ### 4. Swagger se publica en Producción

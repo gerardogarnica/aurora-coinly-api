@@ -2,14 +2,20 @@
 
 Value objects are `sealed record` (structural equality) and immutable. They live in `Domain/Shared/` when they're shared across aggregates (`Money`, `Currency`, `Color`, `DateRange`); one that belongs to a single aggregate (like `Password`) lives in that aggregate's folder.
 
-There is no marker interface for value objects in this codebase, and the architecture tests don't select them.
+Every value object implements the empty marker `IValueObject` (`Domain/Abstractions/IValueObject.cs`). It declares no members; it only lets the architecture tests find value objects (`DomainLayerTests`):
+
+- `ValueObjects_Should_BeSealedRecords`: every `IValueObject` is a `sealed record`.
+- `ValueObjects_ShouldNotHave_PublicConstructor`: no public constructor, so the factory is the only way in. `Money` is the one exception: a positional record's primary constructor is public.
+- `Records_Should_ImplementValueObject`: the completeness net. Every public record in Domain outside `Abstractions` that isn't a domain event must implement `IValueObject`. A new value object that forgets the marker fails here instead of silently escaping the other two tests.
+
+So a new value object is `public sealed record {Name} : IValueObject` with a private constructor.
 
 ## The existing shapes
 
 | Value object | Shape | Built with |
 |---|---|---|
 | `Money` | positional record `(decimal Amount, Currency Currency)` with arithmetic and comparison operators; mixing currencies throws | `new Money(amount, currency)`, `Money.Zero(currency)` |
-| `Currency` | closed set of known currencies (`Currency.All`, `Currency.Usd`, `Currency.Default`) | `Currency.FromCode("USD")` |
+| `Currency` | closed set of known currencies (`Currency.All`, `Currency.Usd`, `Currency.Default`); its private constructor carries Json.NET's `[JsonConstructor]` so the outbox can rebuild the `Money` inside `WalletSavingsUpdatedEvent` | `Currency.FromCode("USD")` |
 | `Color` | `Value` holding `#RRGGBB`, upper-cased | `Color.FromHex("#FF5733")` |
 | `DateRange` | `Start`/`End` dates | `DateRange.Create(start, end)` |
 | `Password` | the plain password, minimum 8 characters (hashing goes through `IPasswordHasher`) | `Password.Create(value)` |
@@ -24,7 +30,7 @@ Prefer this for a new value object whose input isn't fully covered by a validato
 // src/Aurora.Coinly.Domain/Shared/{ValueObject}.cs
 namespace Aurora.Coinly.Domain.Shared;
 
-public sealed record {ValueObject}
+public sealed record {ValueObject} : IValueObject
 {
     public const int MaxLength = 50;
 

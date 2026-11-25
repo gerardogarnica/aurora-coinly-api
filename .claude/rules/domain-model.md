@@ -14,9 +14,9 @@ Enums are persisted as strings (`HasConversion<string>().HasMaxLength(40)`), so 
 
 ## Value objects
 
-- A value object is a `sealed record` with a private constructor (or a positional record, like `Money`) and a static factory.
+- A value object is a `sealed record` that implements the marker `IValueObject`, with a private constructor (or a positional record, like `Money`) and a static factory. The architecture tests enforce all three, and fail for any public record in Domain (outside `Abstractions`, other than events) that lacks the marker.
 - The existing factories (`Color.FromHex`, `DateRange.Create`, `Password.Create`) throw `ArgumentException` on malformed input; commands rely on their validator to reject that input first. A new value object whose input a validator can't fully guarantee returns `Result<T>` from `Create` instead.
-- There is no marker interface for value objects, and the architecture tests don't select them.
+- `IValueObject` is an empty marker used only by the architecture tests. Value objects that travel inside an outbox event (`Money` and its `Currency` in `WalletSavingsUpdatedEvent`) must be rebuildable by Json.NET: a positional record, or a private constructor marked with `Newtonsoft.Json.JsonConstructor` (as in `Currency`). System.Text.Json's `[JsonConstructor]` has no effect on the outbox. `CurrencyTests` covers the round trip.
 - EF Core maps every persisted value object with `OwnsOne`, except `Currency`, which is stored as its 3-letter code with `HasConversion(c => c.Code, code => Currency.FromCode(code))` inside each `Money` owned type.
 
 ## Money

@@ -2,7 +2,7 @@
 
 > **Qué es esto.** Plantilla de referencia para arrancar **otro repositorio** con la misma arquitectura que Aurora Coinly. No es una guía de trabajo para este repo: la solución ya está scaffoldeada, y para trabajar sobre ella se usan las skills `domain-entity`, `create-feature` y `unit-testing`.
 >
-> Procede de Aurora Flowboard, que comparte la arquitectura; aquí está adaptada a los nombres y decisiones de Coinly. Si arrancas un servicio nuevo, empieza por este documento y después reconstruye las convenciones leyendo `src/` y `.claude/rules/`.
+> Usa los nombres y decisiones de Coinly. Si arrancas un servicio nuevo, empieza por este documento y después reconstruye las convenciones leyendo `src/` y `.claude/rules/`.
 
 Clean Architecture (también Onion o Hexagonal): separación por capas con dependencias unidireccionales hacia dentro.
 
