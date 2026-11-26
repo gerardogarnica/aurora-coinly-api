@@ -94,7 +94,9 @@ builder.Navigation(x => x.Operations)
     .UsePropertyAccessMode(PropertyAccessMode.Field);
 ```
 
-A private field with no public property at all is mapped by name, as `UserConfiguration` does with `_passwordHash`.
+A private member with no public property is mapped by name. `UserConfiguration` maps the private `Password` property as an owned type with `builder.OwnsOne<Password>("Password", ...)`.
+
+An owned collection uses `OwnsMany` with its own table and key, as `UserConfiguration` does for roles (`user_roles`, key `(UserId, Name)`). Each owner needs its own instances of the owned type: EF can't let one instance belong to two owners.
 
 ## Value objects
 
@@ -127,7 +129,7 @@ builder.OwnsOne(x => x.Color, y =>
 ```csharp
 builder.HasIndex(x => x.UserId);
 
-builder.HasIndex(x => x.IdentityId).IsUnique();
+builder.HasIndex(x => x.RefreshTokenHash).IsUnique();
 ```
 
 A unique index on an owned value object goes inside `OwnsOne`, as `users.email` does:

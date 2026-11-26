@@ -178,7 +178,7 @@ Existing handlers (`UpdateCategoryCommandHandler`, `UpdateBudgetLimitCommandHand
 ## Tracking rules
 
 - **Don't call `Update()` on an entity you loaded from the context.** It is already tracked; `SaveChangesAsync` detects the changes. `Update()` only adds risk: it marks every entity in the graph `Modified` when its key is set.
-- **Add a new child with a domain-assigned key explicitly.** EF tracks a new entity found through a navigation as `Modified` when its key already has a value, and the save fails trying to update a row that doesn't exist. `WalletHistory` leaves `Id` unset and is inserted normally. `BudgetPeriod` and `BudgetTransaction` assign `Guid.NewGuid()` in their constructors, so the handler calls `dbContext.BudgetTransactions.Add(child)` (see `AddTransactionToBudgetCommandHandler`). See `.claude/rules/ef-core-queries.md`.
+- **A new child appended to a tracked aggregate needs no explicit `Add`.** Guid keys are `ValueGenerated.Never` (set in `ApplicationDbContext.OnModelCreating`), so EF tracks a new child found through a navigation as `Added`. The child must assign its own `Id`. See `.claude/rules/ef-core-queries.md`.
 - **An entity you attach to a navigation property must be tracked.** If it is going to be assigned to a navigation, load it *without* `AsNoTracking()`.
 
 ## Loading a related aggregate

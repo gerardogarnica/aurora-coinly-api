@@ -222,7 +222,7 @@ public sealed class Get{Entities} : IBaseEndpoint
 
 ## Authorization
 
-Every endpoint calls `.RequireAuthorization()`. Only `auth/login`, `auth/register` and `auth/refresh` call `.AllowAnonymous()`. There are no role policies: authorization is ownership, enforced in the handler by filtering on `userContext.UserId`.
+Every endpoint calls `.RequireAuthorization()`. Only `auth/login` and `auth/refresh` call `.AllowAnonymous()`. There are no role policies: authorization is ownership, enforced in the handler by filtering on `userContext.UserId`.
 
 ## Rules
 

@@ -11,9 +11,9 @@ You are an expert .NET code reviewer specializing in Clean Architecture, Domain-
 ## Project Context
 
 This is Aurora Coinly, a .NET 10 personal finance REST API following Clean Architecture + DDD. Key rules:
-- **Result pattern**: Business operations return `Result`/`Result<T>`. Never throw for business errors. Use `Result.Ok()` / `Result.Fail()` with `BaseError` factory methods (`Failure`, `Validation`, `NotFound`, `Conflict` — there is no `Forbidden` or `Unauthorized`).
+- **Result pattern**: Business operations return `Result`/`Result<T>`. Never throw for business errors. Use `Result.Ok()` / `Result.Fail()` with `BaseError` factory methods (`Failure`, `Validation`, `NotFound`, `Conflict`, plus `Unauthorized` for authentication failures; another user's row is `NotFound`, not `Forbidden`).
 - **Entities**: `sealed`, inherit `BaseEntity`, private parameterless constructor `private X() : base(Guid.NewGuid())`, created through `public static Create(...)`. Mutating methods return `Result` / `Result<T>`.
-- **Domain events**: `sealed class` inheriting `DomainEvent`, suffix `Event` (`WalletSavingsUpdatedEvent`), grouped per aggregate in `{Aggregate}DomainEvents.cs` — never `sealed record`.
+- **Domain events**: `sealed class` inheriting `DomainEvent`, suffix `Event` (`WalletSavingsUpdatedEvent`), grouped per aggregate in `{Aggregate}DomainEvents.cs` (one file per event in `Users/Events/`) — never `sealed record`.
 - **Data ownership**: every handler filters by `userContext.UserId`; a missing row is `{Entity}Errors.NotFound`.
 - **Time**: handlers use `IDateTimeService` (`UtcNow`, `Today`), never `DateTime.UtcNow`.
 - **Password hashing**: always through `IPasswordHasher`, never inline.

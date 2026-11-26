@@ -19,7 +19,7 @@ So a new value object is `public sealed record {Name} : IValueObject` with a pri
 | `Color` | free text in `Value` (`"#FF5733"`, `"blue"`, a design token), trimmed, case kept, at most `Color.MaxLength` (20) characters; no format check | `Color.Create("#FF5733")` → `Result<Color>` (`ColorErrors`) |
 | `DateRange` | `Start`/`End` dates, start on or before end | `DateRange.Create(start, end)` → `Result<DateRange>` (`DateRangeErrors`) |
 | `Email` | trimmed and lowercased address in `Value`, at most `Email.MaxLength` (255) characters; `MailAddress` must parse it back to the same string (no `"Name <a@b.com>"`) and the host needs a dot | `Email.Create(value)` → `Result<Email>` (`EmailErrors`) |
-| `Password` | the plain password, minimum 8 characters (hashing goes through `IPasswordHasher`) | `Password.Create(value)` → `Result<Password>` (`PasswordErrors`) |
+| `Password` | the password **hash** in `Hash` (8–500 characters), never the plain password; the handler hashes with `IPasswordHasher` first, and plain-password rules live in the validators | `Password.Create(hash)` → `Result<Password>` (`PasswordErrors`) |
 
 A factory that validates returns `Result<T>` and never throws. `Money` and `Currency` have nothing to validate: `Currency.FromCode` falls back to `Currency.Default` for an unknown code, and the command validator checks the code against `Currency.All`. `Money` throws only when its operators mix currencies; aggregates check that first, so the exception means a bug.
 

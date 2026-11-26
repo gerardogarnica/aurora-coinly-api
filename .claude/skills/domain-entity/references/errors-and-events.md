@@ -11,9 +11,11 @@ The error type is `BaseError` (`Domain/Abstractions/BaseError.cs`). Build it wit
 | `BaseError.Validation` | `Validation` | 400 |
 | `BaseError.NotFound` | `NotFound` | 404 |
 | `BaseError.Conflict` | `Conflict` | 409 |
+| `BaseError.Unauthorized` | `Unauthorized` | 401 |
+| `BaseError.Forbidden` | `Forbidden` | 403 |
 | `BaseError.Failure` | `Failure` | 500 |
 
-There is no `Forbidden`: a row that belongs to another user is `NotFound`, so its existence is not leaked. Adding a new `BaseErrorType` means touching `ApiResponses` too.
+`Unauthorized` is for authentication failures (`AuthenticationErrors` in Application: bad credentials, an invalid refresh token). Don't use `Forbidden` for a row that belongs to another user: return `NotFound`, so its existence is not leaked. Adding a new `BaseErrorType` means touching `ApiResponses` too.
 
 Error codes are `"{Entity}.{Reason}"` — the entity name is **singular**: `"Wallet.NotFound"`, not `"Wallets.NotFound"`.
 
@@ -43,7 +45,7 @@ public static class {Entity}Errors
 
 ## Domain events
 
-All events of an aggregate live in **one file**, `{Entity}DomainEvents.cs`, next to the entity (`WalletDomainEvents.cs`, `TransactionDomainEvents.cs`). Each is a `sealed class` inheriting `DomainEvent`, which supplies `Id` and `OccurredOnUtc`. The name ends with `Event` — the architecture tests check both.
+All events of an aggregate live in **one file**, `{Entity}DomainEvents.cs`, next to the entity (`WalletDomainEvents.cs`, `TransactionDomainEvents.cs`). `Users` is the exception, with one file per event in `Users/Events/` (`UserCreatedDomainEvent`, `UserTokenIssuedDomainEvent`...); follow the aggregate you're in. Each is a `sealed class` inheriting `DomainEvent`, which supplies `Id` and `OccurredOnUtc`. The name ends with `Event` — the architecture tests check both.
 
 Events carry **ids and simple values, never entity instances**. The event is serialized into the outbox and read back later, possibly after the entity changed; an entity in the payload is a stale snapshot and drags its whole graph into the JSON. (`BudgetUpdatedEvent(Budget budget)` predates this rule; don't copy it.)
 

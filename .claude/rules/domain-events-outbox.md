@@ -7,6 +7,7 @@ paths:
   - "src/Aurora.Coinly.Application/Abstractions/Messaging/IDomainEventHandler.cs"
   - "src/Aurora.Coinly.Application/**/*EventHandler.cs"
   - "src/Aurora.Coinly.Domain/**/*DomainEvents.cs"
+  - "src/Aurora.Coinly.Domain/**/Events/*.cs"
 ---
 
 # Domain events and the outbox
@@ -18,6 +19,8 @@ paths:
 3. `ProcessOutboxJob` (Quartz, `[DisallowConcurrentExecution]`, every `Outbox:IntervalInSeconds`) reads up to `Outbox:BatchSize` pending messages `FOR UPDATE`, ordered by `occurred_on_utc`, in one transaction. It dispatches each one to every `IDomainEventHandler<T>` (`DomainEventsDispatcher`, a new DI scope per event) and commits.
 
 Side effects on other aggregates are handled this way: `TransactionPaidEvent` → `UpdateSummaryOnTransactionPaidEventHandler` and `UpdateBudgetOnTransactionPaidEventHandler`; `WalletSavingsUpdatedEvent` → `UpdateSummaryOnSavingsAssignedEventHandler`. They are **eventually consistent**: the monthly summary and the budget lag the transaction by up to one job interval (60 s in `appsettings.Development.json`).
+
+The `Users` events (`UserCreatedDomainEvent`, `UserPasswordChangedDomainEvent`, `UserTokenIssuedDomainEvent`, `UserTokenRevokedDomainEvent`) have no handlers yet: every refresh and password change writes outbox rows that the job marks processed without dispatching anything. Login loads the user with `AsNoTracking()` and adds the token directly, so its `UserTokenIssuedDomainEvent` never reaches the outbox; track the user there before adding a handler for that event.
 
 ## Handlers
 
