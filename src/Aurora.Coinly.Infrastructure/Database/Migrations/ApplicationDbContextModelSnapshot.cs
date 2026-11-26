@@ -422,12 +422,6 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on_utc");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("email");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -458,10 +452,6 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_users");
-
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("ix_users_email");
 
                     b.HasIndex("IdentityId")
                         .IsUnique()
@@ -886,6 +876,37 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                     b.Navigation("PaymentMethod");
 
                     b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("Aurora.Coinly.Domain.Users.User", b =>
+                {
+                    b.OwnsOne("Aurora.Coinly.Domain.Users.Email", "Email", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(255)
+                                .HasColumnType("character varying(255)")
+                                .HasColumnName("email");
+
+                            b1.HasKey("UserId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique()
+                                .HasDatabaseName("ix_users_email");
+
+                            b1.ToTable("users", "coinly");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId")
+                                .HasConstraintName("fk_users_users_id");
+                        });
+
+                    b.Navigation("Email")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Aurora.Coinly.Domain.Users.UserToken", b =>

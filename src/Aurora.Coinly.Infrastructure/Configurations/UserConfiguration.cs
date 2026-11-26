@@ -10,7 +10,16 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Email).HasMaxLength(200);
+        builder.OwnsOne(x => x.Email, y =>
+        {
+            y.Property(e => e.Value)
+                .HasColumnName("email")
+                .IsRequired()
+                .HasMaxLength(Email.MaxLength);
+
+            y.HasIndex(e => e.Value).IsUnique();
+        });
+
         builder.Property(x => x.FirstName).HasMaxLength(100);
         builder.Property(x => x.LastName).HasMaxLength(100);
         builder.Property(x => x.IdentityId).HasMaxLength(256);
@@ -23,7 +32,6 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Ignore(user => user.FullName);
 
-        builder.HasIndex(x => x.Email).IsUnique();
         builder.HasIndex(x => x.IdentityId).IsUnique();
     }
 }

@@ -12,11 +12,19 @@ internal sealed class RegisterUserCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get user by email
-        User? user = await dbContext
-            .Users
-            .SingleOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+        Result<Email> email = Email.Create(request.Email);
+        if (!email.IsSuccessful)
+        {
+            return Result.Fail<UserModel>(email.Error);
+        }
 
-        if (user is not null)
+        string emailValue = email.Value.Value;
+
+        bool emailExists = await dbContext
+            .Users
+            .AnyAsync(x => x.Email.Value == emailValue, cancellationToken);
+
+        if (emailExists)
         {
             return Result.Fail<UserModel>(UserErrors.EmailAlreadyExists);
         }
@@ -32,7 +40,7 @@ internal sealed class RegisterUserCommandHandler(
 
         // Create user
         var newUser = User.Create(
-            request.Email.Trim(),
+            email.Value,
             request.FirstName.Trim(),
             request.LastName.Trim(),
             hashedPassword,

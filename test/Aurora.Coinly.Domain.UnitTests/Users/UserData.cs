@@ -2,7 +2,7 @@
 
 internal static class UserData
 {
-    public const string Email = "test@test.mail";
+    public static readonly Email Email = Email.Create("test@test.mail").Value;
     public const string FirstName = "First";
     public const string LastName = "Last";
     public const string Password = "test123";

@@ -5,7 +5,7 @@ public sealed class User : BaseEntity
     private string _passwordHash;
     private readonly List<Role> _roles = [];
 
-    public string Email { get; private set; }
+    public Email Email { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     public string FullName => $"{FirstName} {LastName}";
@@ -16,14 +16,13 @@ public sealed class User : BaseEntity
 
     private User() : base(Guid.NewGuid())
     {
-        Email = string.Empty;
         FirstName = string.Empty;
         LastName = string.Empty;
         IdentityId = string.Empty;
     }
 
     public static User Create(
-        string email,
+        Email email,
         string firstName,
         string lastName,
         string password,

@@ -11,10 +11,19 @@ internal sealed class LoginCommandHandler(
         CancellationToken cancellationToken)
     {
         // Get user by email
+        // A malformed email is reported as invalid credentials, like an unknown one.
+        Result<Email> email = Email.Create(request.Email);
+        if (!email.IsSuccessful)
+        {
+            return Result.Fail<IdentityToken>(UserErrors.InvalidCredentials);
+        }
+
+        string emailValue = email.Value.Value;
+
         User? user = await dbContext
             .Users
             .Include(x => x.Roles)
-            .SingleOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+            .SingleOrDefaultAsync(x => x.Email.Value == emailValue, cancellationToken);
 
         if (user is null)
         {

@@ -6,6 +6,7 @@ internal sealed class RegisterUserCommandValidator : AbstractValidator<RegisterU
     {
         RuleFor(x => x.Email)
             .NotEmpty()
+            .MaximumLength(Email.MaxLength)
             .EmailAddress();
 
         RuleFor(x => x.FirstName)
