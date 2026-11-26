@@ -1,6 +1,6 @@
 # Value objects
 
-Value objects are `sealed record` (structural equality) and immutable. They live in `Domain/Shared/` when they're shared across aggregates (`Money`, `Currency`, `Color`, `DateRange`); one that belongs to a single aggregate (like `Password`) lives in that aggregate's folder.
+Value objects are `sealed record` (structural equality) and immutable. They live in `Domain/Shared/` when they're shared across aggregates (`Money`, `Currency`, `Color`, `DateRange`); one that belongs to a single aggregate (like `Email` and `Password`) lives in that aggregate's folder.
 
 Every value object implements the empty marker `IValueObject` (`Domain/Abstractions/IValueObject.cs`). It declares no members; it only lets the architecture tests find value objects (`DomainLayerTests`):
 
@@ -18,6 +18,7 @@ So a new value object is `public sealed record {Name} : IValueObject` with a pri
 | `Currency` | closed set of known currencies (`Currency.All`, `Currency.Usd`, `Currency.Default`); travels in the `Money` of `WalletSavingsUpdatedEvent`, rebuilt by the outbox's `ValueObjectContractResolver` through its private constructor | `Currency.FromCode("USD")` |
 | `Color` | free text in `Value` (`"#FF5733"`, `"blue"`, a design token), trimmed, case kept, at most `Color.MaxLength` (20) characters; no format check | `Color.Create("#FF5733")` → `Result<Color>` (`ColorErrors`) |
 | `DateRange` | `Start`/`End` dates, start on or before end | `DateRange.Create(start, end)` → `Result<DateRange>` (`DateRangeErrors`) |
+| `Email` | trimmed and lowercased address in `Value`, at most `Email.MaxLength` (255) characters; `MailAddress` must parse it back to the same string (no `"Name <a@b.com>"`) and the host needs a dot | `Email.Create(value)` → `Result<Email>` (`EmailErrors`) |
 | `Password` | the plain password, minimum 8 characters (hashing goes through `IPasswordHasher`) | `Password.Create(value)` → `Result<Password>` (`PasswordErrors`) |
 
 A factory that validates returns `Result<T>` and never throws. `Money` and `Currency` have nothing to validate: `Currency.FromCode` falls back to `Currency.Default` for an unknown code, and the command validator checks the code against `Currency.All`. `Money` throws only when its operators mix currencies; aggregates check that first, so the exception means a bug.

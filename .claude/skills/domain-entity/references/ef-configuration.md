@@ -127,7 +127,21 @@ builder.OwnsOne(x => x.Color, y =>
 ```csharp
 builder.HasIndex(x => x.UserId);
 
-builder.HasIndex(x => x.Email).IsUnique();
+builder.HasIndex(x => x.IdentityId).IsUnique();
+```
+
+A unique index on an owned value object goes inside `OwnsOne`, as `users.email` does:
+
+```csharp
+builder.OwnsOne(x => x.Email, y =>
+{
+    y.Property(e => e.Value)
+        .HasColumnName("email")
+        .IsRequired()
+        .HasMaxLength(Email.MaxLength);
+
+    y.HasIndex(e => e.Value).IsUnique();
+});
 ```
 
 ## Ignoring

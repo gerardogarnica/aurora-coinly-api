@@ -16,7 +16,7 @@ paths:
 - `Program.cs` calls `ApplyMigrationsAsync` (`Api/Extensions/MigrationServiceExtensions.cs`) only when the environment is Development or Staging. **Production does not migrate on startup**: a release with a migration needs it applied by hand (`dotnet ef database update`, or a generated script) before or with the deploy.
 - Because Staging migrates on startup, a broken migration takes the staging deploy down on its first request. Review migrations with `arch-guard` before merging into `staging`.
 - Migrations live in `Infrastructure/Database/Migrations/` (pass `--output-dir Database/Migrations`). The history table is `coinly.__EFMigrationsHistory`.
-- Migrations so far: `InitialMigration` and `IncreaseColorMaxLength`. Don't edit an applied migration; add a new one.
+- Migrations so far: `InitialMigration`, `IncreaseColorMaxLength` and `IncreaseEmailMaxLength`. Don't edit an applied migration; add a new one.
 - Generated migrations are committed as scaffolded. The `[**/Migrations/*.cs]` section at the end of `.editorconfig` turns off IDE0161 (block-scoped namespace) and CA1861 (constant arrays in `InsertData` and composite indexes) for them, so don't hand-edit a new migration to satisfy the analyzers.
 
 ## Configuration

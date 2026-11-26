@@ -80,7 +80,7 @@ internal static class WalletData
 ```
 
 - **Prefer fixed dates** for new fixtures — `new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)`, `new DateOnly(2026, 1, 1)` — exposed as constants on the data class. Existing fixtures still pass `DateTime.UtcNow`; that works because domain methods take the timestamp as a parameter, but a test that asserts a date or crosses a month boundary must use a fixed one.
-- Value objects come from their real factories: `Color.Create("#000000").Value` (the factory returns `Result<Color>`), `new Money(100m, Currency.Usd)`. Their own tests (`ColorTests`, `DateRangeTests`, `PasswordTests`) assert both the success and each `{ValueObject}Errors` failure.
+- Value objects come from their real factories: `Color.Create("#000000").Value` (the factory returns `Result<Color>`), `new Money(100m, Currency.Usd)`. Their own tests (`ColorTests`, `DateRangeTests`, `EmailTests`, `PasswordTests`) assert both the success and each `{ValueObject}Errors` failure.
 - Entities reach a non-initial state by calling the aggregate's own methods (`wallet.Delete(...)`), never by mutation.
 - Data classes may depend on each other across aggregates (`WalletData` uses `UserData`). Aggregate namespaces are in `GlobalUsings.cs`; the test-side data namespaces (`Aurora.Coinly.Domain.UnitTests.Users`) are imported per file.
 

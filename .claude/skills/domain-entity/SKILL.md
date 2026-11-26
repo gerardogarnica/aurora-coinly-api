@@ -39,7 +39,7 @@ Once the entity exists, continue with the `create-feature` skill for the use cas
 |---------|---------|-----------|---------|
 | Aggregate root | Entry point for the aggregate | `BaseEntity` | `Wallet`, `Budget`, `Transaction` |
 | Child entity | Part of an aggregate, changed only through the root | none | `WalletHistory`, `BudgetPeriod`, `BudgetTransaction` |
-| Value object | Immutable, no identity | `IValueObject` (`sealed record`) | `Money`, `Currency`, `Color`, `DateRange`, `Password` |
+| Value object | Immutable, no identity | `IValueObject` (`sealed record`) | `Money`, `Currency`, `Color`, `DateRange`, `Email`, `Password` |
 | Domain event | Signals a state change other aggregates react to | `DomainEvent` | `WalletSavingsUpdatedEvent` |
 
 Child entities don't inherit `BaseEntity`: they raise no events, declare their own `Guid Id`, and have an `internal static Create(...)` so only the root can build them. Leave the `Id` unset so EF generates it on insert, as `WalletHistory` does. `BudgetPeriod` and `BudgetTransaction` assign it in their constructor, which forces handlers to add new instances explicitly (see [aggregate-root.md](references/aggregate-root.md#child-entity)). The architecture tests don't select child entities, so nothing checks a child's shape: follow `WalletHistory`.

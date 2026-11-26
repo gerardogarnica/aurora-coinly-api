@@ -214,6 +214,7 @@ RuleFor(x => x.WalletId)
 // Email
 RuleFor(x => x.Email)
     .NotEmpty()
+    .MaximumLength(Email.MaxLength)
     .EmailAddress();
 
 // Conditional
