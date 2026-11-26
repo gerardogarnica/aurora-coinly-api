@@ -1,4 +1,4 @@
-﻿namespace Aurora.Coinly.Application.Users.Update;
+﻿namespace Aurora.Coinly.Application.Users.UpdateUser;
 
 internal sealed class UpdateUserCommandHandler(
     ICoinlyDbContext dbContext,
@@ -20,12 +20,15 @@ internal sealed class UpdateUserCommandHandler(
         }
 
         // Update user
-        user.Update(
+        Result updateUserResult = user.Update(
             request.FirstName,
             request.LastName,
             dateTimeService.UtcNow);
 
-        dbContext.Users.Update(user);
+        if (!updateUserResult.IsSuccessful)
+        {
+            return updateUserResult;
+        }
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

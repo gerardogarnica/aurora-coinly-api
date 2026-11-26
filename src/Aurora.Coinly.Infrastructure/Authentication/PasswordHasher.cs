@@ -1,21 +1,66 @@
-﻿namespace Aurora.Coinly.Infrastructure.Authentication;
+﻿using System.Security.Cryptography;
 
-internal sealed class PasswordHasher(EncryptionService encryptionService) : IPasswordHasher
+namespace Aurora.Coinly.Infrastructure.Authentication;
+
+internal sealed class PasswordHasher : IPasswordHasher
 {
+    private const int SaltSize = 16;
+    private const int HashSize = 32;
+    private const int Iterations = 310_000;
+    private static readonly HashAlgorithmName Algorithm = HashAlgorithmName.SHA256;
+    private const byte FormatVersion = 0x01;
+    private const int TotalSize = 1 + SaltSize + HashSize;
+
+    private static readonly string DummyHash = BuildDummyHash();
+
+    private static string BuildDummyHash()
+    {
+        byte[] buffer = new byte[TotalSize];
+        buffer[0] = FormatVersion;
+        return Convert.ToBase64String(buffer);
+    }
+
+    public void VerifyDummy(string providedPassword) =>
+        VerifyHashedPassword(DummyHash, providedPassword);
+
     public string HashPassword(string password)
     {
-        ArgumentNullException.ThrowIfNull(password);
+        byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
+        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, Algorithm, HashSize);
 
-        return encryptionService.Encrypt(password);
+        byte[] buffer = new byte[TotalSize];
+        buffer[0] = FormatVersion;
+        Buffer.BlockCopy(salt, 0, buffer, 1, SaltSize);
+        Buffer.BlockCopy(hash, 0, buffer, 1 + SaltSize, HashSize);
+
+        return Convert.ToBase64String(buffer);
     }
 
     public bool VerifyHashedPassword(string hashedPassword, string providedPassword)
     {
-        ArgumentNullException.ThrowIfNull(hashedPassword);
-        ArgumentNullException.ThrowIfNull(providedPassword);
+        byte[] buffer;
+        try
+        {
+            buffer = Convert.FromBase64String(hashedPassword);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
 
-        var decryptedPassword = encryptionService.Decrypt(hashedPassword);
+        if (buffer.Length != TotalSize || buffer[0] != FormatVersion)
+        {
+            return false;
+        }
 
-        return decryptedPassword == providedPassword;
+        byte[] salt = new byte[SaltSize];
+        byte[] storedHash = new byte[HashSize];
+
+        Buffer.BlockCopy(buffer, 1, salt, 0, SaltSize);
+        Buffer.BlockCopy(buffer, 1 + SaltSize, storedHash, 0, HashSize);
+
+        byte[] computedHash = Rfc2898DeriveBytes.Pbkdf2(providedPassword, salt, Iterations, Algorithm, HashSize);
+
+        return CryptographicOperations.FixedTimeEquals(storedHash, computedHash);
     }
 }

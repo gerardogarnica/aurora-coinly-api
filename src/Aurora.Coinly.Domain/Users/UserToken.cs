@@ -1,47 +1,73 @@
 ﻿namespace Aurora.Coinly.Domain.Users;
 
-public sealed class UserToken : BaseEntity
+public sealed class UserToken
 {
+    public const int MaxAccessTokenIdLength = 64;
+    public const int RefreshTokenHashLength = 64;
+    public const int MaxRefreshTokenLength = 500;
+
+    public Guid UserTokenId { get; private set; }
     public Guid UserId { get; private set; }
-    public string AccessToken { get; private set; }
+    public string AccessTokenId { get; private set; }
+    public string RefreshTokenHash { get; private set; }
     public DateTime AccessTokenExpiresOnUtc { get; private set; }
-    public string RefreshToken { get; private set; }
     public DateTime RefreshTokenExpiresOnUtc { get; private set; }
     public DateTime IssuedOnUtc { get; private set; }
+    public bool IsRevoked { get; private set; }
+
     public User User { get; init; } = null!;
 
-    private UserToken() : base(Guid.NewGuid()) { }
+    private UserToken() { } // EF Core
 
-    public static UserToken Create(
+    private UserToken(
+        Guid userTokenId,
         Guid userId,
-        string accessToken,
+        string accessTokenId,
+        string refreshTokenHash,
         DateTime accessTokenExpiresOnUtc,
-        string refreshToken,
         DateTime refreshTokenExpiresOnUtc,
         DateTime issuedOnUtc)
     {
-        return new UserToken
-        {
-            UserId = userId,
-            AccessToken = accessToken,
-            AccessTokenExpiresOnUtc = accessTokenExpiresOnUtc,
-            RefreshToken = refreshToken,
-            RefreshTokenExpiresOnUtc = refreshTokenExpiresOnUtc,
-            IssuedOnUtc = issuedOnUtc,
-        };
-    }
-
-    public void Update(
-        string accessToken,
-        DateTime accessTokenExpiresOnUtc,
-        string refreshToken,
-        DateTime refreshTokenExpiresOnUtc,
-        DateTime issuedOnUtc)
-    {
-        AccessToken = accessToken;
+        UserTokenId = userTokenId;
+        UserId = userId;
+        AccessTokenId = accessTokenId;
+        RefreshTokenHash = refreshTokenHash;
         AccessTokenExpiresOnUtc = accessTokenExpiresOnUtc;
-        RefreshToken = refreshToken;
         RefreshTokenExpiresOnUtc = refreshTokenExpiresOnUtc;
         IssuedOnUtc = issuedOnUtc;
+        IsRevoked = false;
     }
+
+    internal static UserToken Create(
+        Guid userId,
+        string accessTokenId,
+        string refreshTokenHash,
+        DateTime accessTokenExpiresOnUtc,
+        DateTime refreshTokenExpiresOnUtc,
+        DateTime issuedOnUtc)
+    {
+        return new UserToken(
+            Guid.NewGuid(),
+            userId,
+            accessTokenId,
+            refreshTokenHash,
+            accessTokenExpiresOnUtc,
+            refreshTokenExpiresOnUtc,
+            issuedOnUtc);
+    }
+
+    internal Result Revoke()
+    {
+        if (IsRevoked)
+        {
+            return Result.Fail(UserTokenErrors.AlreadyRevoked);
+        }
+
+        IsRevoked = true;
+
+        return Result.Ok();
+    }
+
+    public bool IsRefreshTokenValid(DateTime utcNow) =>
+        !IsRevoked && RefreshTokenExpiresOnUtc > utcNow;
 }

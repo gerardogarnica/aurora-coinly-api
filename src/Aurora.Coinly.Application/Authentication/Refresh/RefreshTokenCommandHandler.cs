@@ -6,59 +6,74 @@ internal sealed class RefreshTokenCommandHandler(
     IDateTimeService dateTimeService) : ICommandHandler<RefreshTokenCommand, IdentityToken>
 {
     public async Task<Result<IdentityToken>> Handle(
-        RefreshTokenCommand request,
+        RefreshTokenCommand command,
         CancellationToken cancellationToken)
     {
-        // Get user token by refresh token
-        UserToken? userToken = await dbContext
-            .UserTokens
-            .SingleOrDefaultAsync(x => x.RefreshToken == request.RefreshToken, cancellationToken);
+        string refreshTokenHash = tokenProvider.HashRefreshToken(command.RefreshToken);
+        DateTime utcNow = dateTimeService.UtcNow;
 
-        if (userToken is null)
-        {
-            return Result.Fail<IdentityToken>(UserErrors.InvalidRefreshToken);
-        }
-
-        // Check if the refresh token is expired
-        if (userToken.RefreshTokenExpiresOnUtc < dateTimeService.UtcNow)
-        {
-            return Result.Fail<IdentityToken>(UserErrors.RefreshTokenExpired);
-        }
-
-        // Get user with roles
+        // Loads only the presented token, not the user's whole token history.
         User? user = await dbContext
             .Users
-            .Include(x => x.Roles)
-            .SingleOrDefaultAsync(x => x.Id == userToken.UserId, cancellationToken);
+            .Include(u => u.Roles)
+            .Include(u => u.Tokens.Where(t => t.RefreshTokenHash == refreshTokenHash))
+            .SingleOrDefaultAsync(
+                u => u.Tokens.Any(t => t.RefreshTokenHash == refreshTokenHash),
+                cancellationToken);
 
-        if (user is null)
+        UserToken? userToken = user?.Tokens.SingleOrDefault(t => t.RefreshTokenHash == refreshTokenHash);
+
+        // A revoked token here is a replay of an already rotated token: rejected like any other.
+        if (user is null || userToken is null || !user.IsActive || !userToken.IsRefreshTokenValid(utcNow))
         {
-            return Result.Fail<IdentityToken>(UserErrors.NotFound);
+            return Result.Fail<IdentityToken>(AuthenticationErrors.InvalidRefreshToken);
         }
 
-        // Create new access token
+        Result revokeResult = user.RevokeToken(userToken.UserTokenId);
+
+        if (!revokeResult.IsSuccessful)
+        {
+            return Result.Fail<IdentityToken>(revokeResult.Error);
+        }
+
+        List<string> roles = [.. user.Roles.Select(r => r.Name)];
+
+        // Create token
         TokenRequest tokenRequest = new(
-            user.Id.ToString(),
-            user.Email,
+            user.Id,
+            user.Email.Value,
             user.FirstName,
             user.LastName,
-            user.Roles.Select(x => x.Name));
+            roles);
 
-        var accessToken = tokenProvider.CreateToken(tokenRequest);
+        IssuedToken issuedToken = tokenProvider.CreateToken(tokenRequest);
+
+        // Create new access token
+        Result<UserToken> issueResult = user.IssueToken(
+            issuedToken.AccessTokenId,
+            issuedToken.RefreshTokenHash,
+            issuedToken.Identity.AccessTokenExpiresOn.UtcDateTime,
+            issuedToken.Identity.RefreshTokenExpiresOn.UtcDateTime,
+            utcNow);
+
+        if (!issueResult.IsSuccessful)
+        {
+            return Result.Fail<IdentityToken>(issueResult.Error);
+        }
 
         // Update existing user token
-        userToken.Update(
-            accessToken.AccessToken,
-            accessToken.AccessTokenExpiresOn,
-            accessToken.RefreshToken,
-            accessToken.RefreshTokenExpiresOn,
-            dateTimeService.UtcNow);
-
-        dbContext.UserTokens.Update(userToken);
-
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Another request redeemed the same token between our read and our write (xmin changed).
+            // SaveChanges' transaction also rolled back the insert of the new token.
+            return Result.Fail<IdentityToken>(AuthenticationErrors.InvalidRefreshToken);
+        }
 
         // Return new identity token
-        return accessToken;
+        return issuedToken.Identity;
     }
 }

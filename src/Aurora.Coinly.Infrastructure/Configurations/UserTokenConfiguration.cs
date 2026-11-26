@@ -8,15 +8,44 @@ internal sealed class UserTokenConfiguration : IEntityTypeConfiguration<UserToke
     {
         builder.ToTable("user_tokens");
 
-        builder.HasKey(x => x.Id);
+        builder.HasKey(x => x.UserTokenId);
 
-        builder.Property(x => x.AccessToken).HasMaxLength(1000);
-        builder.Property(x => x.RefreshToken).HasMaxLength(1000);
+        builder.HasXminConcurrencyToken();
 
-        builder
-            .HasOne(x => x.User)
-            .WithMany()
-            .HasForeignKey(x => x.UserId)
+        builder.Property(x => x.UserId)
             .IsRequired();
+
+        builder.Property(x => x.AccessTokenId)
+            .IsRequired()
+            .HasMaxLength(UserToken.MaxAccessTokenIdLength);
+
+        builder.Property(x => x.RefreshTokenHash)
+            .IsRequired()
+            .HasMaxLength(UserToken.RefreshTokenHashLength)
+            .IsFixedLength();
+
+        builder.Property(x => x.AccessTokenExpiresOnUtc)
+            .IsRequired();
+
+        builder.Property(x => x.RefreshTokenExpiresOnUtc)
+            .IsRequired();
+
+        builder.Property(x => x.IssuedOnUtc)
+            .IsRequired();
+
+        builder.Property(x => x.IsRevoked)
+            .IsRequired();
+
+        builder.HasOne<User>(x => x.User)
+            .WithMany(u => u.Tokens)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(x => x.UserId);
+
+        builder.HasIndex(x => x.RefreshTokenHash)
+            .IsUnique();
+
+        builder.HasIndex(x => x.RefreshTokenExpiresOnUtc);
     }
 }

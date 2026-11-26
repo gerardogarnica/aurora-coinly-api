@@ -1,29 +1,28 @@
-﻿using Aurora.Coinly.Application.Users;
-using Aurora.Coinly.Application.Users.GetById;
+﻿using Aurora.Coinly.Application.Users.GetUserById;
 
-namespace Aurora.Coinly.Api.Endpoints.Profile;
+namespace Aurora.Coinly.Api.Endpoints.Users;
 
 public sealed class GetMyProfile : IBaseEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(
-            "me",
+            "users/me",
             async (
                 IUserContext userContext,
-                IQueryHandler<GetUserByIdQuery, UserModel> handler,
+                IQueryHandler<GetUserByIdQuery, UserProfileResponse> handler,
                 CancellationToken cancellationToken) =>
             {
                 var query = new GetUserByIdQuery(userContext.UserId);
 
-                Result<UserModel> result = await handler.Handle(query, cancellationToken);
+                Result<UserProfileResponse> result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(Results.Ok, ApiResponses.Problem);
             })
             .RequireAuthorization()
             .WithName("GetMyProfile")
-            .WithTags(EndpointTags.Profile)
-            .Produces<UserModel>(StatusCodes.Status200OK)
+            .WithTags(EndpointTags.Users)
+            .Produces<UserProfileResponse>(StatusCodes.Status200OK)
             .Produces<ProblemDetails>(StatusCodes.Status204NoContent)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
     }

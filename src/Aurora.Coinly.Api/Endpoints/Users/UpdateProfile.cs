@@ -1,13 +1,13 @@
-﻿using Aurora.Coinly.Application.Users.Update;
+﻿using Aurora.Coinly.Application.Users.UpdateUser;
 
-namespace Aurora.Coinly.Api.Endpoints.Profile;
+namespace Aurora.Coinly.Api.Endpoints.Users;
 
 public sealed class UpdateProfile : IBaseEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut(
-            "me",
+            "users/me",
             async (
                 [FromBody] UpdateProfileRequest request,
                 ICommandHandler<UpdateUserCommand> handler,
@@ -25,7 +25,7 @@ public sealed class UpdateProfile : IBaseEndpoint
             })
             .RequireAuthorization()
             .WithName("UpdateProfile")
-            .WithTags(EndpointTags.Profile)
+            .WithTags(EndpointTags.Users)
             .Produces(StatusCodes.Status202Accepted)
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);

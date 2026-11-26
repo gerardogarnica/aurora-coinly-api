@@ -10,28 +10,73 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasKey(x => x.Id);
 
-        builder.OwnsOne(x => x.Email, y =>
+        builder.HasXminConcurrencyToken();
+
+        builder.Property(x => x.FirstName)
+            .IsRequired()
+            .HasMaxLength(User.MaxNameLength);
+
+        builder.Property(x => x.LastName)
+            .IsRequired()
+            .HasMaxLength(User.MaxNameLength);
+
+        builder.Ignore(x => x.FullName);
+
+        builder.Ignore(x => x.Initials);
+
+        builder.Ignore(x => x.IsAdministrator);
+
+        builder.OwnsOne(x => x.Email, email =>
         {
-            y.Property(e => e.Value)
+            email.Property(e => e.Value)
                 .HasColumnName("email")
                 .IsRequired()
                 .HasMaxLength(Email.MaxLength);
 
-            y.HasIndex(e => e.Value).IsUnique();
+            email.HasIndex(e => e.Value)
+                .IsUnique();
         });
 
-        builder.Property(x => x.FirstName).HasMaxLength(100);
-        builder.Property(x => x.LastName).HasMaxLength(100);
-        builder.Property(x => x.IdentityId).HasMaxLength(256);
+        builder.OwnsOne<Password>("Password", password =>
+        {
+            password.Property(p => p.Hash)
+                .HasColumnName("password_hash")
+                .IsRequired()
+                .HasMaxLength(Password.MaxHashLength);
+        });
 
-        builder.Property<string>("_passwordHash")
-            .HasField("_passwordHash")
-            .HasColumnName("password_hash")
-            .IsRequired()
-            .HasMaxLength(256);
+        builder.Property(x => x.IsActive)
+            .IsRequired();
 
-        builder.Ignore(user => user.FullName);
+        builder.Property(x => x.CreatedOnUtc)
+            .IsRequired();
 
-        builder.HasIndex(x => x.IdentityId).IsUnique();
+        builder.Property(x => x.UpdatedOnUtc);
+
+        builder.OwnsMany(x => x.Roles, role =>
+        {
+            role.ToTable("user_roles");
+
+            role.WithOwner().HasForeignKey("UserId");
+
+            role.HasKey("UserId", nameof(Role.Name));
+
+            role.Property(r => r.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+        });
+
+        builder.Navigation(x => x.Roles)
+            .HasField("_roles")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasMany(x => x.Tokens)
+            .WithOne(t => t.User)
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(x => x.Tokens)
+            .HasField("_tokens")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

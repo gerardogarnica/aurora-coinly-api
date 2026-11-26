@@ -2,26 +2,32 @@
 
 public sealed record Password : IValueObject
 {
-    private const int MinLength = 8;
+    public const int MinHashLength = 8;
+    public const int MaxHashLength = 500;
 
-    public string Value { get; init; }
+    public string Hash { get; init; }
 
-    private Password(string value) => Value = value;
+    private Password(string hash) => Hash = hash;
 
-    public static Result<Password> Create(string value)
+    public static Result<Password> Create(string hash)
     {
-        if (string.IsNullOrWhiteSpace(value))
+        if (string.IsNullOrWhiteSpace(hash))
         {
-            return Result.Fail<Password>(PasswordErrors.Empty);
+            return Result.Fail<Password>(PasswordErrors.Required);
         }
 
-        if (value.Length < MinLength)
+        if (hash.Length < MinHashLength)
         {
             return Result.Fail<Password>(PasswordErrors.TooShort);
         }
 
-        return new Password(value);
+        if (hash.Length > MaxHashLength)
+        {
+            return Result.Fail<Password>(PasswordErrors.TooLong);
+        }
+
+        return new Password(hash);
     }
 
-    public override string ToString() => Value;
+    public override string ToString() => Hash;
 }

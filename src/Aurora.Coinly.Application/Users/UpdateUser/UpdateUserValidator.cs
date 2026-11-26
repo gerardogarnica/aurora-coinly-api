@@ -1,8 +1,8 @@
-﻿namespace Aurora.Coinly.Application.Users.Update;
+﻿namespace Aurora.Coinly.Application.Users.UpdateUser;
 
-internal sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
+internal sealed class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
 {
-    public UpdateUserCommandValidator()
+    public UpdateUserValidator()
     {
         RuleFor(x => x.FirstName)
             .NotEmpty()

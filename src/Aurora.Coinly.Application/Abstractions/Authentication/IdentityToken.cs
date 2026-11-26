@@ -1,10 +1,10 @@
-﻿namespace Aurora.Coinly.Application.Authentication;
+﻿namespace Aurora.Coinly.Application.Abstractions.Authentication;
 
 public sealed record IdentityToken(
     string AccessToken,
-    DateTime AccessTokenExpiresOn,
+    DateTimeOffset AccessTokenExpiresOn,
     string RefreshToken,
-    DateTime RefreshTokenExpiresOn)
+    DateTimeOffset RefreshTokenExpiresOn)
 {
     public override string ToString() =>
         $"IdentityToken {{ AccessToken = [REDACTED], AccessTokenExpiresOn = {AccessTokenExpiresOn}, RefreshToken = [REDACTED], RefreshTokenExpiresOn = {RefreshTokenExpiresOn} }}";

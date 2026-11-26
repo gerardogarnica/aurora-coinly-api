@@ -29,6 +29,7 @@ public sealed class WalletHistory
     {
         return new WalletHistory
         {
+            Id = Guid.NewGuid(),
             WalletId = walletId,
             TransactionId = transactionId,
             Type = type,

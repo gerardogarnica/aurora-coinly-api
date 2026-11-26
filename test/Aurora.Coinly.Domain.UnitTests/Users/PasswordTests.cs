@@ -3,36 +3,36 @@ namespace Aurora.Coinly.Domain.UnitTests.Users;
 public class PasswordTests
 {
     [Fact]
-    public void Create_Should_SetValue()
+    public void Create_Should_SetHash()
     {
         // Arrange
-        const string value = "Secret123";
+        const string hash = "hashed-password";
 
         // Act
-        Result<Password> result = Password.Create(value);
+        Result<Password> result = Password.Create(hash);
 
         // Assert
         result.IsSuccessful.Should().BeTrue();
-        result.Value.Value.Should().Be(value);
+        result.Value.Hash.Should().Be(hash);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_Should_Fail_WhenValueIsEmpty(string value)
+    public void Create_Should_Fail_WhenHashIsEmpty(string hash)
     {
         // Arrange
 
         // Act
-        Result<Password> result = Password.Create(value);
+        Result<Password> result = Password.Create(hash);
 
         // Assert
         result.IsSuccessful.Should().BeFalse();
-        result.Error.Should().Be(PasswordErrors.Empty);
+        result.Error.Should().Be(PasswordErrors.Required);
     }
 
     [Fact]
-    public void Create_Should_Fail_WhenValueIsTooShort()
+    public void Create_Should_Fail_WhenHashIsTooShort()
     {
         // Arrange
 
@@ -42,5 +42,34 @@ public class PasswordTests
         // Assert
         result.IsSuccessful.Should().BeFalse();
         result.Error.Should().Be(PasswordErrors.TooShort);
+    }
+
+    [Theory]
+    [InlineData(Password.MinHashLength)]
+    [InlineData(Password.MaxHashLength)]
+    public void Create_Should_Succeed_WhenHashLengthIsAtTheLimit(int length)
+    {
+        // Arrange
+        string hash = new('a', length);
+
+        // Act
+        Result<Password> result = Password.Create(hash);
+
+        // Assert
+        result.IsSuccessful.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Create_Should_Fail_WhenHashIsTooLong()
+    {
+        // Arrange
+        string hash = new('a', Password.MaxHashLength + 1);
+
+        // Act
+        Result<Password> result = Password.Create(hash);
+
+        // Assert
+        result.IsSuccessful.Should().BeFalse();
+        result.Error.Should().Be(PasswordErrors.TooLong);
     }
 }

@@ -1,8 +1,8 @@
-﻿using Aurora.Coinly.Application.Authentication;
-
-namespace Aurora.Coinly.Application.Abstractions.Authentication;
+﻿namespace Aurora.Coinly.Application.Abstractions.Authentication;
 
 public interface ITokenProvider
 {
-    IdentityToken CreateToken(TokenRequest tokenRequest);
+    IssuedToken CreateToken(TokenRequest tokenRequest);
+
+    string HashRefreshToken(string refreshToken);
 }
