@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Application.Wallets.Create;
+﻿using Aurora.Coinly.Application.Abstractions.Validations;
+
+namespace Aurora.Coinly.Application.Wallets.Create;
 
 internal sealed class CreateWalletCommandValidator : AbstractValidator<CreateWalletCommand>
 {
@@ -17,9 +19,7 @@ internal sealed class CreateWalletCommandValidator : AbstractValidator<CreateWal
             .GreaterThanOrEqualTo(0)
             .PrecisionScale(9, 2, true);
 
-        RuleFor(x => x.Color)
-            .NotEmpty()
-            .Length(7);
+        RuleFor(x => x.Color).MustBeValidColor();
 
         RuleFor(x => x.Notes).MaximumLength(1000);
     }

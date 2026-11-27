@@ -1,0 +1,28 @@
+﻿using Aurora.Coinly.Application.Users.GetUserById;
+
+namespace Aurora.Coinly.Api.Endpoints.Users;
+
+public sealed class GetMyProfile : IBaseEndpoint
+{
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapGet(
+            "users/me",
+            async (
+                IQueryHandler<GetUserByIdQuery, UserProfileResponse> handler,
+                CancellationToken cancellationToken) =>
+            {
+                var query = new GetUserByIdQuery();
+
+                Result<UserProfileResponse> result = await handler.Handle(query, cancellationToken);
+
+                return result.Match(Results.Ok, ApiResponses.Problem);
+            })
+            .RequireAuthorization()
+            .WithName("GetMyProfile")
+            .WithTags(EndpointTags.Users)
+            .Produces<UserProfileResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status204NoContent)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+    }
+}

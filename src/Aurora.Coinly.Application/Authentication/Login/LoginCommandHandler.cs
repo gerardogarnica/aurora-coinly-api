@@ -7,51 +7,68 @@ internal sealed class LoginCommandHandler(
     IDateTimeService dateTimeService) : ICommandHandler<LoginCommand, IdentityToken>
 {
     public async Task<Result<IdentityToken>> Handle(
-        LoginCommand request,
+        LoginCommand command,
         CancellationToken cancellationToken)
     {
-        // Get user by email
+        Result<Email> emailResult = Email.Create(command.Email);
+        if (!emailResult.IsSuccessful)
+        {
+            passwordHasher.VerifyDummy(command.Password);
+            return Result.Fail<IdentityToken>(AuthenticationErrors.InvalidCredentials);
+        }
+
+        string emailValue = emailResult.Value.Value;
+
         User? user = await dbContext
             .Users
             .Include(x => x.Roles)
-            .SingleOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Email.Value == emailValue, cancellationToken);
 
         if (user is null)
         {
-            return Result.Fail<IdentityToken>(UserErrors.InvalidCredentials);
+            passwordHasher.VerifyDummy(command.Password);
+            return Result.Fail<IdentityToken>(AuthenticationErrors.InvalidCredentials);
         }
 
         // Validate password
-        var password = Password.Create(request.Password);
-        if (!user.VerifyPassword(password, passwordHasher))
+        bool passwordValid = user.VerifyPassword(passwordHasher, command.Password);
+
+        if (!user.IsActive || !passwordValid)
         {
-            return Result.Fail<IdentityToken>(UserErrors.InvalidCredentials);
+            return Result.Fail<IdentityToken>(AuthenticationErrors.InvalidCredentials);
         }
+
+        List<string> roles = [.. user.Roles.Select(r => r.Name)];
 
         // Create token
         TokenRequest tokenRequest = new(
-            user.Id.ToString(),
-            user.Email,
+            user.Id,
+            user.Email.Value,
             user.FirstName,
             user.LastName,
-            user.Roles.Select(x => x.Name));
+            roles);
 
-        var accessToken = tokenProvider.CreateToken(tokenRequest);
+        IssuedToken issuedToken = tokenProvider.CreateToken(tokenRequest);
 
         // Create user token
-        var userToken = UserToken.Create(
-            user.Id,
-            accessToken.AccessToken,
-            accessToken.AccessTokenExpiresOn,
-            accessToken.RefreshToken,
-            accessToken.RefreshTokenExpiresOn,
+        Result<UserToken> issueResult = user.IssueToken(
+            issuedToken.AccessTokenId,
+            issuedToken.RefreshTokenHash,
+            issuedToken.Identity.AccessTokenExpiresOn.UtcDateTime,
+            issuedToken.Identity.RefreshTokenExpiresOn.UtcDateTime,
             dateTimeService.UtcNow);
 
-        dbContext.UserTokens.Add(userToken);
+        if (!issueResult.IsSuccessful)
+        {
+            return Result.Fail<IdentityToken>(issueResult.Error);
+        }
+
+        dbContext.UserTokens.Add(issueResult.Value);
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Return identity token
-        return accessToken;
+        return issuedToken.Identity;
     }
 }

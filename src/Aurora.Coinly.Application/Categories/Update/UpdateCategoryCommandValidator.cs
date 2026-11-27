@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Application.Categories.Update;
+﻿using Aurora.Coinly.Application.Abstractions.Validations;
+
+namespace Aurora.Coinly.Application.Categories.Update;
 
 internal sealed class UpdateCategoryCommandValidator : AbstractValidator<UpdateCategoryCommand>
 {
@@ -13,9 +15,7 @@ internal sealed class UpdateCategoryCommandValidator : AbstractValidator<UpdateC
             .NotEmpty()
             .InclusiveBetween(0, 15);
 
-        RuleFor(x => x.Color)
-            .NotEmpty()
-            .Length(7);
+        RuleFor(x => x.Color).MustBeValidColor();
 
         RuleFor(x => x.Notes).MaximumLength(1000);
     }

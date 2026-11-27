@@ -19,11 +19,17 @@ internal sealed class UpdateCategoryCommandHandler(
             return Result.Fail(CategoryErrors.NotFound);
         }
 
+        Result<Color> color = Color.Create(request.Color);
+        if (!color.IsSuccessful)
+        {
+            return Result.Fail(color.Error);
+        }
+
         // Update category
         var result = category.Update(
             request.Name,
             request.MaxDaysToReverse,
-            Color.FromHex(request.Color),
+            color.Value,
             request.Group,
             request.Notes,
             dateTimeService.UtcNow);

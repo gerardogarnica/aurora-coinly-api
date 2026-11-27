@@ -1,4 +1,6 @@
-﻿namespace Aurora.Coinly.Application.Categories.Create;
+﻿using Aurora.Coinly.Application.Abstractions.Validations;
+
+namespace Aurora.Coinly.Application.Categories.Create;
 
 internal sealed class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCommand>
 {
@@ -13,9 +15,7 @@ internal sealed class CreateCategoryCommandValidator : AbstractValidator<CreateC
             .NotEmpty()
             .InclusiveBetween(0, 15);
 
-        RuleFor(x => x.Color)
-            .NotEmpty()
-            .Length(7);
+        RuleFor(x => x.Color).MustBeValidColor();
 
         RuleFor(x => x.Notes).MaximumLength(1000);
     }

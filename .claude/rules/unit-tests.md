@@ -19,7 +19,8 @@ Domain methods take timestamps as parameters, so tests never need a clock. Exist
 ## Assertions
 
 - `result.IsSuccessful` (not `IsSuccess`) and `result.Error.Should().Be({Entity}Errors.X)` — compare the `BaseError` instance, never its code string.
-- `AssertDomainEventWasPublished<T>(entity)` returns the event; assert its payload.
+- `AssertDomainEventWasPublished<T>(entity)` returns the event; assert its payload. It expects exactly one event of that type: when a method raises several (`RevokeAllActiveTokens`), assert on `entity.DomainEvents.OfType<T>()` instead.
+- A domain method that takes a port (`user.VerifyPassword(IPasswordHasher, ...)`) gets a hand-written fake inside the test class (`UserTests.FakePasswordHasher`); there's no mocking library.
 - Money: `Should().Be(new Money(...))` (record equality).
 
 ## Naming

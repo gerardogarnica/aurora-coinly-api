@@ -35,7 +35,7 @@ public class CategoryTests : BaseTest
         var category = CategoryData.GetCategory();
         var updatedName = "Updated Name";
         var updatedMaxDaysToReverse = 15;
-        var updatedColor = Color.FromHex("#FF0000");
+        var updatedColor = Color.Create("#FF0000").Value;
         var updatedGroup = CategoryGroup.Entertainment;
         var updatedNotes = "Updated Notes";
 
@@ -62,7 +62,7 @@ public class CategoryTests : BaseTest
         var category = CategoryData.GetCategory();
         var updatedName = "Updated Name";
         var updatedMaxDaysToReverse = 15;
-        var updatedColor = Color.FromHex("#FF0000");
+        var updatedColor = Color.Create("#FF0000").Value;
         var updatedGroup = CategoryGroup.Entertainment;
         var updatedNotes = "Updated Notes";
 

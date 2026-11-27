@@ -1,5 +1,4 @@
-﻿using Aurora.Coinly.Application.Authentication;
-using Aurora.Coinly.Application.Authentication.Refresh;
+﻿using Aurora.Coinly.Application.Authentication.Refresh;
 
 namespace Aurora.Coinly.Api.Endpoints.Authentication;
 

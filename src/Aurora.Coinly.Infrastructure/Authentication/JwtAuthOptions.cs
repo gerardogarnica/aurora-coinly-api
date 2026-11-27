@@ -2,6 +2,7 @@
 
 public sealed class JwtAuthOptions
 {
+    public const int MinimumKeyLengthInBytes = 32;
     public const string SectionName = "Jwt";
 
     public required string Issuer { get; init; }

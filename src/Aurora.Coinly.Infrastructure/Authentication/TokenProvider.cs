@@ -1,78 +1,95 @@
-﻿using Aurora.Coinly.Application.Authentication;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
+﻿using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Aurora.Coinly.Infrastructure.Authentication;
 
-internal sealed class TokenProvider(IOptions<JwtAuthOptions> options) : ITokenProvider
+internal sealed class TokenProvider(
+    IOptions<JwtAuthOptions> jwtAuthOptions,
+    IDateTimeService dateTimeService) : ITokenProvider
 {
-    private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
+    private const int RefreshTokenByteLength = 64;
 
-    private DateTime _accessTokenExpiresOnUtc;
-    private DateTime _refreshTokenExpiresOnUtc;
+    private readonly JwtAuthOptions _jwtAuthOptions = jwtAuthOptions.Value;
+    private readonly IDateTimeService _dateTimeService = dateTimeService;
 
-    public IdentityToken CreateToken(TokenRequest tokenRequest)
+    public IssuedToken CreateToken(TokenRequest tokenRequest)
     {
-        var accessToken = CreateAccessToken(tokenRequest);
-        var refreshToken = CreateRefreshToken();
+        DateTime utcNow = _dateTimeService.UtcNow;
+        string accessTokenId = Guid.NewGuid().ToString("N");
 
-        return new IdentityToken(
+        (string accessToken, DateTimeOffset accessTokenExpiresOn) = GenerateAccessToken(tokenRequest, accessTokenId, utcNow);
+        (string refreshToken, DateTimeOffset refreshTokenExpiresOn) = GenerateRefreshToken(utcNow);
+
+        var identityToken = new IdentityToken(
             accessToken,
-            _accessTokenExpiresOnUtc,
+            accessTokenExpiresOn,
             refreshToken,
-            _refreshTokenExpiresOnUtc);
+            refreshTokenExpiresOn);
+
+        return new IssuedToken(identityToken, accessTokenId, HashRefreshToken(refreshToken));
     }
 
-    private string CreateAccessToken(TokenRequest tokenRequest)
+    public string HashRefreshToken(string refreshToken) =>
+        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
+
+    private (string Token, DateTimeOffset ExpiresOn) GenerateAccessToken(TokenRequest tokenRequest, string accessTokenId, DateTime utcNow)
     {
+        DateTime expiresOn = utcNow.AddMinutes(_jwtAuthOptions.LifeTimeInMinutes);
+
         // Create security key from the JWT key
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtAuthOptions.Key));
+        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(_jwtAuthOptions.Key));
 
         // Create signing credentials using the security key and HMAC SHA256 algorithm
-        var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        SigningCredentials signingCredentials = new(securityKey, SecurityAlgorithms.HmacSha256);
+
+        string userId = tokenRequest.UserId.ToString();
+        string fullName = $"{tokenRequest.FirstName} {tokenRequest.LastName}";
 
         // Set list of claims
         List<Claim> claims =
         [
-            new Claim(CustomClaims.Sub, tokenRequest.UserId),
-            new Claim(JwtRegisteredClaimNames.Sid, tokenRequest.UserId),
-            new Claim(JwtRegisteredClaimNames.Email, tokenRequest.Email),
-            new Claim(JwtRegisteredClaimNames.GivenName, tokenRequest.FirstName),
-            new Claim(JwtRegisteredClaimNames.FamilyName, tokenRequest.LastName),
-            new Claim(JwtRegisteredClaimNames.Name, $"{tokenRequest.FirstName} {tokenRequest.LastName}"),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Typ, "Bearer"),
-            ..tokenRequest.Roles.Select(role => new Claim(ClaimTypes.Role, role))
+            new(JwtRegisteredClaimNames.Sub, userId),
+            new(JwtRegisteredClaimNames.Sid, userId),
+            new(ClaimTypes.NameIdentifier, userId),
+            new(JwtRegisteredClaimNames.Email, tokenRequest.Email),
+            new(JwtRegisteredClaimNames.GivenName, tokenRequest.FirstName),
+            new(JwtRegisteredClaimNames.FamilyName, tokenRequest.LastName),
+            new(JwtRegisteredClaimNames.Name, fullName),
+            new(JwtRegisteredClaimNames.Jti, accessTokenId),
+            new(JwtRegisteredClaimNames.Typ, "Bearer"),
+            new(
+                JwtRegisteredClaimNames.Iat,
+                EpochTime.GetIntDate(utcNow).ToString(CultureInfo.InvariantCulture),
+                ClaimValueTypes.Integer64),
+            .. tokenRequest.Roles.Select(role => new Claim(ClaimTypes.Role, role)),
         ];
 
-        // Create the security token descriptor
-        _accessTokenExpiresOnUtc = DateTime.UtcNow.AddMinutes(_jwtAuthOptions.LifeTimeInMinutes);
+        // Create the JWT security token
+        JwtSecurityToken token = new(
+            issuer: _jwtAuthOptions.Issuer,
+            audience: _jwtAuthOptions.Audience,
+            claims: claims,
+            notBefore: utcNow,
+            expires: expiresOn,
+            signingCredentials: signingCredentials);
 
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(claims),
-            Issuer = _jwtAuthOptions.Issuer,
-            Audience = _jwtAuthOptions.Audience,
-            Expires = _accessTokenExpiresOnUtc,
-            SigningCredentials = signingCredentials,
-        };
+        // Generate the token
+        string serializedToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-        // Create the token handler and generate the token
-        var tokenHandler = new JsonWebTokenHandler();
-        var accessToken = tokenHandler.CreateToken(tokenDescriptor);
-
-        return accessToken;
+        return (serializedToken, new DateTimeOffset(expiresOn, TimeSpan.Zero));
     }
 
-    private string CreateRefreshToken()
+    private (string Token, DateTimeOffset ExpiresOn) GenerateRefreshToken(DateTime utcNow)
     {
-        var randomBytes = RandomNumberGenerator.GetBytes(64);
+        Span<byte> bytes = stackalloc byte[RefreshTokenByteLength];
+        RandomNumberGenerator.Fill(bytes);
 
-        _refreshTokenExpiresOnUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
+        string token = Convert.ToBase64String(bytes);
+        DateTime expiresOn = utcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays);
 
-        return Convert.ToBase64String(randomBytes);
+        return (token, new DateTimeOffset(expiresOn, TimeSpan.Zero));
     }
 }

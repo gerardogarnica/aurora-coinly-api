@@ -9,6 +9,12 @@ internal sealed class CreateWalletCommandHandler(
         CreateWalletCommand request,
         CancellationToken cancellationToken)
     {
+        Result<Color> color = Color.Create(request.Color);
+        if (!color.IsSuccessful)
+        {
+            return Result.Fail<Guid>(color.Error);
+        }
+
         // Create wallet
         var wallet = Wallet.Create(
             userContext.UserId,
@@ -16,7 +22,7 @@ internal sealed class CreateWalletCommandHandler(
             new Money(request.Amount, Currency.FromCode(request.CurrencyCode)),
             request.Type,
             request.AllowNegative,
-            Color.FromHex(request.Color),
+            color.Value,
             request.Notes,
             request.OpenedOn,
             dateTimeService.UtcNow);

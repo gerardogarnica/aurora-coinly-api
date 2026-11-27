@@ -16,8 +16,10 @@ What they enforce is listed in `CLAUDE.md` ("Conventions enforced by architectur
 - **Never use `.BeImmutable()` on records.** `init` accessors compile to non-readonly backing fields, so every record is reported as mutable. Detect a record by the synthesized `<Clone>$` method instead.
 - **`Type.Name` carries the generic arity** (``Result`1``), so trim at the backtick before any suffix check.
 - **A reflection test that selects zero types passes silently.** When adding one, verify the selector actually matches something before trusting the green (e.g. assert the selected count is greater than zero).
-- `Domain_Should_NotHaveDependencyOn_*` only checks the other Coinly assemblies. It cannot express "Domain has no third-party dependencies"; if that rule is ever wanted, use `Assembly.GetReferencedAssemblies()` (Domain legitimately references Newtonsoft.Json for `SerializerSettings`).
+- `Domain_Should_NotHaveDependencyOn_*` only checks the other Coinly assemblies. It cannot express "Domain has no third-party dependencies"; if that rule is ever wanted, use `Assembly.GetReferencedAssemblies()`. Domain has no `PackageReference` today, so only `System.*` assemblies would show up.
 
 ## Scope
 
-The selectors only see `BaseEntity` subclasses, `ICommand*`/`IQuery*` implementations, `AbstractValidator<>` subclasses, `IDomainEventHandler<>` implementations and `IBaseEndpoint` implementations. Child entities (`WalletHistory`), value objects and models are not checked.
+The selectors see `BaseEntity` subclasses, `IValueObject` implementations, `ICommand*`/`IQuery*` implementations, `AbstractValidator<>` subclasses, `IDomainEventHandler<>` implementations and `IBaseEndpoint` implementations. Child entities (`WalletHistory`, `BudgetPeriod`, `BudgetTransaction`) and models are not checked.
+
+Value objects are selected by the marker they declare, not by inference, and `Records_Should_ImplementValueObject` is the completeness net that catches a record missing it. These tests use plain reflection with Shouldly instead of NetArchTest rules. When a new kind of record legitimately belongs in Domain without being a value object, exclude it in that test with a comment, as `Money` is excluded from the public-constructor test.

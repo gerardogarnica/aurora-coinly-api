@@ -39,10 +39,10 @@ Once the entity exists, continue with the `create-feature` skill for the use cas
 |---------|---------|-----------|---------|
 | Aggregate root | Entry point for the aggregate | `BaseEntity` | `Wallet`, `Budget`, `Transaction` |
 | Child entity | Part of an aggregate, changed only through the root | none | `WalletHistory`, `BudgetPeriod`, `BudgetTransaction` |
-| Value object | Immutable, no identity | none (`sealed record`) | `Money`, `Currency`, `Color`, `DateRange` |
+| Value object | Immutable, no identity | `IValueObject` (`sealed record`) | `Money`, `Currency`, `Color`, `DateRange`, `Email`, `Password` |
 | Domain event | Signals a state change other aggregates react to | `DomainEvent` | `WalletSavingsUpdatedEvent` |
 
-Child entities don't inherit `BaseEntity`: they raise no events, declare their own `Guid Id` and leave it unset so EF generates it on insert, and have an `internal static Create(...)` so only the root can build them. The architecture tests only select `BaseEntity` subclasses, so nothing checks a child's shape — follow `WalletHistory`.
+Child entities don't inherit `BaseEntity`: they raise no events, declare their own `Guid Id`, and have an `internal static Create(...)` so only the root can build them. Leave the `Id` unset so EF generates it on insert, as `WalletHistory` does. `BudgetPeriod` and `BudgetTransaction` assign it in their constructor, which forces handlers to add new instances explicitly (see [aggregate-root.md](references/aggregate-root.md#child-entity)). The architecture tests don't select child entities, so nothing checks a child's shape: follow `WalletHistory`.
 
 ## Folder layout
 
@@ -81,7 +81,7 @@ Each domain shape forces a specific mapping. Decide these while designing the en
 |---|---|
 | `private readonly List<T> _items` exposed as `IReadOnlyCollection<T> Items` | Nothing extra when the field is named `_items` for `Items`: EF finds the backing field by convention. Configure the relationship (`HasMany(...).WithOne().HasForeignKey(...)`) explicitly. |
 | `Money` property | `OwnsOne(x => x.Amount, y => { y.Property(m => m.Amount).HasColumnName("amount").HasColumnType("numeric(9, 2)"); y.Property(m => m.Currency).HasConversion(c => c.Code, code => Currency.FromCode(code)).HasMaxLength(3); })` |
-| `Color` property | `OwnsOne(x => x.Color, y => y.Property(c => c.Value).HasColumnName("color").HasMaxLength(7))` |
+| `Color` property | `OwnsOne(x => x.Color, y => y.Property(c => c.Value).HasColumnName("color").HasMaxLength(Color.MaxLength))` |
 | Enum property | `HasConversion<string>().HasMaxLength(40)` |
 | Computed property (`TotalAmount`) | `builder.Ignore(x => x.TotalAmount)` |
 | `UserId` on a new aggregate root | `builder.HasIndex(x => x.UserId)`, since every query filters on it (existing tables have none yet) |

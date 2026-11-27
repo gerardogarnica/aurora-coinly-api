@@ -1,4 +1,5 @@
 ﻿using Aurora.Coinly.Domain.Categories;
+using Aurora.Coinly.Domain.Shared;
 
 namespace Aurora.Coinly.Infrastructure.Configurations;
 
@@ -16,7 +17,7 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.OwnsOne(x => x.Color, y =>
         {
-            y.Property(x => x.Value).HasColumnName("color").HasMaxLength(7);
+            y.Property(x => x.Value).HasColumnName("color").HasMaxLength(Color.MaxLength);
         });
 
         builder.Property(x => x.Group).HasConversion<string>().HasMaxLength(40);

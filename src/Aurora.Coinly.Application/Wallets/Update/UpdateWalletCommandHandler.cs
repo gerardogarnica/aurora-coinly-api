@@ -19,11 +19,17 @@ internal sealed class UpdateWalletCommandHandler(
             return Result.Fail(WalletErrors.NotFound);
         }
 
+        Result<Color> color = Color.Create(request.Color);
+        if (!color.IsSuccessful)
+        {
+            return Result.Fail(color.Error);
+        }
+
         // Update wallet
         var result = wallet.Update(
             request.Name,
             request.AllowNegative,
-            Color.FromHex(request.Color),
+            color.Value,
             request.Notes,
             dateTimeService.UtcNow);
 

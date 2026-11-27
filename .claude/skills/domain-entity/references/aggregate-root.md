@@ -35,7 +35,7 @@ public sealed class {Entity} : BaseEntity
     {
         Name = string.Empty;
         TargetAmount = Money.Zero();
-        Color = Color.FromHex("#000000");
+        Color = Color.Create("#000000").Value;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -144,7 +144,9 @@ public static Result<{Entity}> Create(...)
 
 ## Child entity
 
-A child entity does **not** inherit `BaseEntity` — it raises no domain events of its own and is never loaded independently of its root. It declares its own `Id` and leaves it unset, so EF generates it on insert. Its factory is `internal`, so only the aggregate root can create it.
+A child entity does **not** inherit `BaseEntity` — it raises no domain events of its own and is never loaded independently of its root. Its factory is `internal`, so only the aggregate root can create it.
+
+It declares its own `Id` and **assigns it with `Guid.NewGuid()`** in its constructor or factory, as `WalletHistory`, `BudgetPeriod`, `BudgetTransaction` and `UserToken` do. EF never generates keys here (`ValueGenerated.Never` on every Guid key, in `ApplicationDbContext.OnModelCreating`), so a child left with `Guid.Empty` breaks the second insert. In exchange, a child appended to a tracked root is tracked as `Added` and inserted without an explicit `dbContext.X.Add(child)`.
 
 ```csharp
 // src/Aurora.Coinly.Domain/{Aggregate}/{ChildEntity}.cs

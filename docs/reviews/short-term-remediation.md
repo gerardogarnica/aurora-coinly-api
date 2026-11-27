@@ -6,7 +6,7 @@
 **Rama:** — · **PR:** —
 **Relacionado:** `.claude/rules/` (cada punto enlaza la rule donde está documentado)
 
-Problemas encontrados al adaptar los agents, skills y rules de Aurora Flowboard a Coinly. Ninguno está corregido. Cada punto dice dónde está en el código, qué riesgo tiene, qué se propone y cómo abordarlo:
+Problemas encontrados al revisar los agents, skills y rules de Coinly. Ninguno está corregido. Cada punto dice dónde está en el código, qué riesgo tiene, qué se propone y cómo abordarlo:
 
 - **Acotado:** diseño corto en el chat y se implementa con la skill indicada.
 - **Spec:** cambio arquitectónico, que pasa por `spec` → `write-plan` → `execute-plan`.
@@ -79,15 +79,15 @@ Orden sugerido:
 ### 3. El outbox deserializa cualquier `$type`
 
 - **Dónde:**
-  - `src/Aurora.Coinly.Domain/Abstractions/SerializerSettings.cs:9` (`TypeNameHandling.All`)
+  - `src/Aurora.Coinly.Infrastructure/Serialization/SerializerSettings.cs:7` (`TypeNameHandling.All`)
   - `src/Aurora.Coinly.Infrastructure/Outbox/ProcessOutboxJob.cs:31-33`, que deserializa sin `SerializationBinder`.
 - **Riesgo:** hoy solo escribe en la tabla el interceptor. Aun así, quien consiga escribir una fila puede hacer que el job instancie cualquier tipo cargado en el proceso, que es la vía clásica de *gadget chains* en Json.NET.
 - **Propuesta:** un `ISerializationBinder` que acepte solo:
   - los tipos del ensamblado Domain que implementan `IDomainEvent`;
-  - los tipos que llevan dentro (`Money`, `Currency`, enums).
+  - los tipos concretos del ensamblado Domain que implementan `IValueObject`, porque `WalletSavingsUpdatedEvent` lleva un `Money` con su `Currency` y cada uno viaja con su propio `$type`. Un binder que aceptara solo eventos rechazaría ese evento.
 
-  Rechazar el resto con un error claro. Un test de dominio debe comprobar que cada evento existente se serializa y se deserializa con el binder.
-- **Enfoque:** acotado (skills `domain-entity` y `unit-testing`).
+  Rechazar el resto con un error claro. Ningún test cubre hoy la ida y vuelta: la configuración de Json.NET está en Infrastructure, que no tiene proyecto de tests, y los que había en Domain se eliminaron al quitar Newtonsoft de Domain. Al añadir el binder hay que decidir dónde probarlo y cubrir cada evento existente.
+- **Enfoque:** acotado (Infrastructure, `Serialization/` y `Outbox/`), salvo que se cree un proyecto de tests de Infrastructure: eso es una dependencia nueva y pasa por `spec`.
 
 ### 4. Swagger se publica en Producción
 
@@ -143,7 +143,7 @@ Orden sugerido:
 - **Dónde:**
   - `src/Aurora.Coinly.Application/DependencyInjection.cs:40-41`: `ValidationBehavior` decora solo los comandos.
   - `src/Aurora.Coinly.Application/Wallets/GetHistory/GetWalletHistoryQueryValidator.cs`: es el único validador de query y su regla `DateTo >= DateFrom` no se aplica nunca.
-- **Riesgo:** un rango de fechas invertido llega al handler, que devuelve una lista vacía sin decir por qué. El fichero hace creer que la regla está cubierta.
+- **Riesgo:** el fichero hace creer que la regla está cubierta. Hoy no hay ningún fallo visible: un rango de fechas invertido llega al handler, y `DateRange.Create` devuelve `DateRangeErrors.StartAfterEnd` (400), igual que en `GetTransactionListQueryHandler`, que no tiene validador. Pero cualquier regla nueva que se añada a un validador de query se ignorará sin avisar.
 - **Propuesta:** elegir una de estas dos opciones y documentarla en `create-feature`:
   - añadir `ValidationBehavior.QueryHandler<,>` y registrarlo antes de `LoggingBehavior`;
   - borrar el validador y mover la comprobación al handler.

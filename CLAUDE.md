@@ -53,13 +53,13 @@ Each use case lives in its own folder: `src/Aurora.Coinly.Application/<Feature>/
 
 ### Results and errors
 
-Handlers return `Result` / `Result<T>` (Domain `Abstractions/Result.cs`) instead of throwing. Errors are `BaseError` instances with a `BaseErrorType` (Failure/Validation/NotFound/Conflict), defined as static fields in per-aggregate `XxxErrors` classes (e.g. `WalletErrors`). `ApiResponses.Problem` maps the error type to an HTTP status and ProblemDetails; validation failures surface as a `ValidationError` with an `errors` extension.
+Handlers return `Result` / `Result<T>` (Domain `Abstractions/Result.cs`) instead of throwing. Errors are `BaseError` instances with a `BaseErrorType` (Failure/Validation/NotFound/Conflict/Forbidden/Unauthorized), defined as static fields in per-aggregate `XxxErrors` classes (e.g. `WalletErrors`). `ApiResponses.Problem` maps the error type to an HTTP status and ProblemDetails; validation failures surface as a `ValidationError` with an `errors` extension.
 
 ### Domain model
 
 - Entities inherit `BaseEntity` (Guid `Id`, domain event list), are `sealed`, have a private parameterless ctor (for EF), and are constructed only through a `public static Create(...)` factory. Behavior lives on the entity and returns `Result`.
-- Value objects in `Domain/Shared`: `Money`, `Currency`, `Color`, `DateRange`.
-- Domain events derive from `DomainEvent`, are `sealed`, and end with `Event` (e.g. `WalletSavingsUpdatedEvent`, defined in `XxxDomainEvents.cs`).
+- Value objects are `sealed record`s that implement the marker `IValueObject`: `Money`, `Currency`, `Color`, `DateRange` in `Domain/Shared`, and `Email` and `Password` in `Domain/Users`.
+- Domain events derive from `DomainEvent`, are `sealed`, and end with `Event` (e.g. `WalletSavingsUpdatedEvent`, defined in `XxxDomainEvents.cs`; `Users` keeps one file per event in `Users/Events/`).
 - `BudgetPeriodService` is a domain service registered in Application DI.
 
 ### Domain events via Outbox
@@ -91,6 +91,7 @@ Key sections: `ConnectionStrings:AuroraCoinlyConnection`, `Jwt` (`JwtAuthOptions
 - Domain event handlers: `sealed`, suffix `EventHandler`.
 - Endpoints: `public sealed`.
 - Entities: `sealed`, private parameterless ctor, public static `Create`. Domain events: `sealed`, suffix `Event`.
+- Value objects (`IValueObject`): `sealed record`, no public ctor (except the positional `Money`). Every public record in Domain outside `Abstractions` must implement `IValueObject`.
 
 ## Tests
 

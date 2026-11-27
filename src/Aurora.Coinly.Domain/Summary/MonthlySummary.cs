@@ -112,6 +112,6 @@ public sealed class MonthlySummary : BaseEntity
         DateOnly firstDayOfMonth = new(Year, Month, 1);
         DateOnly lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
-        return DateRange.Create(firstDayOfMonth, lastDayOfMonth);
+        return DateRange.Create(firstDayOfMonth, lastDayOfMonth).Value;
     }
 }

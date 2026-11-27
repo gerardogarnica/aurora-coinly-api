@@ -18,7 +18,7 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("coinly")
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -388,29 +388,6 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                     b.ToTable("transactions", "coinly");
                 });
 
-            modelBuilder.Entity("Aurora.Coinly.Domain.Users.Role", b =>
-                {
-                    b.Property<string>("Name")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Name")
-                        .HasName("pk_roles");
-
-                    b.ToTable("roles", "coinly");
-
-                    b.HasData(
-                        new
-                        {
-                            Name = "Member"
-                        },
-                        new
-                        {
-                            Name = "Administrator"
-                        });
-                });
-
             modelBuilder.Entity("Aurora.Coinly.Domain.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -422,23 +399,15 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on_utc");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("email");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("first_name");
 
-                    b.Property<string>("IdentityId")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("identity_id");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -450,63 +419,73 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_on_utc");
 
-                    b.Property<string>("_passwordHash")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("password_hash");
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id")
                         .HasName("pk_users");
-
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("ix_users_email");
-
-                    b.HasIndex("IdentityId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_users_identity_id");
 
                     b.ToTable("users", "coinly");
                 });
 
             modelBuilder.Entity("Aurora.Coinly.Domain.Users.UserToken", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("UserTokenId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("AccessToken")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("access_token");
+                        .HasColumnName("user_token_id");
 
                     b.Property<DateTime>("AccessTokenExpiresOnUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("access_token_expires_on_utc");
 
+                    b.Property<string>("AccessTokenId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("access_token_id");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_revoked");
+
                     b.Property<DateTime>("IssuedOnUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("issued_on_utc");
-
-                    b.Property<string>("RefreshToken")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("refresh_token");
 
                     b.Property<DateTime>("RefreshTokenExpiresOnUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("refresh_token_expires_on_utc");
 
+                    b.Property<string>("RefreshTokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character(64)")
+                        .HasColumnName("refresh_token_hash")
+                        .IsFixedLength();
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id")
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("UserTokenId")
                         .HasName("pk_user_tokens");
+
+                    b.HasIndex("RefreshTokenExpiresOnUtc")
+                        .HasDatabaseName("ix_user_tokens_refresh_token_expires_on_utc");
+
+                    b.HasIndex("RefreshTokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_tokens_refresh_token_hash");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_tokens_user_id");
@@ -662,25 +641,6 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                     b.ToTable("outbox_messages", "coinly");
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
-                {
-                    b.Property<string>("RolesName")
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("role_name");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("RolesName", "UserId")
-                        .HasName("pk_user_roles");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_user_roles_user_id");
-
-                    b.ToTable("user_roles", "coinly");
-                });
-
             modelBuilder.Entity("Aurora.Coinly.Domain.Budgets.Budget", b =>
                 {
                     b.HasOne("Aurora.Coinly.Domain.Categories.Category", "Category")
@@ -805,8 +765,8 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(7)
-                                .HasColumnType("character varying(7)")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("color");
 
                             b1.HasKey("CategoryId");
@@ -888,10 +848,88 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                     b.Navigation("Wallet");
                 });
 
+            modelBuilder.Entity("Aurora.Coinly.Domain.Users.User", b =>
+                {
+                    b.OwnsOne("Aurora.Coinly.Domain.Users.Email", "Email", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(255)
+                                .HasColumnType("character varying(255)")
+                                .HasColumnName("email");
+
+                            b1.HasKey("UserId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique()
+                                .HasDatabaseName("ix_users_email");
+
+                            b1.ToTable("users", "coinly");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId")
+                                .HasConstraintName("fk_users_users_id");
+                        });
+
+                    b.OwnsOne("Aurora.Coinly.Domain.Users.Password", "Password", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Hash")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("password_hash");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("users", "coinly");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId")
+                                .HasConstraintName("fk_users_users_id");
+                        });
+
+                    b.OwnsMany("Aurora.Coinly.Domain.Users.Role", "Roles", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("user_id");
+
+                            b1.Property<string>("Name")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("name");
+
+                            b1.HasKey("UserId", "Name")
+                                .HasName("pk_user_roles");
+
+                            b1.ToTable("user_roles", "coinly");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId")
+                                .HasConstraintName("fk_user_roles_users_user_id");
+                        });
+
+                    b.Navigation("Email")
+                        .IsRequired();
+
+                    b.Navigation("Password")
+                        .IsRequired();
+
+                    b.Navigation("Roles");
+                });
+
             modelBuilder.Entity("Aurora.Coinly.Domain.Users.UserToken", b =>
                 {
                     b.HasOne("Aurora.Coinly.Domain.Users.User", "User")
-                        .WithMany()
+                        .WithMany("Tokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -935,8 +973,8 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(7)
-                                .HasColumnType("character varying(7)")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("color");
 
                             b1.HasKey("WalletId");
@@ -1077,23 +1115,6 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
-                {
-                    b.HasOne("Aurora.Coinly.Domain.Users.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RolesName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_roles_roles_roles_name");
-
-                    b.HasOne("Aurora.Coinly.Domain.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_roles_users_user_id");
-                });
-
             modelBuilder.Entity("Aurora.Coinly.Domain.Budgets.Budget", b =>
                 {
                     b.Navigation("Periods");
@@ -1102,6 +1123,11 @@ namespace Aurora.Coinly.Infrastructure.Database.Migrations
             modelBuilder.Entity("Aurora.Coinly.Domain.Budgets.BudgetPeriod", b =>
                 {
                     b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Aurora.Coinly.Domain.Users.User", b =>
+                {
+                    b.Navigation("Tokens");
                 });
 
             modelBuilder.Entity("Aurora.Coinly.Domain.Wallets.Wallet", b =>

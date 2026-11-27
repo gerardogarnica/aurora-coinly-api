@@ -9,6 +9,12 @@ internal sealed class CreateCategoryCommandHandler(
         CreateCategoryCommand request,
         CancellationToken cancellationToken)
     {
+        Result<Color> color = Color.Create(request.Color);
+        if (!color.IsSuccessful)
+        {
+            return Result.Fail<Guid>(color.Error);
+        }
+
         // Create category
         var category = Category.Create(
             userContext.UserId,
@@ -16,7 +22,7 @@ internal sealed class CreateCategoryCommandHandler(
             request.Group,
             request.Type,
             request.MaxDaysToReverse,
-            Color.FromHex(request.Color),
+            color.Value,
             request.Notes,
             dateTimeService.UtcNow);
 

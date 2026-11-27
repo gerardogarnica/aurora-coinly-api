@@ -6,4 +6,9 @@ public static class RuleBuilderOptionsExtensions
         this IRuleBuilderOptions<T, TProperty> rule,
         BaseError baseError) =>
         rule.WithErrorCode(baseError.Code).WithMessage(baseError.Message);
+
+    public static IRuleBuilderOptions<T, string> MustBeValidColor<T>(this IRuleBuilder<T, string> ruleBuilder) =>
+        ruleBuilder
+            .NotEmpty()
+            .MaximumLength(Color.MaxLength);
 }

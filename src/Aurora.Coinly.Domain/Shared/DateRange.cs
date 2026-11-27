@@ -1,6 +1,6 @@
 ﻿namespace Aurora.Coinly.Domain.Shared;
 
-public sealed record DateRange
+public sealed record DateRange : IValueObject
 {
     public DateOnly Start { get; init; }
     public DateOnly End { get; init; }
@@ -8,11 +8,11 @@ public sealed record DateRange
 
     private DateRange() { }
 
-    public static DateRange Create(DateOnly start, DateOnly end)
+    public static Result<DateRange> Create(DateOnly start, DateOnly end)
     {
         if (start > end)
         {
-            throw new ArgumentException("Start date must be before end date");
+            return Result.Fail<DateRange>(DateRangeErrors.StartAfterEnd);
         }
 
         return new DateRange

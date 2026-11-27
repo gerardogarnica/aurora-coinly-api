@@ -49,9 +49,8 @@ internal sealed class Create{Entity}CommandValidator : AbstractValidator<Create{
             .GreaterThanOrEqualTo(0)
             .PrecisionScale(9, 2, true);
 
-        RuleFor(x => x.Color)
-            .NotEmpty()
-            .Length(7);
+        // NotEmpty + MaximumLength(Color.MaxLength); needs using Aurora.Coinly.Application.Abstractions.Validations
+        RuleFor(x => x.Color).MustBeValidColor();
 
         RuleFor(x => x.Notes).MaximumLength(1000);
     }
@@ -74,12 +73,19 @@ internal sealed class Create{Entity}CommandHandler(
         Create{Entity}Command request,
         CancellationToken cancellationToken)
     {
+        // Value object factories return Result<T>: check before using them
+        Result<Color> color = Color.Create(request.Color);
+        if (!color.IsSuccessful)
+        {
+            return Result.Fail<Guid>(color.Error);
+        }
+
         // Create {entity}
         var {entity} = {Entity}.Create(
             userContext.UserId,
             request.Name,
             new Money(request.Amount, Currency.FromCode(request.CurrencyCode)),
-            Color.FromHex(request.Color),
+            color.Value,
             request.Notes,
             dateTimeService.UtcNow);
 
@@ -141,10 +147,16 @@ internal sealed class Update{Entity}CommandHandler(
             return Result.Fail({Entity}Errors.NotFound);
         }
 
+        Result<Color> color = Color.Create(request.Color);
+        if (!color.IsSuccessful)
+        {
+            return Result.Fail(color.Error);
+        }
+
         // Update {entity}
         var result = {entity}.Update(
             request.Name,
-            Color.FromHex(request.Color),
+            color.Value,
             request.Notes,
             dateTimeService.UtcNow);
 
@@ -165,7 +177,8 @@ Existing handlers (`UpdateCategoryCommandHandler`, `UpdateBudgetLimitCommandHand
 
 ## Tracking rules
 
-- **Don't call `Update()` on an entity you loaded from the context.** It is already tracked; `SaveChangesAsync` detects the changes. `Update()` only adds risk: it marks every entity in the graph `Modified` when its key is set. Coinly's child entities (`WalletHistory`, `BudgetTransaction`) leave `Id` unset, so EF still inserts them, but a child whose key is assigned by the domain (anything deriving from `BaseEntity`, whose constructor calls `Guid.NewGuid()`) would become an `UPDATE` of a row that doesn't exist and the save would fail.
+- **Don't call `Update()` on an entity you loaded from the context.** It is already tracked; `SaveChangesAsync` detects the changes. `Update()` only adds risk: it marks every entity in the graph `Modified` when its key is set.
+- **A new child appended to a tracked aggregate needs no explicit `Add`.** Guid keys are `ValueGenerated.Never` (set in `ApplicationDbContext.OnModelCreating`), so EF tracks a new child found through a navigation as `Added`. The child must assign its own `Id`. See `.claude/rules/ef-core-queries.md`.
 - **An entity you attach to a navigation property must be tracked.** If it is going to be assigned to a navigation, load it *without* `AsNoTracking()`.
 
 ## Loading a related aggregate
@@ -201,6 +214,7 @@ RuleFor(x => x.WalletId)
 // Email
 RuleFor(x => x.Email)
     .NotEmpty()
+    .MaximumLength(Email.MaxLength)
     .EmailAddress();
 
 // Conditional

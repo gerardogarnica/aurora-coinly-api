@@ -10,10 +10,10 @@ public sealed class ChangePassword : IBaseEndpoint
             "auth/change-password",
             async (
                 [FromBody] ChangePasswordRequest request,
-                ICommandHandler<ChangeUserPasswordCommand> handler,
+                ICommandHandler<ChangePasswordCommand> handler,
                 CancellationToken cancellationToken) =>
             {
-                var command = new ChangeUserPasswordCommand(
+                var command = new ChangePasswordCommand(
                     request.CurrentPassword,
                     request.NewPassword);
 

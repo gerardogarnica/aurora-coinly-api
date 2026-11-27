@@ -20,7 +20,13 @@ internal sealed class GetWalletHistoryQueryHandler(
         }
 
         // Get wallet history
-        DateRange dateRange = DateRange.Create(request.DateFrom, request.DateTo);
+        Result<DateRange> dateRangeResult = DateRange.Create(request.DateFrom, request.DateTo);
+        if (!dateRangeResult.IsSuccessful)
+        {
+            return Result.Fail<WalletModel>(dateRangeResult.Error);
+        }
+
+        DateRange dateRange = dateRangeResult.Value;
 
         List<WalletHistory> operations = await dbContext
             .WalletHistories

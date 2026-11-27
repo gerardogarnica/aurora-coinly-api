@@ -51,7 +51,7 @@ internal static class {Entity}ModelExtensions
 }
 ```
 
-Models flatten value objects (`Money` → `CurrencyCode` + `Amount`, `Color` → its hex string) so the JSON contract doesn't depend on the domain types.
+Models flatten value objects (`Money` → `CurrencyCode` + `Amount`, `Color` → its string `Value`) so the JSON contract doesn't depend on the domain types.
 
 ## Get by Id
 

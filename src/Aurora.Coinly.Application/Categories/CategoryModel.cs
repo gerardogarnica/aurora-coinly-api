@@ -19,7 +19,7 @@ internal static class CategoryModelExtensions
         category.Name,
         category.Type,
         category.MaxDaysToReverse,
-        category.Color.Value,
+        category.Color,
         category.Group,
         category.IsDeleted,
         category.Notes);

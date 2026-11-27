@@ -24,6 +24,8 @@ internal static class ApiResponses
         BaseErrorType.Validation => "https://tools.ietf.org/html/rfc7231#section-6.5.1",
         BaseErrorType.NotFound => "https://tools.ietf.org/html/rfc7231#section-6.5.4",
         BaseErrorType.Conflict => "https://tools.ietf.org/html/rfc7231#section-6.5.8",
+        BaseErrorType.Forbidden => "https://tools.ietf.org/html/rfc7231#section-6.5.3",
+        BaseErrorType.Unauthorized => "https://tools.ietf.org/html/rfc7235#section-3.1",
         _ => "https://tools.ietf.org/html/rfc7231#section-6.6.1"
     };
 
@@ -33,6 +35,8 @@ internal static class ApiResponses
         BaseErrorType.Validation => StatusCodes.Status400BadRequest,
         BaseErrorType.NotFound => StatusCodes.Status404NotFound,
         BaseErrorType.Conflict => StatusCodes.Status409Conflict,
+        BaseErrorType.Forbidden => StatusCodes.Status403Forbidden,
+        BaseErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
         _ => StatusCodes.Status500InternalServerError
     };
 
