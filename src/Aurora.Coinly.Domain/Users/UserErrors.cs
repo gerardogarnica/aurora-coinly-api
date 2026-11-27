@@ -21,4 +21,8 @@ public static class UserErrors
     public static readonly BaseError Inactive = BaseError.Validation(
         "User.Inactive",
         "Cannot perform this operation on an inactive user");
+
+    public static readonly BaseError ConcurrentUpdate = BaseError.Conflict(
+        "User.ConcurrentUpdate",
+        "The user was modified by another request. Try again.");
 }

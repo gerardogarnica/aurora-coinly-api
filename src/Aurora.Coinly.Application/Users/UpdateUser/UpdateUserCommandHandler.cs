@@ -30,7 +30,14 @@ internal sealed class UpdateUserCommandHandler(
             return updateUserResult;
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Result.Fail(UserErrors.ConcurrentUpdate);
+        }
 
         return Result.Ok();
     }

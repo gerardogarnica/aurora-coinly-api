@@ -16,6 +16,7 @@ internal sealed class ChangePasswordCommandHandler(
         User? user = await dbContext
             .Users
             .Include(u => u.Tokens.Where(t => !t.IsRevoked && t.RefreshTokenExpiresOnUtc > utcNow))
+            .AsSplitQuery()
             .SingleOrDefaultAsync(x => x.Id == userContext.UserId, cancellationToken);
 
         if (user is null)

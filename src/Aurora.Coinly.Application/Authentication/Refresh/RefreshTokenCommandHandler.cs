@@ -17,6 +17,7 @@ internal sealed class RefreshTokenCommandHandler(
             .Users
             .Include(u => u.Roles)
             .Include(u => u.Tokens.Where(t => t.RefreshTokenHash == refreshTokenHash))
+            .AsSplitQuery()
             .SingleOrDefaultAsync(
                 u => u.Tokens.Any(t => t.RefreshTokenHash == refreshTokenHash),
                 cancellationToken);

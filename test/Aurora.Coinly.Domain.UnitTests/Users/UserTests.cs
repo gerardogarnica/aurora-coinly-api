@@ -285,6 +285,25 @@ public class UserTests : BaseTest
     }
 
     [Fact]
+    public void ChangePassword_Should_RejectOldPassword()
+    {
+        // Arrange
+        User user = User.Create(
+            UserData.FirstName,
+            UserData.LastName,
+            UserData.Email,
+            Password.Create(PasswordHasher.HashPassword("Secret123!")).Value,
+            UserData.CreatedOnUtc).Value;
+        Password newPassword = Password.Create(PasswordHasher.HashPassword("NewSecret123!")).Value;
+
+        // Act
+        user.ChangePassword(newPassword, UserData.CreatedOnUtc.AddDays(1));
+
+        // Assert
+        user.VerifyPassword(PasswordHasher, "Secret123!").Should().BeFalse();
+    }
+
+    [Fact]
     public void ChangePassword_Should_RaiseUserPasswordChangedEvent()
     {
         // Arrange

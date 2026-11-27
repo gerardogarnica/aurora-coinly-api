@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Buffers.Binary;
+using System.Security.Cryptography;
 
 namespace Aurora.Coinly.Infrastructure.Authentication;
 
@@ -6,10 +7,14 @@ internal sealed class PasswordHasher : IPasswordHasher
 {
     private const int SaltSize = 16;
     private const int HashSize = 32;
-    private const int Iterations = 310_000;
+    private const int IterationsSize = sizeof(int);
+    private const int Iterations = 600_000;
     private static readonly HashAlgorithmName Algorithm = HashAlgorithmName.SHA256;
-    private const byte FormatVersion = 0x01;
-    private const int TotalSize = 1 + SaltSize + HashSize;
+    private const byte FormatVersion = 0x02;
+    private const int IterationsOffset = 1;
+    private const int SaltOffset = IterationsOffset + IterationsSize;
+    private const int HashOffset = SaltOffset + SaltSize;
+    private const int TotalSize = HashOffset + HashSize;
 
     private static readonly string DummyHash = BuildDummyHash();
 
@@ -17,6 +22,7 @@ internal sealed class PasswordHasher : IPasswordHasher
     {
         byte[] buffer = new byte[TotalSize];
         buffer[0] = FormatVersion;
+        BinaryPrimitives.WriteInt32BigEndian(buffer.AsSpan(IterationsOffset, IterationsSize), Iterations);
         return Convert.ToBase64String(buffer);
     }
 
@@ -30,8 +36,9 @@ internal sealed class PasswordHasher : IPasswordHasher
 
         byte[] buffer = new byte[TotalSize];
         buffer[0] = FormatVersion;
-        Buffer.BlockCopy(salt, 0, buffer, 1, SaltSize);
-        Buffer.BlockCopy(hash, 0, buffer, 1 + SaltSize, HashSize);
+        BinaryPrimitives.WriteInt32BigEndian(buffer.AsSpan(IterationsOffset, IterationsSize), Iterations);
+        Buffer.BlockCopy(salt, 0, buffer, SaltOffset, SaltSize);
+        Buffer.BlockCopy(hash, 0, buffer, HashOffset, HashSize);
 
         return Convert.ToBase64String(buffer);
     }
@@ -53,13 +60,16 @@ internal sealed class PasswordHasher : IPasswordHasher
             return false;
         }
 
-        byte[] salt = new byte[SaltSize];
-        byte[] storedHash = new byte[HashSize];
+        int iterations = BinaryPrimitives.ReadInt32BigEndian(buffer.AsSpan(IterationsOffset, IterationsSize));
+        if (iterations < 1)
+        {
+            return false;
+        }
 
-        Buffer.BlockCopy(buffer, 1, salt, 0, SaltSize);
-        Buffer.BlockCopy(buffer, 1 + SaltSize, storedHash, 0, HashSize);
+        byte[] salt = buffer[SaltOffset..HashOffset];
+        byte[] storedHash = buffer[HashOffset..];
 
-        byte[] computedHash = Rfc2898DeriveBytes.Pbkdf2(providedPassword, salt, Iterations, Algorithm, HashSize);
+        byte[] computedHash = Rfc2898DeriveBytes.Pbkdf2(providedPassword, salt, iterations, Algorithm, HashSize);
 
         return CryptographicOperations.FixedTimeEquals(storedHash, computedHash);
     }

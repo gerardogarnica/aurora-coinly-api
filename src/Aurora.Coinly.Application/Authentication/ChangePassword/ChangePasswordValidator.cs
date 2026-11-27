@@ -5,7 +5,8 @@ internal sealed class ChangePasswordValidator : AbstractValidator<ChangePassword
     public ChangePasswordValidator()
     {
         RuleFor(x => x.CurrentPassword)
-            .NotEmpty();
+            .NotEmpty()
+            .MaximumLength(PasswordRuleExtensions.MaxPasswordLength);
 
         RuleFor(x => x.NewPassword)
             .MustBeStrongPassword()

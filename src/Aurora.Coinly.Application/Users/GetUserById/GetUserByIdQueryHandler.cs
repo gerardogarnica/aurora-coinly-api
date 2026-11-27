@@ -1,7 +1,8 @@
 ﻿namespace Aurora.Coinly.Application.Users.GetUserById;
 
 internal sealed class GetUserByIdQueryHandler(
-    ICoinlyDbContext dbContext) : IQueryHandler<GetUserByIdQuery, UserProfileResponse>
+    ICoinlyDbContext dbContext,
+    IUserContext userContext) : IQueryHandler<GetUserByIdQuery, UserProfileResponse>
 {
     public async Task<Result<UserProfileResponse>> Handle(
         GetUserByIdQuery query,
@@ -11,7 +12,7 @@ internal sealed class GetUserByIdQueryHandler(
             .Users
             .Include(u => u.Roles)
             .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.Id == query.UserId, cancellationToken);
+            .SingleOrDefaultAsync(u => u.Id == userContext.UserId, cancellationToken);
 
         if (user is null)
         {

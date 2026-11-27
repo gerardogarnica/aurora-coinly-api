@@ -148,6 +148,22 @@ public class UserTokenTests : BaseTest
     }
 
     [Fact]
+    public void RevokeToken_Should_KeepOtherTokensValid()
+    {
+        // Arrange
+        User user = UserData.GetUser();
+        UserToken revoked = UserData.IssueToken(user);
+        UserToken other = UserData.IssueToken(user);
+
+        // Act
+        user.RevokeToken(revoked.UserTokenId);
+
+        // Assert
+        other.IsRevoked.Should().BeFalse();
+        other.IsRefreshTokenValid(UserData.IssuedOnUtc).Should().BeTrue();
+    }
+
+    [Fact]
     public void RevokeToken_Should_RaiseUserTokenRevokedEvent()
     {
         // Arrange
@@ -219,6 +235,21 @@ public class UserTokenTests : BaseTest
         user.DomainEvents.OfType<UserTokenRevokedDomainEvent>()
             .Should().ContainSingle()
             .Which.UserTokenId.Should().Be(valid.UserTokenId);
+    }
+
+    [Fact]
+    public void RevokeAllActiveTokens_Should_Succeed_WhenUserHasNoTokens()
+    {
+        // Arrange
+        User user = UserData.GetUser();
+        user.ClearDomainEvents();
+
+        // Act
+        Result result = user.RevokeAllActiveTokens(UserData.IssuedOnUtc);
+
+        // Assert
+        result.IsSuccessful.Should().BeTrue();
+        user.DomainEvents.Should().BeEmpty();
     }
 
     [Fact]

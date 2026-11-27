@@ -9,6 +9,7 @@ internal sealed class LoginValidator : AbstractValidator<LoginCommand>
             .MaximumLength(Email.MaxLength);
 
         RuleFor(x => x.Password)
-            .NotEmpty();
+            .NotEmpty()
+            .MaximumLength(PasswordRuleExtensions.MaxPasswordLength);
     }
 }
